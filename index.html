@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="pt-br" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Planner Hugo Marcelo | Visão Geral</title>
+
+  <!-- Ícones (Font Awesome) e fonte (Montserrat) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <!-- Aparência compartilhada -->
+  <link rel="stylesheet" href="style.css">
+
+  <!-- Estilos SÓ desta página (o painel da Visão Geral) -->
+  <style>
+    /* Card que vira link clicável para a área */
+    .vg-card { display:block; transition: border-color .15s, transform .15s; }
+    .vg-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+
+    /* Número grande de destaque */
+    .vg-num { font-size: 40px; font-weight: 900; letter-spacing: -1px; line-height: 1; }
+    .vg-num small { font-size: 16px; font-weight: 800; color: var(--text-muted); }
+    .vg-sub { color: var(--text-muted); font-size: 12px; margin-top: 8px; font-weight: 600; }
+    .vg-sub .alerta { color: #ef4444; font-weight: 800; }
+
+    /* Barra de progresso (objetivos) */
+    .vg-bar { height: 8px; border-radius: 99px; background: var(--bg-soft); overflow: hidden; margin-top: 14px; }
+    .vg-bar__fill { height: 100%; background: var(--accent); box-shadow: var(--glow);
+                    border-radius: 99px; width: 0; transition: width .6s ease; }
+
+    /* Itens das listas (tarefas em foco / próximos compromissos) */
+    .vg-item { display:flex; align-items:center; gap:12px; padding:12px 2px; border-bottom:1px solid var(--border); }
+    .vg-item:last-child { border-bottom:0; }
+    .vg-item__dot { width:9px; height:9px; border-radius:99px; flex-shrink:0; }
+    .vg-item__txt { flex:1; font-size:13px; font-weight:600; min-width:0; }
+    .vg-item__txt .meta { font-size:10px; color:var(--text-muted); font-weight:700;
+                          text-transform:uppercase; letter-spacing:.5px; margin-top:3px; }
+    .vg-item__tag { font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:.5px; flex-shrink:0; }
+    .vg-item__tag.alerta { color:#ef4444; }
+
+    /* Caixinha de data do compromisso */
+    .vg-data { width:46px; flex-shrink:0; text-align:center; background:var(--bg-soft);
+               border:1px solid var(--border); border-radius:10px; padding:6px 0; }
+    .vg-data b { display:block; font-size:16px; font-weight:900; line-height:1; }
+    .vg-data span { font-size:9px; text-transform:uppercase; color:var(--text-muted); letter-spacing:1px; }
+
+    /* Mensagem de lista vazia */
+    .vg-vazio { color: var(--text-muted); font-size:13px; padding: 6px 2px; }
+  </style>
+</head>
+
+<body class="app" data-page="index">
+
+  <div id="sidebar-container"></div>
+  <div id="overlay" class="overlay" onclick="fecharMenu()"></div>
+
+  <main class="main">
+
+    <!-- Cabeçalho -->
+    <header class="header">
+      <div class="header__left">
+        <button class="btn btn--icon btn--menu" onclick="abrirMenu()" aria-label="Abrir menu">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+        <div>
+          <h1 class="header__title">Bom te ver, Hugo</h1>
+          <p class="header__subtitle" id="data-hoje">Carregando data...</p>
+        </div>
+      </div>
+      <div class="header__actions">
+        <button class="btn" onclick="abrirSync()">
+          <i class="fa-solid fa-cloud-arrow-up" style="color: var(--accent)"></i>
+          <span>Backup</span>
+        </button>
+        <button class="btn btn--icon" id="btn-tema" onclick="Tema.alternar()" aria-label="Trocar tema">
+          <i class="fa-solid fa-moon"></i>
+        </button>
+      </div>
+    </header>
+
+    <div class="container fade-up">
+
+      <!-- FOCO DO DIA -->
+      <section class="card" style="margin-bottom:20px;">
+        <h2 class="card__title"><i class="fa-solid fa-star"></i> Foco principal de hoje</h2>
+        <input
+          type="text"
+          id="foco-dia"
+          placeholder="Qual é a sua missão número 1 hoje?"
+          oninput="salvarFoco(this.value)"
+          style="width:100%; background:var(--bg-soft); border:1px solid var(--border);
+                 border-radius:10px; padding:14px; color:var(--text-strong);
+                 font-family:inherit; font-size:14px; font-weight:600; outline:none;">
+      </section>
+
+      <!-- RESUMO DAS ÁREAS (números reais, lidos do Store) -->
+      <section class="grid grid--3" style="margin-bottom:20px;">
+
+        <a class="card vg-card" href="objetivos.html">
+          <h2 class="card__title"><i class="fa-solid fa-bullseye"></i> Objetivos</h2>
+          <p class="vg-num"><span id="vg-obj-num">0</span><small>% médio</small></p>
+          <div class="vg-bar"><div class="vg-bar__fill" id="vg-obj-bar"></div></div>
+          <p class="vg-sub" id="vg-obj-sub">—</p>
+        </a>
+
+        <a class="card vg-card" href="tarefas.html">
+          <h2 class="card__title"><i class="fa-solid fa-list-check"></i> Tarefas</h2>
+          <p class="vg-num"><span id="vg-tar-num">0</span><small>pendentes</small></p>
+          <p class="vg-sub" id="vg-tar-sub">—</p>
+        </a>
+
+        <a class="card vg-card" href="compromissos.html">
+          <h2 class="card__title"><i class="fa-solid fa-calendar-check"></i> Compromissos</h2>
+          <p class="vg-num"><span id="vg-com-num">0</span><small>à frente</small></p>
+          <p class="vg-sub" id="vg-com-sub">—</p>
+        </a>
+
+      </section>
+
+      <!-- LISTAS EM FOCO -->
+      <section class="grid grid--2" style="margin-bottom:20px;">
+        <div class="card">
+          <h2 class="card__title"><i class="fa-solid fa-bolt"></i> Tarefas em foco</h2>
+          <div id="vg-tarefas-lista"></div>
+        </div>
+        <div class="card">
+          <h2 class="card__title"><i class="fa-solid fa-calendar-day"></i> Próximos compromissos</h2>
+          <div id="vg-compromissos-lista"></div>
+        </div>
+      </section>
+
+      <!-- ÁREAS QUE AINDA VÃO ENTRAR -->
+      <section class="card">
+        <h2 class="card__title"><i class="fa-solid fa-layer-group"></i> Próximas áreas</h2>
+        <p style="color:var(--text-muted); font-size:13px; line-height:1.6;">
+          Hábitos, Saúde, Financeiro e as demais áreas aparecem aqui conforme você
+          for construindo cada página — esta tela já está pronta pra puxar os resumos delas.
+        </p>
+      </section>
+
+    </div>
+
+    <div id="footer-container"></div>
+  </main>
+
+  <!-- MODAL DE BACKUP -->
+  <div id="modal-sync" class="modal">
+    <div class="modal__box">
+      <div class="modal__head">
+        <h3><i class="fa-solid fa-cloud-arrow-up" style="color:var(--accent)"></i> Backup & Transferência</h3>
+        <button class="modal__close" onclick="fecharSync()"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal__body">
+        <p>Sem nuvem por enquanto: use isto pra levar seus dados entre celular e computador.</p>
+        <button class="btn" onclick="exportarBackup()" style="width:100%; justify-content:center;">
+          <i class="fa-solid fa-download"></i> Exportar (baixar arquivo)
+        </button>
+        <input type="file" id="input-import" accept=".json" onchange="importarBackup(event)" style="display:none;">
+        <button class="btn btn--primary" onclick="document.getElementById('input-import').click()" style="width:100%; justify-content:center;">
+          <i class="fa-solid fa-upload"></i> Importar (restaurar backup)
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cérebro compartilhado -->
+  <script src="app.js"></script>
+
+  <!-- ===================================================================
+       SCRIPT SÓ DESTA PÁGINA — o painel que LÊ as áreas e resume
+       A Visão Geral não conhece o código das outras páginas: ela só lê
+       os dados que elas salvam no Store. Isso se chama "desacoplamento".
+       =================================================================== -->
+  <script>
+  (function () {
+    "use strict";
+
+    /* ---- Data de hoje no cabeçalho ---- */
+    const hoje = new Date().toLocaleDateString("pt-BR", { weekday:"long", day:"numeric", month:"long" });
+    document.getElementById("data-hoje").textContent = hoje.charAt(0).toUpperCase() + hoje.slice(1);
+
+    /* ---- Foco do dia (salva direto no cofre) ---- */
+    document.getElementById("foco-dia").value = Store.ler("foco_dia", "");
+    window.salvarFoco = function (texto) { Store.salvar("foco_dia", texto); };
+
+    /* ---- Lê os três baús (só leitura; nunca semeia dados aqui) ---- */
+    const objetivos    = Store.ler("objetivos", []) || [];
+    const tarefas      = Store.ler("tarefas", []) || [];
+    const compromissos = Store.ler("compromissos", []) || [];
+    const catComprom   = Store.ler("compromissos_categorias", []) || [];
+
+    const hojeIso = new Date().toISOString().split("T")[0];
+
+    /* =================================================================
+       OBJETIVOS — progresso médio dos ativos (mesma conta da página)
+       ================================================================= */
+    function progEtapa(e) {
+      if (e.tipo === "check") return e.feito ? 100 : 0;
+      const alvo = Number(e.alvo) || 0, atual = Number(e.atual) || 0;
+      if (alvo <= 0) return 0;
+      return Math.min(100, Math.max(0, Math.round(atual / alvo * 100)));
+    }
+    function progObjetivo(o) {
+      if (o.etapas && o.etapas.length) {
+        const soma = o.etapas.reduce((acc, e) => acc + progEtapa(e), 0);
+        return Math.round(soma / o.etapas.length);
+      }
+      return 0;
+    }
+    const objAtivos    = objetivos.filter(o => !o.arquivada);
+    const objConcluidos = objAtivos.filter(o => progObjetivo(o) === 100).length;
+    const progMedio = objAtivos.length
+      ? Math.round(objAtivos.reduce((acc, o) => acc + progObjetivo(o), 0) / objAtivos.length)
+      : 0;
+
+    document.getElementById("vg-obj-num").textContent = progMedio;
+    document.getElementById("vg-obj-bar").style.width = progMedio + "%";
+    document.getElementById("vg-obj-sub").innerHTML = objAtivos.length
+      ? `${objAtivos.length} ativos · ${objConcluidos} concluído(s)`
+      : "Nenhum objetivo ainda";
+
+    /* =================================================================
+       TAREFAS — pendentes, atrasadas e as de prioridade alta
+       ================================================================= */
+    const CORP = { alta: "#ef4444", media: "#f59e0b", baixa: "#10b981" };
+    const pendentes      = tarefas.filter(t => !t.concluida);
+    const atrasadas      = pendentes.filter(t => t.prazo && t.prazo < hojeIso);
+    const altasPendentes = pendentes.filter(t => t.prioridade === "alta");
+
+    document.getElementById("vg-tar-num").textContent = pendentes.length;
+    document.getElementById("vg-tar-sub").innerHTML = atrasadas.length
+      ? `<span class="alerta">${atrasadas.length} atrasada(s)</span>`
+      : (pendentes.length ? "tudo em dia" : "Nenhuma tarefa ainda");
+
+    /* Monta a lista "em foco": atrasadas primeiro, depois prioridade alta,
+       e completa com outras pendentes até no máximo 5. */
+    const foco = [];
+    atrasadas.forEach(t => foco.push(t));
+    altasPendentes.forEach(t => { if (!foco.includes(t)) foco.push(t); });
+    pendentes.forEach(t => { if (foco.length < 5 && !foco.includes(t)) foco.push(t); });
+
+    const elTar = document.getElementById("vg-tarefas-lista");
+    if (foco.length === 0) {
+      elTar.innerHTML = `<p class="vg-vazio">Nada pendente em foco. Aproveite!</p>`;
+    } else {
+      elTar.innerHTML = foco.slice(0, 5).map(t => {
+        const estaAtrasada = t.prazo && t.prazo < hojeIso;
+        const meta = estaAtrasada
+          ? `<span class="vg-item__tag alerta">Atrasada</span>`
+          : `<span class="vg-item__tag">${t.prioridade}</span>`;
+        return `
+          <div class="vg-item">
+            <span class="vg-item__dot" style="background:${CORP[t.prioridade] || 'var(--text-muted)'}"></span>
+            <span class="vg-item__txt">${t.titulo}</span>
+            ${meta}
+          </div>`;
+      }).join("");
+    }
+
+    /* =================================================================
+       COMPROMISSOS — os próximos (que ainda não passaram)
+       ================================================================= */
+    const MESES = ["jan","fev","mar","abr","mai","jun","jul","ago","set","out","nov","dez"];
+    const agora = new Date();
+    function quando(c) { return new Date(`${c.data}T${c.hora || "23:59"}:00`); }
+    function diasFaltam(dataIso) {
+      const h = new Date(); h.setHours(0,0,0,0);
+      const a = new Date(dataIso + "T00:00:00"); a.setHours(0,0,0,0);
+      return Math.round((a - h) / 86400000);
+    }
+    function rotulo(c) {
+      const d = diasFaltam(c.data);
+      if (d === 0) return c.hora ? `Hoje, ${c.hora}` : "Hoje";
+      if (d === 1) return c.hora ? `Amanhã, ${c.hora}` : "Amanhã";
+      if (d > 1 && d <= 7) return `Em ${d} dias`;
+      return c.data.split("-").reverse().slice(0, 2).join("/");
+    }
+    const corCat = {};
+    catComprom.forEach(c => { corCat[c.id] = c.cor; });
+
+    const futuros = compromissos
+      .filter(c => quando(c) >= agora)
+      .sort((a, b) => quando(a) - quando(b));
+    const estaSemana = futuros.filter(c => diasFaltam(c.data) <= 7).length;
+
+    document.getElementById("vg-com-num").textContent = futuros.length;
+    document.getElementById("vg-com-sub").innerHTML = futuros.length
+      ? `${estaSemana} nos próximos 7 dias`
+      : "Nenhum agendado";
+
+    const elCom = document.getElementById("vg-compromissos-lista");
+    if (futuros.length === 0) {
+      elCom.innerHTML = `<p class="vg-vazio">Sem compromissos futuros.</p>`;
+    } else {
+      elCom.innerHTML = futuros.slice(0, 4).map(c => {
+        const cor = corCat[c.categoriaId] || "var(--accent)";
+        return `
+          <div class="vg-item">
+            <div class="vg-data" style="border-left:3px solid ${cor}">
+              <b>${c.data.split("-")[2]}</b>
+              <span>${MESES[Number(c.data.split("-")[1]) - 1]}</span>
+            </div>
+            <div class="vg-item__txt">
+              ${c.titulo}
+              <div class="meta">${rotulo(c)}</div>
+            </div>
+          </div>`;
+      }).join("");
+    }
+
+  })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,2168 @@
+<!DOCTYPE html>
+<html lang="pt-br" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Planner Hugo Marcelo | Saúde &amp; Performance</title>
+
+  <!-- Ícones e fonte (iguais às outras páginas) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <!-- A APARÊNCIA compartilhada -->
+  <link rel="stylesheet" href="style.css">
+
+  <!-- =====================================================================
+       ESTILOS SÓ DESTA PÁGINA (saúde)
+       Tudo aqui usa o prefixo "sa-" pra não colidir com outras páginas.
+       As cores de apoio ficam no :root para que os MODAIS (que ficam fora
+       do .container) também consigam enxergá-las — lição que aprendemos
+       no planejadores.
+       ===================================================================== -->
+  <style>
+    :root {
+      --sa-sono:    #818cf8;   /* indigo  - Sono & Foco        */
+      --sa-musc:    var(--accent);
+      --sa-corrida: #f59e0b;   /* âmbar   - Corrida            */
+      --sa-fut:     #22c55e;   /* verde   - Futebol            */
+      --sa-agua:    #3b82f6;   /* azul    - Hidratação         */
+      --sa-arq:     #ec4899;   /* rosa    - Arquivos Médicos   */
+      --sa-good:    #10b981;
+      --sa-mid:     #f59e0b;
+      --sa-bad:     #ef4444;
+    }
+
+    /* ---- Barra de Nível de Atleta (XP) ---- */
+    .sa-xp { display:flex; align-items:center; gap:18px; border-left:4px solid var(--accent); margin-bottom:20px; }
+    .sa-xp__badge {
+      position:relative; width:62px; height:62px; flex-shrink:0;
+      border-radius:50%; display:grid; place-items:center;
+      background:var(--bg-soft); border:3px solid var(--accent);
+      font-size:26px; box-shadow:var(--glow);
+    }
+    .sa-xp__lvl {
+      position:absolute; bottom:-8px; left:50%; transform:translateX(-50%);
+      background:var(--accent); color:#fff; font-size:9px; font-weight:900;
+      letter-spacing:1px; padding:2px 8px; border-radius:6px; white-space:nowrap;
+    }
+    .sa-xp__info { flex:1; min-width:0; }
+    .sa-xp__row { display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:8px; gap:10px; }
+    .sa-xp__name { font-size:14px; font-weight:900; text-transform:uppercase; letter-spacing:1px; }
+    .sa-xp__pts { font-size:11px; font-weight:800; color:var(--accent); white-space:nowrap; cursor:pointer; }
+    .sa-xp__pts i { color:var(--text-muted); }
+    .sa-xp__track { width:100%; height:12px; background:var(--bg-soft); border:1px solid var(--border); border-radius:99px; overflow:hidden; }
+    .sa-xp__fill { height:100%; background:linear-gradient(90deg, #059669, var(--accent)); width:0%; transition:width 1s cubic-bezier(.4,0,.2,1); }
+
+    /* ---- Abas principais ---- */
+    .sa-tabs { display:flex; gap:8px; overflow-x:auto; padding-bottom:10px; margin-bottom:20px; border-bottom:1px solid var(--border); }
+    .sa-tabs::-webkit-scrollbar { height:0; }
+    .sa-tab {
+      flex-shrink:0; white-space:nowrap; display:inline-flex; align-items:center; gap:8px;
+      padding:11px 18px; border-radius:12px 12px 0 0;
+      background:var(--panel); border:1px solid var(--border);
+      color:var(--text-muted); font-size:11px; font-weight:800;
+      text-transform:uppercase; letter-spacing:1px; transition:all .15s;
+    }
+    .sa-tab:hover { color:var(--text-strong); }
+    .sa-tab.is-active { color:#fff; border-color:transparent; box-shadow:var(--shadow); }
+    .sa-tab[data-cor="sono"].is-active    { background:var(--sa-sono); }
+    .sa-tab[data-cor="treino"].is-active  { background:var(--sa-musc); }
+    .sa-tab[data-cor="nutri"].is-active   { background:var(--sa-good); }
+    .sa-tab[data-cor="arquivos"].is-active{ background:var(--sa-arq); }
+
+    /* ---- Sub-abas (dentro de Treinos) ---- */
+    .sa-subtabs { display:flex; gap:8px; overflow-x:auto; margin-bottom:18px; }
+    .sa-subtab {
+      flex-shrink:0; white-space:nowrap; display:inline-flex; align-items:center; gap:6px;
+      padding:8px 14px; border-radius:99px; background:var(--bg-soft);
+      border:1px solid var(--border); color:var(--text-muted);
+      font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:1px; transition:all .15s;
+    }
+    .sa-subtab.is-active { color:var(--text-strong); border-color:var(--accent); }
+
+    .sa-panel, .sa-subpanel { display:none; }
+    .sa-panel.is-active, .sa-subpanel.is-active { display:block; animation:fadeUp .35s ease both; }
+
+    /* ---- Títulos de seção dentro dos cards ---- */
+    .sa-head { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:16px; padding-bottom:12px; border-bottom:1px solid var(--border); flex-wrap:wrap; }
+    .sa-head h3 { font-size:12px; font-weight:900; text-transform:uppercase; letter-spacing:1.2px; display:flex; align-items:center; gap:8px; }
+    .sa-card-top { border-top:3px solid var(--accent); }
+
+    /* ---- Mini-estatísticas ---- */
+    .sa-stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(90px,1fr)); gap:10px; margin-bottom:16px; }
+    .sa-stat { background:var(--bg-soft); border:1px solid var(--border); border-radius:12px; padding:12px; text-align:center; }
+    .sa-stat__num { font-size:22px; font-weight:900; line-height:1; }
+    .sa-stat__lbl { font-size:9px; font-weight:800; text-transform:uppercase; letter-spacing:1px; color:var(--text-muted); margin-top:6px; }
+
+    /* ---- Formulários (inputs reutilizáveis desta página) ---- */
+    .sa-field { margin-bottom:14px; }
+    .sa-label { display:block; font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:1px; color:var(--text-muted); margin-bottom:6px; }
+    .sa-input {
+      width:100%; background:var(--bg-soft); border:1px solid var(--border);
+      border-radius:10px; padding:11px 12px; color:var(--text-strong);
+      font-family:inherit; font-size:13px; font-weight:600; outline:none;
+    }
+    .sa-input:focus { border-color:var(--accent); }
+    textarea.sa-input { resize:vertical; min-height:70px; }
+    .sa-row2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+    .sa-range { width:100%; accent-color:var(--accent); cursor:pointer; }
+
+    /* ---- Listas e linhas ---- */
+    .sa-list { display:flex; flex-direction:column; gap:10px; }
+    .sa-item {
+      background:var(--bg-soft); border:1px solid var(--border); border-radius:12px;
+      padding:14px; display:flex; align-items:center; gap:12px;
+    }
+    .sa-item__main { flex:1; min-width:0; }
+    .sa-item__title { font-size:13px; font-weight:800; }
+    .sa-item__sub { font-size:11px; color:var(--text-muted); margin-top:3px; }
+    .sa-x { background:none; color:var(--text-muted); width:30px; height:30px; border-radius:8px; flex-shrink:0; }
+    .sa-x:hover { color:var(--sa-bad); background:var(--panel); }
+    .sa-pencil:hover { color:var(--accent); }
+
+    /* ---- Checklists do playbook ---- */
+    .sa-check { display:flex; align-items:center; gap:10px; background:var(--bg-soft); border:1px solid var(--border); border-radius:10px; padding:10px 12px; }
+    .sa-check__box { width:20px; height:20px; border-radius:6px; border:2px solid var(--border); display:grid; place-items:center; cursor:pointer; flex-shrink:0; color:transparent; font-size:11px; }
+    .sa-check.is-done .sa-check__box { background:var(--accent); border-color:var(--accent); color:#fff; }
+    .sa-check.is-done .sa-check__txt { text-decoration:line-through; color:var(--text-muted); }
+    .sa-check__txt { flex:1; font-size:12px; font-weight:600; }
+
+    /* ---- Pílulas / badges ---- */
+    .sa-pill { display:inline-block; font-size:9px; font-weight:900; text-transform:uppercase; letter-spacing:1px; padding:3px 9px; border-radius:99px; border:1px solid; }
+
+    /* ---- Calendário (radar de constância / hidratação) ---- */
+    .sa-cal-week { display:grid; grid-template-columns:repeat(7,1fr); gap:5px; text-align:center; font-size:9px; font-weight:800; color:var(--text-muted); margin-bottom:6px; }
+    .sa-cal { display:grid; grid-template-columns:repeat(7,1fr); gap:5px; }
+    .sa-day { aspect-ratio:1; border-radius:8px; border:1px solid var(--border); background:var(--bg-soft); display:grid; place-items:center; font-size:11px; font-weight:700; cursor:pointer; transition:all .12s; }
+    .sa-day.is-on { background:var(--accent); color:#fff; border-color:var(--accent); box-shadow:var(--glow); }
+    .sa-day.is-today { outline:2px solid var(--sa-corrida); outline-offset:1px; }
+    .sa-day.is-empty { background:transparent; border:none; cursor:default; }
+
+    /* ---- Hidratação (copo) ---- */
+    .sa-water { width:90px; height:170px; border:1px solid var(--border); border-radius:14px; overflow:hidden; background:var(--bg-soft); position:relative; flex-shrink:0; box-shadow:inset 0 2px 8px rgba(0,0,0,.3); }
+    .sa-water__fill { position:absolute; bottom:0; left:0; width:100%; background:linear-gradient(180deg, rgba(59,130,246,.5), rgba(59,130,246,.8)); transition:height 1s cubic-bezier(.4,0,.2,1); }
+    .sa-water__drop { position:absolute; inset:0; display:grid; place-items:center; font-size:30px; color:rgba(255,255,255,.25); }
+
+    /* ---- Gráficos SVG ---- */
+    .sa-chart { width:100%; }
+    .sa-chart svg { width:100%; height:auto; display:block; }
+    .sa-empty { font-size:11px; color:var(--text-muted); font-style:italic; text-align:center; padding:22px; border:1px dashed var(--border); border-radius:12px; }
+
+    /* ---- Toast de level up ---- */
+    .sa-toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--accent); color:#fff; padding:14px 22px; border-radius:14px; font-weight:900; font-size:13px; box-shadow:var(--shadow); opacity:0; pointer-events:none; transition:all .4s ease; z-index:200; display:flex; align-items:center; gap:10px; }
+    .sa-toast.is-show { opacity:1; transform:translateX(-50%) translateY(0); }
+
+    /* ---- +XP flutuante ---- */
+    .sa-xpfloat { position:fixed; pointer-events:none; font-weight:900; color:var(--accent); z-index:9999; font-size:18px; opacity:0; }
+    .sa-xpfloat.is-go { animation:saFloat .8s ease forwards; }
+    @keyframes saFloat { 0%{opacity:1; transform:translateY(0) scale(1);} 100%{opacity:0; transform:translateY(-40px) scale(1.25);} }
+
+    /* ---- Modal: corpo rolável p/ formulários grandes ---- */
+    .sa-modal-body { max-height:65dvh; overflow-y:auto; }
+
+    /* ---- Exercícios temporários dentro do modal de ficha ---- */
+    .sa-mini { background:var(--bg-soft); border:1px solid var(--border); border-radius:10px; padding:10px 12px; display:flex; justify-content:space-between; align-items:center; gap:10px; font-size:12px; }
+
+    /* ================= NOVOS ESTILOS · ABA TREINOS ================= */
+
+    /* Ícones de esporte dentro do Radar */
+    .sa-day.sport-musc    { background:var(--sa-musc);    color:#fff; border-color:var(--sa-musc); }
+    .sa-day.sport-corrida { background:var(--sa-corrida); color:#fff; border-color:var(--sa-corrida); }
+    .sa-day.sport-futebol { background:var(--sa-fut);     color:#fff; border-color:var(--sa-fut); }
+    .sa-day i { font-size:13px; }
+
+    /* Banner da fase ativa */
+    .sa-fase-banner { display:flex; flex-wrap:wrap; align-items:center; gap:10px 18px; background:var(--bg-soft); border:1px solid var(--accent); border-radius:14px; padding:14px 16px; margin-bottom:18px; }
+    .sa-fase-banner b { color:var(--accent); }
+    .sa-fase-banner .sa-fb-item { font-size:12px; font-weight:700; }
+    .sa-fase-banner .sa-fb-item span { color:var(--text-muted); font-weight:600; }
+
+    /* Cartões de fase (periodização) */
+    .sa-fase { background:var(--bg-soft); border:1px solid var(--border); border-left:4px solid var(--border); border-radius:12px; padding:14px; transition:all .15s; }
+    .sa-fase.is-active { border-left-color:var(--accent); box-shadow:var(--glow); }
+    .sa-fase__top { display:flex; justify-content:space-between; align-items:flex-start; gap:10px; margin-bottom:10px; }
+    .sa-fase__nome { font-size:13px; font-weight:900; }
+    .sa-fase__foco { font-size:11px; color:var(--text-muted); margin-top:2px; }
+    .sa-fase__grid { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin:12px 0; text-align:center; }
+    .sa-fase__cell { background:var(--panel); border:1px solid var(--border); border-radius:8px; padding:8px 4px; }
+    .sa-fase__cell b { display:block; font-size:14px; font-weight:900; color:var(--accent); }
+    .sa-fase__cell span { font-size:8px; font-weight:800; text-transform:uppercase; letter-spacing:.5px; color:var(--text-muted); }
+    .sa-status { font-size:9px; font-weight:900; text-transform:uppercase; letter-spacing:1px; padding:3px 9px; border-radius:99px; border:1px solid; white-space:nowrap; }
+    .sa-status.nao        { color:var(--text-muted); border-color:var(--border); }
+    .sa-status.andamento  { color:var(--sa-good); border-color:var(--sa-good); }
+    .sa-status.concluida  { color:var(--sa-corrida); border-color:var(--sa-corrida); }
+
+    /* Toggle segmentado Academia / Casa */
+    .sa-seg { display:inline-flex; background:var(--bg-soft); border:1px solid var(--border); border-radius:99px; padding:4px; gap:4px; }
+    .sa-seg__btn { border:none; background:none; color:var(--text-muted); font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.5px; padding:8px 16px; border-radius:99px; cursor:pointer; display:inline-flex; align-items:center; gap:6px; transition:all .15s; }
+    .sa-seg__btn.is-active { background:var(--accent); color:#fff; }
+
+    /* Ficha de força (treino) + linhas de exercício com check */
+    .sa-treino-card { border-top:3px solid var(--accent); }
+    .sa-treino-card.calistenia { border-top-color:#a855f7; }
+    .sa-fprog { height:8px; background:var(--bg-soft); border:1px solid var(--border); border-radius:99px; overflow:hidden; margin:6px 0 0; }
+    .sa-fprog__fill { height:100%; background:var(--accent); width:0%; transition:width .4s; }
+    .sa-exrow { display:flex; align-items:flex-start; gap:12px; background:var(--bg-soft); border:1px solid var(--border); border-radius:12px; padding:12px; }
+    .sa-exrow.is-done { opacity:.6; }
+    .sa-exrow__chk { width:26px; height:26px; flex-shrink:0; border-radius:8px; border:2px solid var(--border); display:grid; place-items:center; cursor:pointer; color:transparent; font-size:13px; margin-top:2px; transition:all .12s; }
+    .sa-exrow.is-done .sa-exrow__chk { background:var(--accent); border-color:var(--accent); color:#fff; }
+    .sa-exrow__body { flex:1; min-width:0; }
+    .sa-exrow__nome { font-size:13px; font-weight:800; }
+    .sa-exrow.is-done .sa-exrow__nome { text-decoration:line-through; }
+    .sa-exrow__meta { font-size:11px; color:var(--accent); font-weight:700; margin-top:3px; }
+    .sa-exrow__dica { font-size:11px; color:var(--text-muted); margin-top:4px; }
+    .sa-exrow__grupo { font-size:8px; font-weight:900; text-transform:uppercase; letter-spacing:1px; color:var(--text-muted); background:var(--panel); padding:2px 7px; border-radius:99px; border:1px solid var(--border); }
+
+    /* Split / mapa muscular (accordion) */
+    .sa-split-grp { background:var(--bg-soft); border:1px solid var(--border); border-radius:12px; margin-bottom:8px; overflow:hidden; }
+    .sa-split-head { display:flex; justify-content:space-between; align-items:center; gap:10px; padding:12px 14px; cursor:pointer; }
+    .sa-split-head b { font-size:12px; font-weight:800; }
+    .sa-split-head small { font-size:10px; color:var(--text-muted); }
+    .sa-split-body { padding:0 14px 14px; display:none; }
+    .sa-split-grp.is-open .sa-split-body { display:block; }
+    .sa-split-sec { margin-top:10px; }
+    .sa-split-sec p { font-size:10px; font-weight:900; text-transform:uppercase; letter-spacing:1px; color:var(--accent); margin-bottom:5px; }
+    .sa-split-sec span { display:inline-block; font-size:11px; background:var(--panel); border:1px solid var(--border); border-radius:8px; padding:4px 9px; margin:0 4px 4px 0; }
+
+    /* Plano de corrida (linhas) */
+    .sa-week { margin-bottom:16px; }
+    .sa-week__head { display:flex; align-items:center; gap:10px; margin-bottom:8px; flex-wrap:wrap; }
+    .sa-week__num { font-size:12px; font-weight:900; text-transform:uppercase; letter-spacing:1px; }
+    .sa-week__foco { font-size:10px; color:var(--text-muted); font-style:italic; }
+    .sa-run { display:flex; align-items:flex-start; gap:12px; background:var(--bg-soft); border:1px solid var(--border); border-left:4px solid var(--border); border-radius:12px; padding:12px; margin-bottom:8px; }
+    .sa-run.is-done { opacity:.62; border-left-color:var(--sa-good)!important; }
+    .sa-run__chk { width:26px; height:26px; flex-shrink:0; border-radius:8px; border:2px solid var(--border); display:grid; place-items:center; cursor:pointer; color:transparent; font-size:13px; margin-top:2px; }
+    .sa-run.is-done .sa-run__chk { background:var(--sa-good); border-color:var(--sa-good); color:#fff; }
+    .sa-run__body { flex:1; min-width:0; }
+    .sa-run__top { display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:3px; }
+    .sa-run__letra { font-size:12px; font-weight:900; }
+    .sa-run__tipo { font-size:9px; font-weight:900; text-transform:uppercase; letter-spacing:.5px; padding:2px 8px; border-radius:99px; color:#fff; }
+    .sa-run__desc { font-size:12px; }
+    .sa-run__refs { font-size:10px; color:var(--text-muted); margin-top:4px; }
+    .sa-run__reg { font-size:11px; color:var(--sa-good); font-weight:700; margin-top:4px; }
+
+    /* Regras de ouro / legenda */
+    .sa-rule { display:flex; gap:10px; align-items:flex-start; font-size:12px; margin-bottom:8px; }
+    .sa-rule i { color:var(--accent); margin-top:2px; }
+    .sa-legrow { display:flex; gap:10px; align-items:center; font-size:11px; padding:8px 0; border-bottom:1px solid var(--border); }
+    .sa-legrow:last-child { border-bottom:none; }
+
+    /* Valores calculados (avaliação) */
+    .sa-auto { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin:8px 0 14px; }
+    .sa-auto > div { background:var(--bg-soft); border:1px solid var(--border); border-radius:10px; padding:8px; text-align:center; }
+    .sa-auto b { display:block; font-size:16px; font-weight:900; color:var(--accent); }
+    .sa-auto span { font-size:8px; font-weight:800; text-transform:uppercase; letter-spacing:.5px; color:var(--text-muted); }
+
+    /* ===== TREINOS v2: periodização, força, split, corrida 12 semanas ===== */
+    .sa-fase-banner { display:flex; flex-wrap:wrap; align-items:center; gap:10px 16px; background:var(--bg-soft); border:1px solid var(--border); border-left:4px solid var(--accent); border-radius:12px; padding:12px 16px; margin-bottom:16px; font-size:12px; }
+    .sa-fase-banner b { color:var(--accent); }
+    .sa-fase-banner .sa-pill { border-color:var(--accent); color:var(--accent); }
+
+    .sa-fase { border:1px solid var(--border); border-radius:14px; padding:16px; background:var(--bg-soft); transition:all .15s; }
+    .sa-fase.is-ativa { border-color:var(--accent); box-shadow:var(--glow); }
+    .sa-fase__top { display:flex; justify-content:space-between; align-items:flex-start; gap:10px; margin-bottom:6px; }
+    .sa-fase__num { font-size:13px; font-weight:900; }
+    .sa-fase__foco { font-size:11px; color:var(--text-muted); }
+    .sa-fase__params { display:flex; flex-wrap:wrap; gap:6px; margin:10px 0; }
+    .sa-tag { font-size:10px; font-weight:800; padding:4px 9px; border-radius:8px; background:var(--panel); border:1px solid var(--border); }
+
+    .sa-seg { display:inline-flex; background:var(--bg-soft); border:1px solid var(--border); border-radius:99px; padding:4px; gap:4px; }
+    .sa-seg button { border:none; background:none; color:var(--text-muted); font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.5px; padding:8px 14px; border-radius:99px; cursor:pointer; }
+    .sa-seg button.is-on { background:var(--accent); color:#fff; }
+    .sa-seg.sa-seg--casa button.is-on { background:var(--sa-corrida); }
+
+    .sa-abc { display:flex; gap:8px; margin:14px 0; }
+    .sa-abc button { flex:1; padding:12px 8px; border-radius:12px; background:var(--bg-soft); border:1px solid var(--border); color:var(--text-muted); font-weight:900; cursor:pointer; text-align:center; line-height:1.3; }
+    .sa-abc button.is-on { border-color:var(--accent); color:var(--text-strong); box-shadow:var(--shadow); }
+    .sa-abc small { display:block; font-size:9px; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin-top:2px; }
+
+    .sa-exr { display:flex; align-items:flex-start; gap:12px; background:var(--bg-soft); border:1px solid var(--border); border-radius:12px; padding:12px; }
+    .sa-exr.is-done { border-color:var(--accent); }
+    .sa-exr__chk { width:26px; height:26px; border-radius:8px; border:2px solid var(--border); display:grid; place-items:center; cursor:pointer; flex-shrink:0; color:transparent; font-size:12px; }
+    .sa-exr.is-done .sa-exr__chk { background:var(--accent); border-color:var(--accent); color:#fff; }
+    .sa-exr__n { font-size:10px; font-weight:900; color:var(--text-muted); width:16px; flex-shrink:0; text-align:center; padding-top:5px; }
+    .sa-exr__body { flex:1; min-width:0; }
+    .sa-exr__nome { font-size:13px; font-weight:800; }
+    .sa-exr.is-done .sa-exr__nome { text-decoration:line-through; color:var(--text-muted); }
+    .sa-exr__meta { font-size:11px; color:var(--text-muted); margin-top:4px; display:flex; flex-wrap:wrap; gap:4px 10px; }
+    .sa-exr__dica { font-size:11px; font-style:italic; color:var(--text-muted); margin-top:5px; }
+
+    .sa-split { display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:10px; }
+    .sa-split__g { border:1px solid var(--border); border-radius:12px; overflow:hidden; height:fit-content; }
+    .sa-split__h { background:var(--bg-soft); padding:10px 12px; font-size:12px; font-weight:900; cursor:pointer; display:flex; justify-content:space-between; align-items:center; gap:8px; }
+    .sa-split__b { padding:0 12px; max-height:0; overflow:hidden; font-size:11px; transition:all .2s; }
+    .sa-split__g.is-open .sa-split__b { padding:10px 12px; max-height:600px; }
+    .sa-split__sec { font-size:10px; font-weight:800; color:var(--accent); text-transform:uppercase; margin:8px 0 3px; }
+
+    .sa-week { border:1px solid var(--border); border-radius:14px; margin-bottom:12px; overflow:hidden; }
+    .sa-week__h { background:var(--bg-soft); padding:12px 14px; cursor:pointer; display:flex; justify-content:space-between; align-items:center; gap:10px; }
+    .sa-week__t { font-size:13px; font-weight:900; }
+    .sa-week__foco { font-size:10px; color:var(--text-muted); margin-top:2px; }
+    .sa-week__b { padding:0 14px; max-height:0; overflow:hidden; transition:max-height .25s; }
+    .sa-week.is-open .sa-week__b { padding:6px 14px 12px; max-height:1600px; }
+    .sa-run { display:flex; align-items:flex-start; gap:10px; padding:12px 0; border-top:1px dashed var(--border); }
+    .sa-run:first-child { border-top:none; }
+    .sa-run__tag { font-size:18px; flex-shrink:0; width:24px; text-align:center; }
+    .sa-run__body { flex:1; min-width:0; }
+    .sa-run__top { font-size:12px; font-weight:800; }
+    .sa-run.is-done .sa-run__top::after { content:" ✓"; color:var(--accent); }
+    .sa-run__desc { font-size:11px; color:var(--text-muted); margin-top:2px; }
+    .sa-run__nums { font-size:10px; color:var(--text-muted); margin-top:3px; }
+    .sa-run.is-done { opacity:.7; }
+
+    .sa-day.has-sport { border-color:var(--c); background:color-mix(in srgb, var(--c) 16%, transparent); }
+    .sa-day.has-sport i { color:var(--c); font-size:13px; }
+
+    @media (max-width:520px){
+      .sa-row2 { grid-template-columns:1fr; }
+      .sa-xp { flex-direction:column; text-align:center; }
+      .sa-fase__grid { grid-template-columns:repeat(2,1fr); }
+    }
+  </style>
+</head>
+
+<body class="app" data-page="saude">
+
+  <div id="sidebar-container"></div>
+  <div id="overlay" class="overlay" onclick="fecharMenu()"></div>
+
+  <main class="main">
+
+    <!-- Cabeçalho padrão -->
+    <header class="header">
+      <div class="header__left">
+        <button class="btn btn--icon btn--menu" onclick="abrirMenu()" aria-label="Abrir menu">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+        <div>
+          <h1 class="header__title">Saúde &amp; Performance</h1>
+          <p class="header__subtitle" id="sa-data">Sua máquina humana</p>
+        </div>
+      </div>
+      <div class="header__actions">
+        <button class="btn" onclick="abrirSync()">
+          <i class="fa-solid fa-cloud-arrow-up" style="color: var(--accent)"></i>
+          <span>Backup</span>
+        </button>
+        <button class="btn btn--icon" id="btn-tema" onclick="Tema.alternar()" aria-label="Trocar tema">
+          <i class="fa-solid fa-moon"></i>
+        </button>
+      </div>
+    </header>
+
+    <div class="container fade-up">
+
+      <!-- ======================= NÍVEL DE ATLETA (XP) ======================= -->
+      <section class="card sa-xp">
+        <div class="sa-xp__badge">🧬<span class="sa-xp__lvl">NÍVEL <span id="sa-lvl">1</span></span></div>
+        <div class="sa-xp__info">
+          <div class="sa-xp__row">
+            <span class="sa-xp__name">Nível de Atleta</span>
+            <span class="sa-xp__pts" onclick="SA.ajustarXP()" title="Ajustar XP manualmente">
+              <i class="fa-solid fa-gear"></i> <span id="sa-xp">0</span> / <span id="sa-xpmax">500</span> XP
+            </span>
+          </div>
+          <div class="sa-xp__track"><div class="sa-xp__fill" id="sa-xpfill"></div></div>
+        </div>
+      </section>
+
+      <!-- ======================= ABAS PRINCIPAIS ======================= -->
+      <div class="sa-tabs">
+        <button class="sa-tab is-active" data-cor="sono"     onclick="SA.tab('sono')"><i class="fa-solid fa-moon"></i> Sono &amp; Foco</button>
+        <button class="sa-tab" data-cor="treino"   onclick="SA.tab('treino')"><i class="fa-solid fa-dumbbell"></i> Exercícios &amp; Treinos</button>
+        <button class="sa-tab" data-cor="nutri"    onclick="SA.tab('nutri')"><i class="fa-solid fa-apple-whole"></i> Alimentação</button>
+        <button class="sa-tab" data-cor="arquivos" onclick="SA.tab('arquivos')"><i class="fa-solid fa-file-medical"></i> Arquivos</button>
+      </div>
+
+      <!-- ============================================================== -->
+      <!-- ABA 1 · SONO & FOCO                                            -->
+      <!-- ============================================================== -->
+      <section id="sa-panel-sono" class="sa-panel is-active">
+        <div class="grid grid--2">
+
+          <!-- Registro de sono -->
+          <div class="card sa-card-top" style="border-top-color:var(--sa-sono)">
+            <div class="sa-head">
+              <h3><i class="fa-solid fa-bed" style="color:var(--sa-sono)"></i> Controle do Sono</h3>
+              <button class="btn btn--primary" onclick="SA.openSono()"><i class="fa-solid fa-plus"></i> Registrar</button>
+            </div>
+            <div class="sa-stats">
+              <div class="sa-stat"><div class="sa-stat__num" id="sono-media" style="color:var(--sa-sono)">0h</div><div class="sa-stat__lbl">Média 7 dias</div></div>
+              <div class="sa-stat"><div class="sa-stat__num" id="sono-meta">8h</div><div class="sa-stat__lbl">Meta</div></div>
+              <div class="sa-stat"><div class="sa-stat__num" id="sono-nameta">0</div><div class="sa-stat__lbl">Dias na meta</div></div>
+            </div>
+            <div class="sa-chart" id="sono-chart" style="margin-bottom:16px;"></div>
+            <button class="btn" style="width:100%; justify-content:center; margin-bottom:14px;" onclick="SA.setMetaSono()"><i class="fa-solid fa-sliders"></i> Ajustar meta de horas</button>
+            <div class="sa-list" id="sono-lista"></div>
+          </div>
+
+          <!-- Playbook: ritual da noite + foco -->
+          <div class="card sa-card-top" style="border-top-color:var(--sa-sono)">
+            <div class="sa-head">
+              <h3><i class="fa-solid fa-book-open" style="color:var(--sa-sono)"></i> Playbook</h3>
+            </div>
+
+            <div class="sa-head" style="margin-top:4px;">
+              <h3 style="font-size:11px;"><i class="fa-solid fa-cloud-moon"></i> Ritual da Noite</h3>
+              <button class="sa-x sa-pencil" onclick="SA.addRitual('noite')" title="Adicionar item"><i class="fa-solid fa-plus"></i></button>
+            </div>
+            <div class="sa-list" id="ritual-noite" style="margin-bottom:18px;"></div>
+
+            <div class="sa-head" style="margin-top:4px;">
+              <h3 style="font-size:11px;"><i class="fa-solid fa-bullseye"></i> Foco &amp; Concentração</h3>
+              <button class="sa-x sa-pencil" onclick="SA.addRitual('foco')" title="Adicionar item"><i class="fa-solid fa-plus"></i></button>
+            </div>
+            <div class="sa-list" id="ritual-foco"></div>
+            <p style="font-size:10px; color:var(--text-muted); margin-top:14px;">
+              <i class="fa-solid fa-circle-info"></i> Marque os itens conforme cumpre seu ritual. Eles reiniciam a cada novo dia.
+            </p>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ============================================================== -->
+      <!-- ABA 2 · EXERCÍCIOS & TREINOS (sub-abas)                        -->
+      <!-- ============================================================== -->
+      <section id="sa-panel-treino" class="sa-panel">
+
+        <!-- ===== RADAR DE CONSTÂNCIA (topo, compartilhado) ===== -->
+        <div class="card sa-card-top" style="margin-bottom:20px;">
+          <div class="sa-head">
+            <h3><i class="fa-solid fa-fire" style="color:var(--accent)"></i> Radar de Constância</h3>
+            <div style="display:flex; gap:6px;">
+              <button class="btn btn--icon" onclick="SA.mesRadar(-1)"><i class="fa-solid fa-chevron-left"></i></button>
+              <button class="btn btn--icon" onclick="SA.mesRadar(1)"><i class="fa-solid fa-chevron-right"></i></button>
+            </div>
+          </div>
+          <div class="sa-stats">
+            <div class="sa-stat"><div class="sa-stat__num" id="radar-musc" style="color:var(--sa-musc)">0</div><div class="sa-stat__lbl">💪 Musc.</div></div>
+            <div class="sa-stat"><div class="sa-stat__num" id="radar-cor" style="color:var(--sa-corrida)">0</div><div class="sa-stat__lbl">🏃 Corrida</div></div>
+            <div class="sa-stat"><div class="sa-stat__num" id="radar-fut" style="color:var(--sa-fut)">0</div><div class="sa-stat__lbl">⚽ Futebol</div></div>
+            <div class="sa-stat"><div class="sa-stat__num" id="radar-total">0</div><div class="sa-stat__lbl">Total dias</div></div>
+          </div>
+          <p style="text-align:center; font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:1px; margin-bottom:10px;" id="radar-label">--</p>
+          <div class="sa-cal-week"><span>D</span><span>S</span><span>T</span><span>Q</span><span>Q</span><span>S</span><span>S</span></div>
+          <div class="sa-cal" id="radar-grid"></div>
+          <p style="font-size:10px; color:var(--text-muted); margin-top:10px; text-align:center;"><i class="fa-solid fa-hand-pointer"></i> Clique no dia: 1× 💪 musculação · 2× 🏃 corrida · 3× ⚽ futebol · 4× limpa</p>
+        </div>
+
+        <!-- ===== SUB-ABAS ===== -->
+        <div class="sa-subtabs">
+          <button class="sa-subtab is-active" onclick="SA.subtab('peri')"><i class="fa-solid fa-layer-group"></i> Periodização</button>
+          <button class="sa-subtab" onclick="SA.subtab('forca')"><i class="fa-solid fa-dumbbell"></i> Força</button>
+          <button class="sa-subtab" onclick="SA.subtab('corrida')"><i class="fa-solid fa-person-running"></i> Corrida</button>
+          <button class="sa-subtab" onclick="SA.subtab('futebol')"><i class="fa-solid fa-futbol"></i> Futebol</button>
+          <button class="sa-subtab" onclick="SA.subtab('outros')"><i class="fa-solid fa-plus"></i> Outros</button>
+        </div>
+
+        <!-- ===== SUB: PERIODIZAÇÃO (hub) ===== -->
+        <div id="sa-sub-peri" class="sa-subpanel is-active">
+          <div class="card sa-card-top" style="margin-bottom:20px;">
+            <div class="sa-head"><h3><i class="fa-solid fa-layer-group"></i> Ciclo de Treino — Periodização Clássica</h3></div>
+            <p style="font-size:11px; color:var(--text-muted); margin-bottom:16px;">
+              Defina a <b>data de início</b> de cada fase e <b>ative</b> a fase atual. As séries, reps e carga das fichas de Força seguem a fase ativa automaticamente.
+            </p>
+            <div class="grid grid--2" id="peri-fases"></div>
+          </div>
+          <div class="card sa-card-top">
+            <div class="sa-head"><h3><i class="fa-solid fa-diagram-project"></i> Mapa do Split (referência)</h3></div>
+            <p style="font-size:11px; color:var(--text-muted); margin-bottom:14px;">Os 8 grupos do ciclo e seus exercícios por seção. Clique para abrir.</p>
+            <div class="sa-split" id="peri-split"></div>
+          </div>
+        </div>
+
+        <!-- ===== SUB: FORÇA (Academia ↔ Casa) ===== -->
+        <div id="sa-sub-forca" class="sa-subpanel">
+          <div class="card sa-card-top" style="margin-bottom:20px;">
+            <div id="forca-banner" class="sa-fase-banner"></div>
+            <div style="display:flex; flex-wrap:wrap; gap:12px; justify-content:space-between; align-items:center;">
+              <div class="sa-seg" id="forca-modo">
+                <button onclick="SA.setForcaModo('academia')"><i class="fa-solid fa-dumbbell"></i> Academia</button>
+                <button onclick="SA.setForcaModo('casa')"><i class="fa-solid fa-house"></i> Casa</button>
+              </div>
+              <span id="forca-modo-lbl" class="sa-pill" style="color:var(--accent); border-color:var(--accent)">Musculação</span>
+            </div>
+            <div class="sa-abc" id="forca-abc">
+              <button onclick="SA.setForcaTreino('A')">A<small>Push 💪</small></button>
+              <button onclick="SA.setForcaTreino('B')">B<small>Pull 🦥</small></button>
+              <button onclick="SA.setForcaTreino('C')">C<small>Legs 🦵</small></button>
+            </div>
+            <div id="forca-ficha"></div>
+          </div>
+
+          <!-- AVALIAÇÃO FÍSICA (vai pro fundo) -->
+          <div class="card sa-card-top">
+            <div class="sa-head">
+              <h3><i class="fa-solid fa-weight-scale"></i> Avaliação Física</h3>
+              <button class="btn btn--primary" onclick="SA.openAval()"><i class="fa-solid fa-plus"></i> Nova medição</button>
+            </div>
+            <div class="sa-stats" id="aval-stats"></div>
+            <div class="grid grid--3" style="margin-bottom:16px;">
+              <div class="sa-chart" id="aval-chart-peso"></div>
+              <div class="sa-chart" id="aval-chart-gord"></div>
+              <div class="sa-chart" id="aval-chart-cint"></div>
+            </div>
+            <div class="sa-list" id="aval-lista"></div>
+          </div>
+        </div>
+
+        <!-- ===== SUB: CORRIDA (plano de 12 semanas) ===== -->
+        <div id="sa-sub-corrida" class="sa-subpanel">
+          <div class="card sa-card-top" style="border-top-color:var(--sa-corrida); margin-bottom:20px;">
+            <div class="sa-head"><h3><i class="fa-solid fa-flag-checkered" style="color:var(--sa-corrida)"></i> Plano de Corrida — 12 Semanas</h3></div>
+            <div class="sa-fase-banner" style="border-left-color:var(--sa-corrida)">
+              <span>🎯 <b style="color:var(--sa-corrida)">5 km em menos de 30 min</b></span>
+              <span>⏱️ Ritmo-alvo: &lt; 6:00/km (&gt; 10 km/h)</span>
+            </div>
+            <div class="sa-row2">
+              <div class="sa-field"><label class="sa-label">Início do plano</label><input type="date" class="sa-input" id="cor-inicio" onchange="SA.setCorInicio()"></div>
+              <div class="sa-field"><label class="sa-label">Conclusão prevista</label><input type="text" class="sa-input" id="cor-fim" readonly></div>
+            </div>
+            <p style="font-size:11px; font-weight:800; margin-bottom:6px;">Progresso: <span id="cor-prog-txt">0 de 36 corridas (0%)</span></p>
+            <div class="sa-xp__track"><div class="sa-xp__fill" id="cor-prog-bar" style="background:linear-gradient(90deg,#d97706,var(--sa-corrida))"></div></div>
+          </div>
+          <div class="card sa-card-top" style="border-top-color:var(--sa-corrida); margin-bottom:20px;">
+            <div class="sa-head"><h3><i class="fa-solid fa-calendar-week" style="color:var(--sa-corrida)"></i> Cronograma</h3></div>
+            <div id="cor-plano"></div>
+          </div>
+          <div class="card sa-card-top" style="border-top-color:var(--sa-corrida)">
+            <div class="sa-head"><h3><i class="fa-solid fa-circle-info"></i> Tipos de treino &amp; Regras de Ouro</h3></div>
+            <div id="cor-legenda"></div>
+          </div>
+        </div>
+
+        <!-- ===== SUB: FUTEBOL ===== -->
+        <div id="sa-sub-futebol" class="sa-subpanel">
+          <div class="card sa-card-top" style="border-top-color:var(--sa-fut)">
+            <div class="sa-head">
+              <h3><i class="fa-solid fa-futbol" style="color:var(--sa-fut)"></i> Peladas &amp; Jogos</h3>
+              <button class="btn btn--primary" style="background:var(--sa-fut); border-color:var(--sa-fut)" onclick="SA.openFut()"><i class="fa-solid fa-plus"></i> Registrar Jogo</button>
+            </div>
+            <div class="sa-stats">
+              <div class="sa-stat"><div class="sa-stat__num" id="fut-jogos" style="color:var(--sa-fut)">0</div><div class="sa-stat__lbl">Jogos</div></div>
+              <div class="sa-stat"><div class="sa-stat__num" id="fut-gols">0</div><div class="sa-stat__lbl">Gols</div></div>
+              <div class="sa-stat"><div class="sa-stat__num" id="fut-assist">0</div><div class="sa-stat__lbl">Assist.</div></div>
+              <div class="sa-stat"><div class="sa-stat__num" id="fut-nota">--</div><div class="sa-stat__lbl">Nota média</div></div>
+            </div>
+            <div class="sa-list" id="fut-lista"></div>
+          </div>
+        </div>
+
+        <!-- ===== SUB: OUTROS ===== -->
+        <div id="sa-sub-outros" class="sa-subpanel">
+          <div class="card sa-card-top">
+            <div class="sa-head">
+              <h3><i class="fa-solid fa-medal"></i> Outros Esportes</h3>
+              <button class="btn btn--primary" onclick="SA.openEsporte()"><i class="fa-solid fa-plus"></i> Novo Esporte</button>
+            </div>
+            <p style="font-size:11px; color:var(--text-muted); margin-bottom:16px;">
+              Crie um esporte e defina os campos que quer acompanhar (ex.: Natação → metros, tempo). Depois é só registrar.
+            </p>
+            <div class="sa-list" id="outros-lista"></div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ============================================================== -->
+      <!-- ABA 3 · ALIMENTAÇÃO & HIDRATAÇÃO                               -->
+      <!-- ============================================================== -->
+      <section id="sa-panel-nutri" class="sa-panel">
+        <div class="grid grid--2">
+
+          <!-- Plano alimentar -->
+          <div class="card sa-card-top">
+            <div class="sa-head">
+              <h3><i class="fa-solid fa-utensils"></i> Plano Alimentar</h3>
+              <button class="btn btn--primary" onclick="SA.openRefeicao()"><i class="fa-solid fa-plus"></i> Refeição</button>
+            </div>
+            <div class="sa-list" id="refeicoes-lista" style="margin-bottom:16px;"></div>
+            <button class="btn" style="width:100%; justify-content:center;" onclick="SA.arquivarDieta()"><i class="fa-solid fa-box-archive"></i> Arquivar este plano</button>
+            <div style="margin-top:16px;">
+              <p class="sa-label">Planos salvos</p>
+              <div class="sa-list" id="dietas-arquivadas"></div>
+            </div>
+          </div>
+
+          <!-- Hidratação + prato -->
+          <div style="display:flex; flex-direction:column; gap:20px;">
+            <div class="card sa-card-top" style="border-top-color:var(--sa-agua)">
+              <div class="sa-head">
+                <h3><i class="fa-solid fa-droplet" style="color:var(--sa-agua)"></i> Hidratação</h3>
+                <div style="display:flex; gap:6px; align-items:center;">
+                  <button class="btn btn--icon" onclick="SA.diaAgua(-1)"><i class="fa-solid fa-chevron-left"></i></button>
+                  <span id="agua-dia" style="font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:1px; width:60px; text-align:center;">HOJE</span>
+                  <button class="btn btn--icon" onclick="SA.diaAgua(1)"><i class="fa-solid fa-chevron-right"></i></button>
+                </div>
+              </div>
+              <div style="display:flex; gap:18px; align-items:center;">
+                <div class="sa-water"><div class="sa-water__fill" id="agua-fill"></div><div class="sa-water__drop"><i class="fa-solid fa-droplet"></i></div></div>
+                <div style="flex:1;">
+                  <div class="sa-stat" style="margin-bottom:12px;">
+                    <div class="sa-stat__num" style="color:var(--sa-agua)"><span id="agua-ml">0</span> ml</div>
+                    <div class="sa-stat__lbl">Meta: <span id="agua-meta">2500</span> ml</div>
+                  </div>
+                  <div class="sa-row2" style="gap:8px;">
+                    <button class="btn" onclick="SA.addAgua(250)">+250</button>
+                    <button class="btn" onclick="SA.addAgua(500)">+500</button>
+                    <button class="btn" onclick="SA.addAgua(-250)">-250</button>
+                    <button class="btn" onclick="SA.setMetaAgua()"><i class="fa-solid fa-sliders"></i></button>
+                  </div>
+                  <p style="font-size:10px; color:var(--text-muted); margin-top:10px; text-align:center;">Dias na meta: <b id="agua-dias" style="color:var(--sa-agua)">0</b></p>
+                </div>
+              </div>
+            </div>
+
+            <div class="card sa-card-top">
+              <div class="sa-head"><h3><i class="fa-solid fa-plate-wheat"></i> Guia do Prato</h3></div>
+              <div class="sa-check" style="border-left:4px solid var(--sa-good)"><span class="sa-check__txt">50% Salada / Vegetais</span></div>
+              <div class="sa-check" style="border-left:4px solid var(--sa-bad); margin-top:8px;"><span class="sa-check__txt">25% Proteína magra</span></div>
+              <div class="sa-check" style="border-left:4px solid var(--sa-mid); margin-top:8px;"><span class="sa-check__txt">25% Carboidrato complexo</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Códex de alimentos -->
+        <div class="card sa-card-top" style="margin-top:20px;">
+          <div class="sa-head">
+            <h3><i class="fa-solid fa-leaf"></i> Códex de Alimentos</h3>
+            <button class="btn btn--primary" onclick="SA.openAlimento()"><i class="fa-solid fa-plus"></i> Cadastrar</button>
+          </div>
+          <p style="font-size:11px; color:var(--text-muted); margin-bottom:16px;">Anote como cada alimento te faz sentir (vitalidade de 1 a 5). Com o tempo você descobre seus padrões.</p>
+          <div class="grid grid--3" id="alimentos-lista"></div>
+        </div>
+      </section>
+
+      <!-- ============================================================== -->
+      <!-- ABA 4 · ARQUIVOS MÉDICOS                                       -->
+      <!-- ============================================================== -->
+      <section id="sa-panel-arquivos" class="sa-panel">
+        <div class="card sa-card-top" style="border-top-color:var(--sa-arq)">
+          <div class="sa-head">
+            <h3><i class="fa-solid fa-file-medical" style="color:var(--sa-arq)"></i> Exames &amp; Documentos</h3>
+            <div style="display:flex; gap:8px;">
+              <select class="sa-input" id="arq-filtro" style="width:auto; padding:8px 10px;" onchange="SA.renderArquivos()">
+                <option value="todos">Todos</option>
+                <option value="Exames">Exames</option>
+                <option value="Resultados">Resultados</option>
+                <option value="Guias">Guias</option>
+                <option value="Atestados">Atestados</option>
+                <option value="Gerais">Gerais</option>
+              </select>
+              <button class="btn btn--primary" style="background:var(--sa-arq); border-color:var(--sa-arq)" onclick="SA.openArquivo()"><i class="fa-solid fa-upload"></i> Anexar</button>
+            </div>
+          </div>
+          <div class="grid grid--3" id="arquivos-lista"></div>
+        </div>
+      </section>
+
+    </div>
+
+    <div id="footer-container"></div>
+  </main>
+
+  <!-- ===================== MODAL DE BACKUP (igual molde) ===================== -->
+  <div id="modal-sync" class="modal">
+    <div class="modal__box">
+      <div class="modal__head">
+        <h3><i class="fa-solid fa-cloud-arrow-up" style="color:var(--accent)"></i> Backup &amp; Transferência</h3>
+        <button class="modal__close" onclick="fecharSync()"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal__body">
+        <p>Sem nuvem por enquanto: use isto pra levar seus dados entre celular e computador.</p>
+        <button class="btn" onclick="exportarBackup()" style="width:100%; justify-content:center;">
+          <i class="fa-solid fa-download"></i> Exportar (baixar arquivo)
+        </button>
+        <input type="file" id="input-import" accept=".json" onchange="importarBackup(event)" style="display:none;">
+        <button class="btn btn--primary" onclick="document.getElementById('input-import').click()" style="width:100%; justify-content:center;">
+          <i class="fa-solid fa-upload"></i> Importar (restaurar backup)
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== MINI-MODAIS GENÉRICOS ===================== -->
+  <!-- Confirmação (substitui o confirm() nativo) -->
+  <div id="sa-modal-confirm" class="modal">
+    <div class="modal__box">
+      <div class="modal__head"><h3><i class="fa-solid fa-triangle-exclamation" style="color:var(--sa-mid)"></i> Confirmar</h3></div>
+      <div class="modal__body">
+        <p id="sa-confirm-msg" style="color:var(--text-strong);">Tem certeza?</p>
+        <div style="display:flex; gap:10px;">
+          <button class="btn" style="flex:1; justify-content:center;" onclick="SA.closeM('sa-modal-confirm')">Cancelar</button>
+          <button class="btn btn--primary" style="flex:1; justify-content:center; background:var(--sa-bad); border-color:var(--sa-bad)" id="sa-confirm-ok">Confirmar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Prompt de 1 campo (substitui o prompt() nativo) -->
+  <div id="sa-modal-prompt" class="modal">
+    <div class="modal__box">
+      <div class="modal__head"><h3 id="sa-prompt-title">Digite</h3><button class="modal__close" onclick="SA.closeM('sa-modal-prompt')"><i class="fa-solid fa-xmark"></i></button></div>
+      <div class="modal__body">
+        <input type="text" class="sa-input" id="sa-prompt-input">
+        <button class="btn btn--primary" style="width:100%; justify-content:center;" id="sa-prompt-ok">Salvar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== MODAIS DE FORMULÁRIO ===================== -->
+  <!-- Sono -->
+  <div id="sa-modal-sono" class="modal">
+    <div class="modal__box">
+      <div class="modal__head"><h3><i class="fa-solid fa-bed" style="color:var(--sa-sono)"></i> Registrar Sono</h3><button class="modal__close" onclick="SA.closeM('sa-modal-sono')"><i class="fa-solid fa-xmark"></i></button></div>
+      <div class="modal__body sa-modal-body">
+        <div class="sa-field"><label class="sa-label">Data</label><input type="date" class="sa-input" id="sono-data"></div>
+        <div class="sa-row2">
+          <div class="sa-field"><label class="sa-label">Deitei às</label><input type="time" class="sa-input" id="sono-deitar" value="23:00"></div>
+          <div class="sa-field"><label class="sa-label">Acordei às</label><input type="time" class="sa-input" id="sono-acordar" value="07:00"></div>
+        </div>
+        <div class="sa-field"><label class="sa-label">Qualidade: <span id="sono-q-val">3</span>/5</label><input type="range" class="sa-range" id="sono-qual" min="1" max="5" value="3" oninput="document.getElementById('sono-q-val').innerText=this.value"></div>
+        <div class="sa-field"><label class="sa-label">Notas (opcional)</label><textarea class="sa-input" id="sono-nota" placeholder="Acordei no meio da noite? Sonhei muito?"></textarea></div>
+        <button class="btn btn--primary" style="width:100%; justify-content:center; background:var(--sa-sono); border-color:var(--sa-sono)" onclick="SA.saveSono()">Salvar registro</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Avaliação física (completa) -->
+  <div id="sa-modal-aval" class="modal">
+    <div class="modal__box">
+      <div class="modal__head"><h3><i class="fa-solid fa-weight-scale"></i> Avaliação Física</h3><button class="modal__close" onclick="SA.closeM('sa-modal-aval')"><i class="fa-solid fa-xmark"></i></button></div>
+      <div class="modal__body sa-modal-body">
+        <div class="sa-row2">
+          <div class="sa-field"><label class="sa-label">Data</label><input type="date" class="sa-input" id="aval-data"></div>
+          <div class="sa-field"><label class="sa-label">Altura (cm)</label><input type="number" step="0.1" class="sa-input" id="aval-altura" placeholder="178"></div>
+        </div>
+        <div class="sa-row2">
+          <div class="sa-field"><label class="sa-label">Peso (kg)</label><input type="number" step="0.1" class="sa-input" id="aval-peso" placeholder="75.5"></div>
+          <div class="sa-field"><label class="sa-label">Gordura (%)</label><input type="number" step="0.1" class="sa-input" id="aval-gordura" placeholder="18"></div>
+        </div>
+        <p class="sa-label" style="margin-top:4px;">Circunferências (cm)</p>
+        <div class="sa-row2">
+          <div class="sa-field"><label class="sa-label">Pescoço</label><input type="number" step="0.1" class="sa-input" id="aval-pescoco"></div>
+          <div class="sa-field"><label class="sa-label">Peito</label><input type="number" step="0.1" class="sa-input" id="aval-peito"></div>
+        </div>
+        <div class="sa-row2">
+          <div class="sa-field"><label class="sa-label">Cintura</label><input type="number" step="0.1" class="sa-input" id="aval-cintura"></div>
+          <div class="sa-field"><label class="sa-label">Quadril</label><input type="number" step="0.1" class="sa-input" id="aval-quadril"></div>
+        </div>
+        <div class="sa-row2">
+          <div class="sa-field"><label class="sa-label">Braço relaxado</label><input type="number" step="0.1" class="sa-input" id="aval-bracor"></div>
+          <div class="sa-field"><label class="sa-label">Braço contraído</label><input type="number" step="0.1" class="sa-input" id="aval-bracoc"></div>
+        </div>
+        <div class="sa-row2">
+          <div class="sa-field"><label class="sa-label">Antebraço</label><input type="number" step="0.1" class="sa-input" id="aval-antebraco"></div>
+          <div class="sa-field"><label class="sa-label">Coxa</label><input type="number" step="0.1" class="sa-input" id="aval-coxa"></div>
+        </div>
+        <div class="sa-row2">
+          <div class="sa-field"><label class="sa-label">Panturrilha</label><input type="number" step="0.1" class="sa-input" id="aval-pant"></div>
+          <div class="sa-field"><label class="sa-label">FC repouso (bpm)</label><input type="number" class="sa-input" id="aval-fc"></div>
+        </div>
+        <div class="sa-row2">
+          <div class="sa-field"><label class="sa-label">Pressão sistólica</label><input type="number" class="sa-input" id="aval-pas" placeholder="120"></div>
+          <div class="sa-field"><label class="sa-label">Pressão diastólica</label><input type="number" class="sa-input" id="aval-pad" placeholder="80"></div>
+        </div>
+        <div class="sa-field"><label class="sa-label">Observações</label><textarea class="sa-input" id="aval-nota"></textarea></div>
+        <p style="font-size:10px; color:var(--text-muted); margin:-4px 0 12px;"><i class="fa-solid fa-circle-info"></i> IMC, massa magra e relação cintura-quadril são calculados automaticamente.</p>
+        <button class="btn btn--primary" style="width:100%; justify-content:center;" onclick="SA.saveAval()">Salvar avaliação</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Editar/adicionar exercício de Força -->
+  <div id="sa-modal-ex" class="modal">
+    <div class="modal__box">
+      <div class="modal__head"><h3 id="ex-titulo"><i class="fa-solid fa-pen"></i> Exercício</h3><button class="modal__close" onclick="SA.closeM('sa-modal-ex')"><i class="fa-solid fa-xmark"></i></button></div>
+      <div class="modal__body sa-modal-body">
+        <input type="hidden" id="ex-idx">
+        <div class="sa-row2">
+          <div class="sa-field"><label class="sa-label">Grupo</label><input type="text" class="sa-input" id="ex-grupo" placeholder="Peito"></div>
+          <div class="sa-field"><label class="sa-label">Exercício</label><input type="text" class="sa-input" id="ex-nome" placeholder="Supino Reto"></div>
+        </div>
+        <div class="sa-field"><label class="sa-label" id="ex-extra-lbl">Dica prática</label><textarea class="sa-input" id="ex-extra" placeholder="Instrução técnica de execução"></textarea></div>
+        <p style="font-size:10px; color:var(--text-muted); margin:-4px 0 12px;"><i class="fa-solid fa-circle-info"></i> Deixe os campos abaixo vazios para usar séries/reps da fase ativa. Preencha só para uma exceção neste exercício.</p>
+        <div class="sa-row2">
+          <div class="sa-field"><label class="sa-label">Séries (opcional)</label><input type="text" class="sa-input" id="ex-series"></div>
+          <div class="sa-field"><label class="sa-label">Reps (opcional)</label><input type="text" class="sa-input" id="ex-reps"></div>
+        </div>
+        <button class="btn btn--primary" style="width:100%; justify-content:center;" onclick="SA.saveEx()">Salvar exercício</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Registro de corrida (de uma sessão do plano) -->
+  <div id="sa-modal-corrida" class="modal">
+    <div class="modal__box">
+      <div class="modal__head"><h3 id="corr-titulo"><i class="fa-solid fa-stopwatch" style="color:var(--sa-corrida)"></i> Registrar Corrida</h3><button class="modal__close" onclick="SA.closeM('sa-modal-corrida')"><i class="fa-solid fa-xmark"></i></button></div>
+      <div class="modal__body sa-modal-body">
+        <input type="hidden" id="corr-runid">
+        <div class="sa-field"><label class="sa-label">Data</label><input type="date" class="sa-input" id="corr-data"></div>
+        <div class="sa-row2">
+          <div class="sa-field"><label class="sa-label">Distância (km)</label><input type="number" step="0.01" class="sa-input" id="corr-dist" placeholder="3"></div>
+          <div class="sa-field"><label class="sa-label">Tempo (min)</label><input type="number" step="0.1" class="sa-input" id="corr-tempo" placeholder="22"></div>
+        </div>
+        <div class="sa-row2">
+          <div class="sa-field"><label class="sa-label">Ritmo máx (min/km)</label><input type="text" class="sa-input" id="corr-ritmax" placeholder="5:10"></div>
+          <div class="sa-field"><label class="sa-label">Vel. máx (km/h)</label><input type="number" step="0.1" class="sa-input" id="corr-velmax" placeholder="13"></div>
+        </div>
+        <p style="font-size:10px; color:var(--text-muted); margin:-4px 0 12px;"><i class="fa-solid fa-circle-info"></i> Ritmo médio e velocidade média saem do tempo e da distância.</p>
+        <div class="sa-field"><label class="sa-label">Sensação / notas</label><textarea class="sa-input" id="corr-nota"></textarea></div>
+        <button class="btn btn--primary" style="width:100%; justify-content:center; background:var(--sa-corrida); border-color:var(--sa-corrida)" onclick="SA.saveCorrida()">Salvar corrida ✓</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Registro de futebol -->
+  <div id="sa-modal-fut" class="modal">
+    <div class="modal__box">
+      <div class="modal__head"><h3><i class="fa-solid fa-futbol" style="color:var(--sa-fut)"></i> Registrar Jogo</h3><button class="modal__close" onclick="SA.closeM('sa-modal-fut')"><i class="fa-solid fa-xmark"></i></button></div>
+      <div class="modal__body sa-modal-body">
+        <div class="sa-row2">
+          <div class="sa-field"><label class="sa-label">Data</label><input type="date" class="sa-input" id="fut-data"></div>
+          <div class="sa-field"><label class="sa-label">Local</label><input type="text" class="sa-input" id="fut-local" placeholder="Society do bairro"></div>
+        </div>
+        <div class="sa-row2">
+          <div class="sa-field"><label class="sa-label">Gols</label><input type="number" class="sa-input" id="fut-g" value="0"></div>
+          <div class="sa-field"><label class="sa-label">Assistências</label><input type="number" class="sa-input" id="fut-a" value="0"></div>
+        </div>
+        <div class="sa-field"><label class="sa-label">Sua nota: <span id="fut-n-val">3</span>/5</label><input type="range" class="sa-range" id="fut-n" min="1" max="5" value="3" oninput="document.getElementById('fut-n-val').innerText=this.value"></div>
+        <div class="sa-field"><label class="sa-label">Cansaço: <span id="fut-c-val">3</span>/5</label><input type="range" class="sa-range" id="fut-c" min="1" max="5" value="3" oninput="document.getElementById('fut-c-val').innerText=this.value"></div>
+        <div class="sa-field"><label class="sa-label">Dificuldade: <span id="fut-d-val">3</span>/5</label><input type="range" class="sa-range" id="fut-d" min="1" max="5" value="3" oninput="document.getElementById('fut-d-val').innerText=this.value"></div>
+        <button class="btn btn--primary" style="width:100%; justify-content:center; background:var(--sa-fut); border-color:var(--sa-fut)" onclick="SA.saveFut()">Salvar jogo</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Novo esporte -->
+  <div id="sa-modal-esporte" class="modal">
+    <div class="modal__box">
+      <div class="modal__head"><h3><i class="fa-solid fa-medal"></i> Novo Esporte</h3><button class="modal__close" onclick="SA.closeM('sa-modal-esporte')"><i class="fa-solid fa-xmark"></i></button></div>
+      <div class="modal__body sa-modal-body">
+        <div class="sa-field"><label class="sa-label">Nome do esporte</label><input type="text" class="sa-input" id="esp-nome" placeholder="Natação"></div>
+        <div class="sa-field"><label class="sa-label">Campos para acompanhar (separe por vírgula)</label><input type="text" class="sa-input" id="esp-campos" placeholder="Metros, Tempo (min), Estilo"></div>
+        <button class="btn btn--primary" style="width:100%; justify-content:center;" onclick="SA.saveEsporte()">Criar esporte</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Registro de esporte custom -->
+  <div id="sa-modal-espreg" class="modal">
+    <div class="modal__box">
+      <div class="modal__head"><h3 id="espreg-titulo">Registro</h3><button class="modal__close" onclick="SA.closeM('sa-modal-espreg')"><i class="fa-solid fa-xmark"></i></button></div>
+      <div class="modal__body sa-modal-body">
+        <input type="hidden" id="espreg-id">
+        <div class="sa-field"><label class="sa-label">Data</label><input type="date" class="sa-input" id="espreg-data"></div>
+        <div id="espreg-campos"></div>
+        <div class="sa-field"><label class="sa-label">Nota</label><textarea class="sa-input" id="espreg-nota"></textarea></div>
+        <button class="btn btn--primary" style="width:100%; justify-content:center;" onclick="SA.saveEspReg()">Salvar registro</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Refeição -->
+  <div id="sa-modal-refeicao" class="modal">
+    <div class="modal__box">
+      <div class="modal__head"><h3 id="ref-titulo"><i class="fa-solid fa-utensils"></i> Refeição</h3><button class="modal__close" onclick="SA.closeM('sa-modal-refeicao')"><i class="fa-solid fa-xmark"></i></button></div>
+      <div class="modal__body sa-modal-body">
+        <input type="hidden" id="ref-id">
+        <div class="sa-row2">
+          <div class="sa-field"><label class="sa-label">Nome</label><input type="text" class="sa-input" id="ref-nome" placeholder="Café da manhã"></div>
+          <div class="sa-field"><label class="sa-label">Horário</label><input type="time" class="sa-input" id="ref-hora"></div>
+        </div>
+        <div class="sa-field"><label class="sa-label">Alimentos</label><textarea class="sa-input" id="ref-itens" style="min-height:110px;" placeholder="- 2 ovos&#10;- 1 fatia de pão integral&#10;- café sem açúcar"></textarea></div>
+        <button class="btn btn--primary" style="width:100%; justify-content:center;" onclick="SA.saveRefeicao()">Salvar refeição</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Alimento (códex) -->
+  <div id="sa-modal-alimento" class="modal">
+    <div class="modal__box">
+      <div class="modal__head"><h3><i class="fa-solid fa-leaf"></i> Cadastrar Alimento</h3><button class="modal__close" onclick="SA.closeM('sa-modal-alimento')"><i class="fa-solid fa-xmark"></i></button></div>
+      <div class="modal__body sa-modal-body">
+        <div class="sa-field"><label class="sa-label">Alimento</label><input type="text" class="sa-input" id="ali-nome" placeholder="Arroz, ovos, batata frita..."></div>
+        <div class="sa-row2">
+          <div class="sa-field"><label class="sa-label">Kcal (porção)</label><input type="number" class="sa-input" id="ali-kcal" placeholder="130"></div>
+          <div class="sa-field"><label class="sa-label">Macro dominante</label>
+            <select class="sa-input" id="ali-macro">
+              <option>Proteína</option><option>Carboidrato</option><option>Gordura</option><option>Fibras/Micros</option>
+            </select>
+          </div>
+        </div>
+        <div class="sa-field"><label class="sa-label">Vitalidade: <span id="ali-v-val">3</span>/5 (como te faz sentir)</label><input type="range" class="sa-range" id="ali-vit" min="1" max="5" value="3" oninput="document.getElementById('ali-v-val').innerText=this.value"></div>
+        <div class="sa-field"><label class="sa-label">Reação do corpo</label><textarea class="sa-input" id="ali-obs" placeholder="Me dá sono / ótimo pré-treino"></textarea></div>
+        <button class="btn btn--primary" style="width:100%; justify-content:center;" onclick="SA.saveAlimento()">Salvar no códex</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Arquivo médico -->
+  <div id="sa-modal-arquivo" class="modal">
+    <div class="modal__box">
+      <div class="modal__head"><h3><i class="fa-solid fa-file-medical" style="color:var(--sa-arq)"></i> Anexar Documento</h3><button class="modal__close" onclick="SA.closeM('sa-modal-arquivo')"><i class="fa-solid fa-xmark"></i></button></div>
+      <div class="modal__body sa-modal-body">
+        <div class="sa-field"><label class="sa-label">Categoria</label>
+          <select class="sa-input" id="arq-cat"><option>Exames</option><option>Resultados</option><option>Guias</option><option>Atestados</option><option>Gerais</option></select>
+        </div>
+        <div class="sa-field"><label class="sa-label">Imagem</label><input type="file" class="sa-input" id="arq-file" accept="image/*"></div>
+        <div class="sa-field"><label class="sa-label">Anotações</label><textarea class="sa-input" id="arq-nota"></textarea></div>
+        <button class="btn btn--primary" style="width:100%; justify-content:center; background:var(--sa-arq); border-color:var(--sa-arq)" onclick="SA.saveArquivo()">Anexar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Elementos de gamificação -->
+  <div class="sa-xpfloat" id="sa-xpfloat"></div>
+  <div class="sa-toast" id="sa-toast"></div>
+
+  <!-- O COMPORTAMENTO compartilhado -->
+  <script src="app.js"></script>
+
+  <!-- ===================================================================
+       SCRIPT SÓ DESTA PÁGINA
+       Tudo vive dentro do objeto global SA (de "Saúde") para não colidir
+       com as funções globais do app.js. Cada área tem: dados (via Store),
+       uma função render() que desenha na tela, e os handlers dos botões.
+       =================================================================== -->
+  <script>
+  window.SA = {
+
+    /* ---------- estado em memória (carregado do Store no init) ---------- */
+    xp: 0,
+    calistenia: null, periodizacao: null, treinoRadar: null, forcaCheck: null,
+    forcaModo: "academia", forcaTreino: "A",
+    sono: null, musc: null, corrida: null, futebol: null, outros: null,
+    nutri: null, agua: null, arquivos: null,
+    radarDate: new Date(),       // mês exibido no radar
+    aguaDate: new Date(),        // dia exibido na hidratação
+    tmpEx: [],                   // exercícios sendo montados num modal de ficha
+    tmpBloco: [],                // blocos sendo montados numa sessão de corrida
+
+    /* ================= ATALHOS DE DADOS (Store com prefixo saude_) ====== */
+    load(chave, padrao) { return Store.ler("saude_" + chave, padrao); },
+    save(chave, valor)  { Store.salvar("saude_" + chave, valor); },
+
+    /* ================= DATAS (sempre hora LOCAL, nunca toISOString) ===== */
+    chaveData(d) {
+      // Monta "AAAA-MM-DD" com getters locais -> evita o bug de fuso (UTC-3)
+      const ano = d.getFullYear();
+      const mes = String(d.getMonth() + 1).padStart(2, "0");
+      const dia = String(d.getDate()).padStart(2, "0");
+      return ano + "-" + mes + "-" + dia;
+    },
+    hojeChave() { return this.chaveData(new Date()); },
+    brData(chave) { return chave.split("-").reverse().join("/"); },
+
+    /* ================= MODAIS (abrir/fechar reaproveitando .modal) ====== */
+    openM(id)  { document.getElementById(id).classList.add("is-open"); },
+    closeM(id) { document.getElementById(id).classList.remove("is-open"); },
+
+    // Confirmação reutilizável (no lugar do confirm nativo)
+    confirmar(msg, aoConfirmar) {
+      document.getElementById("sa-confirm-msg").innerText = msg;
+      const btn = document.getElementById("sa-confirm-ok");
+      const novo = btn.cloneNode(true);           // troca o botão pra limpar listeners antigos
+      btn.parentNode.replaceChild(novo, btn);
+      novo.addEventListener("click", () => { this.closeM("sa-modal-confirm"); aoConfirmar(); });
+      this.openM("sa-modal-confirm");
+    },
+
+    // Prompt de 1 linha (no lugar do prompt nativo)
+    perguntar(titulo, valor, aoSalvar) {
+      document.getElementById("sa-prompt-title").innerText = titulo;
+      const input = document.getElementById("sa-prompt-input");
+      input.value = valor || "";
+      const btn = document.getElementById("sa-prompt-ok");
+      const novo = btn.cloneNode(true);
+      btn.parentNode.replaceChild(novo, btn);
+      novo.addEventListener("click", () => {
+        const v = input.value.trim();
+        if (v !== "") { this.closeM("sa-modal-prompt"); aoSalvar(v); }
+      });
+      this.openM("sa-modal-prompt");
+      setTimeout(() => input.focus(), 50);
+    },
+
+    /* ================= GAMIFICAÇÃO (XP / nível) ======================== */
+    darXP(qtd, msg) {
+      const nivelAntes = Math.floor(this.xp / 500) + 1;
+      this.xp = Math.max(0, this.xp + qtd);
+      this.save("xp", this.xp);
+      this.renderXP();
+      // +XP flutuante perto do centro do topo
+      const f = document.getElementById("sa-xpfloat");
+      f.innerText = (qtd >= 0 ? "+" : "") + qtd + " XP";
+      f.style.left = "50%"; f.style.top = "120px";
+      f.classList.remove("is-go"); void f.offsetWidth; f.classList.add("is-go");
+      // Subiu de nível? Comemora.
+      const nivelDepois = Math.floor(this.xp / 500) + 1;
+      if (nivelDepois > nivelAntes) this.toast("🎉 Subiu para o Nível " + nivelDepois + "!");
+    },
+    ajustarXP() {
+      this.perguntar("Definir XP total", String(this.xp), (v) => {
+        const n = parseInt(v); if (!isNaN(n)) { this.xp = Math.max(0, n); this.save("xp", this.xp); this.renderXP(); }
+      });
+    },
+    renderXP() {
+      const nivel = Math.floor(this.xp / 500) + 1;
+      const dentro = this.xp % 500;
+      document.getElementById("sa-lvl").innerText = nivel;
+      document.getElementById("sa-xp").innerText = dentro;
+      document.getElementById("sa-xpfill").style.width = (dentro / 500 * 100) + "%";
+    },
+    toast(txt) {
+      const t = document.getElementById("sa-toast");
+      t.innerText = txt; t.classList.add("is-show");
+      setTimeout(() => t.classList.remove("is-show"), 2600);
+    },
+
+    /* ================= GRÁFICO DE LINHA EM SVG (feito na mão) =========== */
+    // pontos = [{label, value}]  ·  devolve uma string de SVG responsivo.
+    grafico(pontos, cor, unidade) {
+      if (!pontos || pontos.length === 0)
+        return '<div class="sa-empty">Sem dados ainda. Comece a registrar!</div>';
+      const W = 320, H = 130, P = 26;
+      const vals = pontos.map(p => p.value);
+      let min = Math.min(...vals), max = Math.max(...vals);
+      if (min === max) { min -= 1; max += 1; }
+      const n = pontos.length;
+      const px = i => P + (n === 1 ? (W - 2 * P) / 2 : i * (W - 2 * P) / (n - 1));
+      const py = v => (H - P) - ((v - min) / (max - min)) * (H - 2 * P);
+      const linha = pontos.map((p, i) => px(i) + "," + py(p.value)).join(" ");
+      const area = P + "," + (H - P) + " " + linha + " " + px(n - 1) + "," + (H - P);
+      const dots = pontos.map((p, i) => '<circle cx="' + px(i) + '" cy="' + py(p.value) + '" r="3" fill="' + cor + '"/>').join("");
+      // rótulos do eixo X: primeiro, meio, último
+      const idxs = n === 1 ? [0] : [0, Math.floor((n - 1) / 2), n - 1];
+      const xlabels = idxs.map(i => '<text x="' + px(i) + '" y="' + (H - 6) + '" text-anchor="middle" font-size="8" fill="var(--text-muted)">' + pontos[i].label + '</text>').join("");
+      return '<div class="sa-chart"><svg viewBox="0 0 ' + W + ' ' + H + '">' +
+        '<polygon points="' + area + '" fill="' + cor + '" opacity="0.12"/>' +
+        '<polyline points="' + linha + '" fill="none" stroke="' + cor + '" stroke-width="2" stroke-linejoin="round"/>' +
+        dots +
+        '<text x="' + P + '" y="14" font-size="8" fill="var(--text-muted)">' + max.toFixed(1) + (unidade || "") + '</text>' +
+        '<text x="' + P + '" y="' + (H - P) + '" font-size="8" fill="var(--text-muted)">' + min.toFixed(1) + '</text>' +
+        xlabels + '</svg></div>';
+    },
+
+    /* ================= NAVEGAÇÃO ENTRE ABAS ============================ */
+    tab(id) {
+      document.querySelectorAll(".sa-panel").forEach(p => p.classList.remove("is-active"));
+      document.getElementById("sa-panel-" + id).classList.add("is-active");
+      document.querySelectorAll(".sa-tab").forEach(b => b.classList.remove("is-active"));
+      document.querySelector('.sa-tab[data-cor="' + id + '"]').classList.add("is-active");
+    },
+    subtab(id) {
+      document.querySelectorAll(".sa-subpanel").forEach(p => p.classList.remove("is-active"));
+      document.getElementById("sa-sub-" + id).classList.add("is-active");
+      document.querySelectorAll(".sa-subtab").forEach(b => b.classList.remove("is-active"));
+      event.currentTarget.classList.add("is-active");
+    },
+
+    /* ================================================================== */
+    /* ÁREA 1 · SONO & FOCO                                                */
+    /* ================================================================== */
+    openSono() {
+      document.getElementById("sono-data").value = this.hojeChave();
+      document.getElementById("sono-deitar").value = "23:00";
+      document.getElementById("sono-acordar").value = "07:00";
+      document.getElementById("sono-qual").value = 3;
+      document.getElementById("sono-q-val").innerText = "3";
+      document.getElementById("sono-nota").value = "";
+      this.openM("sa-modal-sono");
+    },
+    saveSono() {
+      const data = document.getElementById("sono-data").value;
+      if (!data) return;
+      const deitar = document.getElementById("sono-deitar").value;
+      const acordar = document.getElementById("sono-acordar").value;
+      // horas dormidas (se acordar <= deitar, virou o dia -> soma 24h)
+      const [hd, md] = deitar.split(":").map(Number);
+      const [ha, ma] = acordar.split(":").map(Number);
+      let min = (ha * 60 + ma) - (hd * 60 + md);
+      if (min <= 0) min += 24 * 60;
+      const horas = Math.round((min / 60) * 10) / 10;
+      this.sono.registros.unshift({
+        id: Date.now(), data, deitar, acordar, horas,
+        qualidade: parseInt(document.getElementById("sono-qual").value),
+        nota: document.getElementById("sono-nota").value.trim()
+      });
+      this.save("sono", this.sono);
+      this.closeM("sa-modal-sono");
+      this.renderSono();
+      this.darXP(15, "sono registrado");
+    },
+    delSono(id) {
+      this.confirmar("Apagar este registro de sono?", () => {
+        this.sono.registros = this.sono.registros.filter(r => r.id !== id);
+        this.save("sono", this.sono); this.renderSono();
+      });
+    },
+    setMetaSono() {
+      this.perguntar("Meta de horas de sono", String(this.sono.metaHoras), (v) => {
+        const n = parseFloat(v); if (!isNaN(n)) { this.sono.metaHoras = n; this.save("sono", this.sono); this.renderSono(); }
+      });
+    },
+    addRitual(tipo) {
+      const titulo = tipo === "noite" ? "Item do ritual da noite" : "Item de foco";
+      this.perguntar(titulo, "", (v) => {
+        this.sono[tipo].push({ texto: v, ok: false, dia: this.hojeChave() });
+        this.save("sono", this.sono); this.renderSono();
+      });
+    },
+    toggleRitual(tipo, i) {
+      const item = this.sono[tipo][i];
+      // reinicia a marcação se for de outro dia
+      if (item.dia !== this.hojeChave()) { item.dia = this.hojeChave(); item.ok = false; }
+      item.ok = !item.ok;
+      this.save("sono", this.sono); this.renderSono();
+    },
+    delRitual(tipo, i) {
+      this.confirmar("Remover este item?", () => {
+        this.sono[tipo].splice(i, 1); this.save("sono", this.sono); this.renderSono();
+      });
+    },
+    renderSono() {
+      const regs = this.sono.registros;
+      // estatísticas
+      const ult7 = regs.slice(0, 7);
+      const media = ult7.length ? (ult7.reduce((s, r) => s + r.horas, 0) / ult7.length) : 0;
+      document.getElementById("sono-media").innerText = media.toFixed(1) + "h";
+      document.getElementById("sono-meta").innerText = this.sono.metaHoras + "h";
+      document.getElementById("sono-nameta").innerText = regs.filter(r => r.horas >= this.sono.metaHoras).length;
+      // gráfico (do mais antigo p/ o mais novo, últimos 10)
+      const pts = regs.slice(0, 10).reverse().map(r => ({ label: this.brData(r.data).slice(0, 5), value: r.horas }));
+      document.getElementById("sono-chart").innerHTML = this.grafico(pts, "var(--sa-sono)", "h");
+      // lista
+      const lista = document.getElementById("sono-lista");
+      lista.innerHTML = regs.length ? "" : '<div class="sa-empty">Nenhum registro de sono ainda.</div>';
+      regs.slice(0, 8).forEach(r => {
+        const cor = r.horas >= this.sono.metaHoras ? "var(--sa-good)" : "var(--sa-mid)";
+        lista.innerHTML +=
+          '<div class="sa-item"><div class="sa-item__main">' +
+          '<div class="sa-item__title">' + this.brData(r.data) + ' — <span style="color:' + cor + '">' + r.horas + 'h</span></div>' +
+          '<div class="sa-item__sub">' + r.deitar + ' → ' + r.acordar + ' · qualidade ' + r.qualidade + '/5' + (r.nota ? ' · ' + r.nota : '') + '</div>' +
+          '</div><button class="sa-x" onclick="SA.delSono(' + r.id + ')"><i class="fa-solid fa-trash"></i></button></div>';
+      });
+      // playbooks
+      this.renderRitual("noite", "ritual-noite");
+      this.renderRitual("foco", "ritual-foco");
+    },
+    renderRitual(tipo, containerId) {
+      const c = document.getElementById(containerId);
+      const arr = this.sono[tipo];
+      c.innerHTML = arr.length ? "" : '<div class="sa-empty">Adicione itens no +</div>';
+      arr.forEach((item, i) => {
+        const feitoHoje = item.ok && item.dia === this.hojeChave();
+        c.innerHTML +=
+          '<div class="sa-check ' + (feitoHoje ? "is-done" : "") + '">' +
+          '<div class="sa-check__box" onclick="SA.toggleRitual(\'' + tipo + '\',' + i + ')"><i class="fa-solid fa-check"></i></div>' +
+          '<span class="sa-check__txt">' + item.texto + '</span>' +
+          '<button class="sa-x" onclick="SA.delRitual(\'' + tipo + '\',' + i + ')"><i class="fa-solid fa-xmark"></i></button></div>';
+      });
+    },
+
+    /* ================================================================== */
+    /* HUB · PERIODIZAÇÃO (define a fase ativa que abastece a Força)       */
+    /* ================================================================== */
+    faseAtiva() {
+      const p = this.periodizacao;
+      return p.fases.find(f => f.id === p.faseAtivaId) || p.fases[0];
+    },
+    fimDaFase(f) {
+      if (!f.inicio) return "";
+      const d = new Date(f.inicio + "T00:00:00");          // T00:00 evita o salto de fuso
+      d.setDate(d.getDate() + f.semanas * 7 - 1);
+      return this.chaveData(d);
+    },
+    statusFase(f) {
+      if (!f.inicio) return { txt: "Não iniciada", ic: "⏳", cor: "var(--text-muted)" };
+      const hoje = this.hojeChave(), fim = this.fimDaFase(f);
+      if (hoje < f.inicio) return { txt: "Não iniciada", ic: "⏳", cor: "var(--text-muted)" };
+      if (hoje > fim)      return { txt: "Concluída",    ic: "🏁", cor: "var(--sa-good)" };
+      return { txt: "Em andamento", ic: "✅", cor: "var(--accent)" };
+    },
+    setFaseInicio(id, val) {
+      this.periodizacao.fases.find(x => x.id === id).inicio = val;
+      this.save("periodizacao", this.periodizacao); this.renderPeri();
+    },
+    ativarFase(id) {
+      this.periodizacao.faseAtivaId = id;
+      this.save("periodizacao", this.periodizacao);
+      this.renderPeri(); this.renderForca();
+      this.toast("Fase ativada — fichas atualizadas!");
+    },
+    renderPeri() {
+      const c = document.getElementById("peri-fases");
+      c.innerHTML = "";
+      this.periodizacao.fases.forEach(f => {
+        const ativa = f.id === this.periodizacao.faseAtivaId;
+        const st = this.statusFase(f);
+        const fim = this.fimDaFase(f);
+        c.innerHTML +=
+          '<div class="sa-fase ' + (ativa ? "is-ativa" : "") + '">' +
+          '<div class="sa-fase__top"><div><div class="sa-fase__num">' + f.num + ' · ' + f.nome + '</div>' +
+          '<div class="sa-fase__foco">' + f.foco + '</div></div>' +
+          '<span class="sa-pill" style="color:' + st.cor + '; border-color:' + st.cor + '">' + st.ic + ' ' + st.txt + '</span></div>' +
+          '<div class="sa-fase__params">' +
+          '<span class="sa-tag">🏋️ ' + f.carga + '</span>' +
+          '<span class="sa-tag">🔁 ' + f.repsMin + '–' + f.repsMax + ' reps</span>' +
+          '<span class="sa-tag">📊 ' + f.series + ' séries</span>' +
+          '<span class="sa-tag">📅 ' + f.semanas + ' sem.</span></div>' +
+          '<div class="sa-row2">' +
+          '<div class="sa-field" style="margin-bottom:0;"><label class="sa-label">Início</label>' +
+          '<input type="date" class="sa-input" value="' + (f.inicio || "") + '" onchange="SA.setFaseInicio(' + f.id + ', this.value)"></div>' +
+          '<div class="sa-field" style="margin-bottom:0;"><label class="sa-label">Fim previsto</label>' +
+          '<input type="text" class="sa-input" value="' + (fim ? this.brData(fim) : "—") + '" readonly></div></div>' +
+          (ativa
+            ? '<div class="sa-tag" style="display:block; text-align:center; margin-top:12px; background:var(--accent); color:#fff; border-color:var(--accent);">✓ Fase ativa</div>'
+            : '<button class="btn" style="width:100%; justify-content:center; margin-top:12px;" onclick="SA.ativarFase(' + f.id + ')">Ativar esta fase</button>') +
+          '</div>';
+      });
+      this.renderSplit();
+    },
+    renderSplit() {
+      const c = document.getElementById("peri-split");
+      if (!c) return;
+      c.innerHTML = "";
+      this.SPLIT.forEach((g, i) => {
+        const secs = g.secoes.map(s =>
+          '<div class="sa-split__sec">' + s.nome + '</div>' + s.exs.map(e => '<div>• ' + e + '</div>').join("")
+        ).join("");
+        c.innerHTML +=
+          '<div class="sa-split__g" id="split-g' + i + '">' +
+          '<div class="sa-split__h" onclick="document.getElementById(\'split-g' + i + '\').classList.toggle(\'is-open\')">' +
+          '<span>Dia ' + g.dia + ' · ' + g.grupo + '</span><i class="fa-solid fa-chevron-down"></i></div>' +
+          '<div class="sa-split__b">' + secs + '</div></div>';
+      });
+    },
+
+    /* ================================================================== */
+    /* FORÇA · Musculação (Academia) e Calistenia (Casa) herdam a fase     */
+    /* ================================================================== */
+    setForcaModo(m) { this.forcaModo = m; this.renderForca(); },
+    setForcaTreino(t) { this.forcaTreino = t; this.renderForca(); },
+    fichaAtual() {
+      const fonte = this.forcaModo === "academia" ? this.musc.fichas : this.calistenia.fichas;
+      return fonte.find(f => f.treino === this.forcaTreino) || fonte[0];
+    },
+    chkKey(idx) { return this.forcaModo + "_" + this.forcaTreino + "_" + idx; },
+    exFeito(idx) {
+      const dia = this.forcaCheck[this.hojeChave()];
+      return !!(dia && dia[this.chkKey(idx)]);
+    },
+    toggleEx(idx) {
+      const hoje = this.hojeChave();
+      if (!this.forcaCheck[hoje]) this.forcaCheck[hoje] = {};
+      const k = this.chkKey(idx);
+      if (this.forcaCheck[hoje][k]) delete this.forcaCheck[hoje][k];
+      else this.forcaCheck[hoje][k] = true;
+      this.save("forca_check", this.forcaCheck); this.renderForca();
+    },
+    concluirForca() {
+      const ficha = this.fichaAtual();
+      const todos = ficha.exs.length > 0 && ficha.exs.every((e, i) => this.exFeito(i));
+      if (!todos) { this.toast("Marque todos os exercícios primeiro 😉"); return; }
+      const hoje = this.hojeChave();
+      const flag = "_done_" + this.forcaModo + "_" + this.forcaTreino;
+      this.marcarRadar(hoje, "musc");
+      if (!this.forcaCheck[hoje]) this.forcaCheck[hoje] = {};
+      if (!this.forcaCheck[hoje][flag]) {
+        this.forcaCheck[hoje][flag] = true;
+        this.save("forca_check", this.forcaCheck);
+        this.darXP(50, "treino concluído");
+        this.toast("💪 Treino " + this.forcaTreino + " concluído! Dia marcado no radar.");
+      } else {
+        this.toast("✅ Esse treino já foi concluído hoje.");
+      }
+    },
+    renderForca() {
+      const f = this.faseAtiva();
+      // banner de fase ativa
+      document.getElementById("forca-banner").innerHTML =
+        '<span>Fase ativa → <b>' + f.num + ' · ' + f.nome + '</b></span>' +
+        '<span class="sa-pill">Séries: ' + f.series + '</span>' +
+        '<span class="sa-pill">Reps: ' + f.repsMin + '–' + f.repsMax + '</span>' +
+        '<span class="sa-pill">' + f.carga + '</span>';
+      // estado dos botões
+      document.querySelectorAll("#forca-modo button").forEach((b, i) =>
+        b.classList.toggle("is-on", (i === 0) === (this.forcaModo === "academia")));
+      document.getElementById("forca-modo").classList.toggle("sa-seg--casa", this.forcaModo === "casa");
+      const lbl = document.getElementById("forca-modo-lbl");
+      lbl.innerText = this.forcaModo === "academia" ? "Musculação" : "Calistenia";
+      lbl.style.color = this.forcaModo === "academia" ? "var(--accent)" : "var(--sa-corrida)";
+      lbl.style.borderColor = lbl.style.color;
+      const letras = ["A", "B", "C"];
+      document.querySelectorAll("#forca-abc button").forEach((b, i) =>
+        b.classList.toggle("is-on", letras[i] === this.forcaTreino));
+      // ficha
+      const ficha = this.fichaAtual();
+      const total = ficha.exs.length;
+      const feitos = ficha.exs.filter((e, i) => this.exFeito(i)).length;
+      let html =
+        '<div class="sa-head" style="margin-top:6px;"><h3 style="font-size:12px;">' + ficha.emoji + ' Treino ' + ficha.treino + ' — ' + ficha.titulo + ' <span style="color:var(--text-muted); font-weight:600;">· ' + ficha.sub + '</span></h3>' +
+        '<button class="sa-x sa-pencil" onclick="SA.openEx(-1)" title="Adicionar exercício"><i class="fa-solid fa-plus"></i></button></div>' +
+        '<p style="font-size:10px; color:var(--text-muted); margin-bottom:10px;"><i class="fa-regular fa-calendar"></i> Sugestão: ' + ficha.dia + ' · <b>' + feitos + '/' + total + '</b> feitos hoje</p>' +
+        '<div class="sa-xp__track" style="margin-bottom:14px;"><div class="sa-xp__fill" style="width:' + (total ? feitos / total * 100 : 0) + '%"></div></div>' +
+        '<div class="sa-list">';
+      ficha.exs.forEach((e, i) => {
+        const done = this.exFeito(i);
+        const series = e.series || f.series;
+        const reps = e.reps || (f.repsMin + "–" + f.repsMax);
+        const cargaOuProg = this.forcaModo === "academia"
+          ? '<span>🏋️ ' + f.carga + '</span>'
+          : '<span>🔧 ' + (e.prog || "—") + '</span>';
+        const textoDica = this.forcaModo === "academia" ? (e.dica || "") : (e.prog || "");
+        html +=
+          '<div class="sa-exr ' + (done ? "is-done" : "") + '">' +
+          '<div class="sa-exr__chk" onclick="SA.toggleEx(' + i + ')"><i class="fa-solid fa-check"></i></div>' +
+          '<div class="sa-exr__n">' + (i + 1) + '</div>' +
+          '<div class="sa-exr__body">' +
+          '<div class="sa-exr__nome">' + e.nome + ' <span class="sa-pill" style="color:var(--text-muted); border-color:var(--border)">' + e.grupo + '</span></div>' +
+          '<div class="sa-exr__meta"><span>📊 ' + series + ' séries</span><span>🔁 ' + reps + ' reps</span>' + cargaOuProg + '</div>' +
+          (textoDica ? '<div class="sa-exr__dica">' + textoDica + '</div>' : '') +
+          '<div style="margin-top:6px; display:flex; gap:4px;">' +
+          '<button class="sa-x sa-pencil" onclick="SA.openEx(' + i + ')"><i class="fa-solid fa-pen"></i></button>' +
+          '<button class="sa-x" onclick="SA.delEx(' + i + ')"><i class="fa-solid fa-trash"></i></button></div>' +
+          '</div></div>';
+      });
+      html += '</div>';
+      const tudoFeito = total > 0 && feitos === total;
+      html += '<button class="btn btn--primary" style="width:100%; justify-content:center; margin-top:16px;' + (tudoFeito ? "" : " opacity:.5;") + '" onclick="SA.concluirForca()"><i class="fa-solid fa-trophy"></i> Concluir Treino ' + ficha.treino + ' (+50 XP)</button>';
+      document.getElementById("forca-ficha").innerHTML = html;
+    },
+    openEx(idx) {
+      document.getElementById("ex-idx").value = idx;
+      const casa = this.forcaModo === "casa";
+      document.getElementById("ex-extra-lbl").innerText = casa ? "Progressão (como dificultar)" : "Dica prática";
+      let e = { grupo: "", nome: "", dica: "", prog: "", series: "", reps: "" };
+      if (idx >= 0) e = Object.assign(e, this.fichaAtual().exs[idx]);
+      document.getElementById("ex-grupo").value = e.grupo || "";
+      document.getElementById("ex-nome").value = e.nome || "";
+      document.getElementById("ex-extra").value = casa ? (e.prog || "") : (e.dica || "");
+      document.getElementById("ex-series").value = e.series || "";
+      document.getElementById("ex-reps").value = e.reps || "";
+      document.getElementById("ex-titulo").innerHTML = idx >= 0 ? '<i class="fa-solid fa-pen"></i> Editar Exercício' : '<i class="fa-solid fa-plus"></i> Novo Exercício';
+      this.openM("sa-modal-ex");
+    },
+    saveEx() {
+      const idx = parseInt(document.getElementById("ex-idx").value);
+      const casa = this.forcaModo === "casa";
+      const nome = document.getElementById("ex-nome").value.trim(); if (!nome) return;
+      const obj = {
+        grupo: document.getElementById("ex-grupo").value.trim(),
+        nome,
+        series: document.getElementById("ex-series").value.trim(),
+        reps: document.getElementById("ex-reps").value.trim()
+      };
+      if (casa) obj.prog = document.getElementById("ex-extra").value.trim();
+      else obj.dica = document.getElementById("ex-extra").value.trim();
+      const ficha = this.fichaAtual();
+      if (idx >= 0) Object.assign(ficha.exs[idx], obj);
+      else ficha.exs.push(obj);
+      this.saveForca(); this.closeM("sa-modal-ex"); this.renderForca();
+    },
+    delEx(idx) {
+      this.confirmar("Remover este exercício da ficha?", () => {
+        this.fichaAtual().exs.splice(idx, 1); this.saveForca(); this.renderForca();
+      });
+    },
+    saveForca() {
+      if (this.forcaModo === "academia") this.save("musc_v2", this.musc);
+      else this.save("calistenia", this.calistenia);
+    },
+
+    /* ================================================================== */
+    /* AVALIAÇÃO FÍSICA (completa, base científica)                       */
+    /* ================================================================== */
+    openAval() {
+      ["aval-altura","aval-peso","aval-gordura","aval-pescoco","aval-peito","aval-cintura","aval-quadril","aval-bracor","aval-bracoc","aval-antebraco","aval-coxa","aval-pant","aval-fc","aval-pas","aval-pad","aval-nota"].forEach(id => document.getElementById(id).value = "");
+      document.getElementById("aval-data").value = this.hojeChave();
+      const ult = this.musc.avaliacoes[this.musc.avaliacoes.length - 1];
+      if (ult && ult.altura) document.getElementById("aval-altura").value = ult.altura;
+      this.openM("sa-modal-aval");
+    },
+    saveAval() {
+      const g = id => { const v = parseFloat(document.getElementById(id).value); return isNaN(v) ? null : v; };
+      const data = document.getElementById("aval-data").value; if (!data) return;
+      this.musc.avaliacoes.push({
+        id: Date.now(), data,
+        altura: g("aval-altura"), peso: g("aval-peso"), gordura: g("aval-gordura"),
+        pescoco: g("aval-pescoco"), peito: g("aval-peito"), cintura: g("aval-cintura"), quadril: g("aval-quadril"),
+        bracor: g("aval-bracor"), bracoc: g("aval-bracoc"), antebraco: g("aval-antebraco"),
+        coxa: g("aval-coxa"), pant: g("aval-pant"),
+        fc: g("aval-fc"), pas: g("aval-pas"), pad: g("aval-pad"),
+        nota: document.getElementById("aval-nota").value.trim()
+      });
+      this.musc.avaliacoes.sort((a, b) => a.data.localeCompare(b.data));
+      this.save("musc_v2", this.musc);
+      this.closeM("sa-modal-aval"); this.renderAval(); this.darXP(25, "avaliação");
+    },
+    delAval(id) {
+      this.confirmar("Apagar esta avaliação?", () => {
+        this.musc.avaliacoes = this.musc.avaliacoes.filter(a => a.id !== id);
+        this.save("musc_v2", this.musc); this.renderAval();
+      });
+    },
+    renderAval() {
+      const arr = this.musc.avaliacoes;
+      const ult = arr[arr.length - 1];
+      const stats = document.getElementById("aval-stats");
+      if (ult) {
+        const imc = (ult.peso && ult.altura) ? (ult.peso / Math.pow(ult.altura / 100, 2)) : null;
+        const magra = (ult.peso && ult.gordura != null) ? ult.peso * (1 - ult.gordura / 100) : null;
+        const rcq = (ult.cintura && ult.quadril) ? ult.cintura / ult.quadril : null;
+        stats.innerHTML =
+          '<div class="sa-stat"><div class="sa-stat__num" style="color:var(--accent)">' + (ult.peso != null ? ult.peso : "--") + '</div><div class="sa-stat__lbl">Peso (kg)</div></div>' +
+          '<div class="sa-stat"><div class="sa-stat__num">' + (imc != null ? imc.toFixed(1) : "--") + '</div><div class="sa-stat__lbl">IMC</div></div>' +
+          '<div class="sa-stat"><div class="sa-stat__num">' + (ult.gordura != null ? ult.gordura + "%" : "--") + '</div><div class="sa-stat__lbl">Gordura</div></div>' +
+          '<div class="sa-stat"><div class="sa-stat__num">' + (magra != null ? magra.toFixed(1) : "--") + '</div><div class="sa-stat__lbl">Massa magra</div></div>' +
+          '<div class="sa-stat"><div class="sa-stat__num">' + (rcq != null ? rcq.toFixed(2) : "--") + '</div><div class="sa-stat__lbl">Cint/Quadril</div></div>';
+      } else {
+        stats.innerHTML = '<div class="sa-empty" style="grid-column:1/-1;">Sem avaliações ainda. Faça sua primeira medição!</div>';
+      }
+      const mk = campo => arr.filter(a => a[campo] != null).map(a => ({ label: this.brData(a.data).slice(0, 5), value: a[campo] }));
+      document.getElementById("aval-chart-peso").innerHTML = '<p class="sa-label" style="text-align:center;">Peso (kg)</p>' + this.grafico(mk("peso"), "var(--accent)", "kg");
+      document.getElementById("aval-chart-gord").innerHTML = '<p class="sa-label" style="text-align:center;">Gordura (%)</p>' + this.grafico(mk("gordura"), "var(--sa-mid)", "%");
+      document.getElementById("aval-chart-cint").innerHTML = '<p class="sa-label" style="text-align:center;">Cintura (cm)</p>' + this.grafico(mk("cintura"), "var(--sa-corrida)", "cm");
+      const lista = document.getElementById("aval-lista");
+      lista.innerHTML = "";
+      arr.slice().reverse().forEach(a => {
+        const det = [
+          a.peso != null ? a.peso + "kg" : null,
+          a.gordura != null ? a.gordura + "%" : null,
+          a.cintura != null ? "cint. " + a.cintura : null,
+          a.quadril != null ? "quad. " + a.quadril : null,
+          a.bracoc != null ? "braço " + a.bracoc : null,
+          a.coxa != null ? "coxa " + a.coxa : null,
+          (a.pas && a.pad) ? "PA " + a.pas + "/" + a.pad : null,
+          a.fc != null ? a.fc + "bpm" : null
+        ].filter(Boolean).join(" · ");
+        lista.innerHTML +=
+          '<div class="sa-item"><div class="sa-item__main">' +
+          '<div class="sa-item__title">' + this.brData(a.data) + '</div>' +
+          '<div class="sa-item__sub">' + (det || "sem dados") + (a.nota ? ' · ' + a.nota : '') + '</div>' +
+          '</div><button class="sa-x" onclick="SA.delAval(' + a.id + ')"><i class="fa-solid fa-trash"></i></button></div>';
+      });
+    },
+
+    /* ================================================================== */
+    /* CORRIDA · Plano de 12 semanas (periodização independente)          */
+    /* ================================================================== */
+    setCorInicio() {
+      this.corrida.inicio = document.getElementById("cor-inicio").value;
+      this.save("corrida_v2", this.corrida); this.renderCorrida();
+    },
+    runId(s, letra) { return "S" + s + letra; },
+    totalRuns() { let t = 0; this.corrida.plano.forEach(w => t += w.corridas.length); return t; },
+    feitasCount() { return Object.keys(this.corrida.registros).length; },
+    openCorrida(rid, titulo) {
+      document.getElementById("corr-runid").value = rid;
+      document.getElementById("corr-titulo").innerHTML = '<i class="fa-solid fa-stopwatch" style="color:var(--sa-corrida)"></i> ' + titulo;
+      const reg = this.corrida.registros[rid] || {};
+      document.getElementById("corr-data").value = reg.data || this.hojeChave();
+      document.getElementById("corr-dist").value = reg.dist || "";
+      document.getElementById("corr-tempo").value = reg.tempo || "";
+      document.getElementById("corr-ritmax").value = reg.ritmax || "";
+      document.getElementById("corr-velmax").value = reg.velmax || "";
+      document.getElementById("corr-nota").value = reg.nota || "";
+      this.openM("sa-modal-corrida");
+    },
+    saveCorrida() {
+      const rid = document.getElementById("corr-runid").value;
+      const data = document.getElementById("corr-data").value; if (!data) return;
+      const dist = parseFloat(document.getElementById("corr-dist").value) || 0;
+      const tempo = parseFloat(document.getElementById("corr-tempo").value) || 0;
+      const velMed = (dist > 0 && tempo > 0) ? Math.round((dist / (tempo / 60)) * 10) / 10 : 0;
+      const rNum = (dist > 0 && tempo > 0) ? tempo / dist : 0;
+      const rTxt = rNum ? (Math.floor(rNum) + ":" + String(Math.round((rNum % 1) * 60)).padStart(2, "0")) : "--";
+      const novo = !this.corrida.registros[rid];
+      this.corrida.registros[rid] = {
+        data, dist, tempo, velMed, ritmoMed: rTxt,
+        ritmax: document.getElementById("corr-ritmax").value.trim(),
+        velmax: parseFloat(document.getElementById("corr-velmax").value) || null,
+        nota: document.getElementById("corr-nota").value.trim()
+      };
+      this.save("corrida_v2", this.corrida);
+      this.marcarRadar(data, "corrida");
+      this.closeM("sa-modal-corrida"); this.renderCorrida();
+      if (novo) this.darXP(30, "corrida registrada");
+      this.toast("🏃 Corrida registrada!");
+    },
+    delCorridaReg(rid) {
+      this.confirmar("Apagar o registro desta corrida?", () => {
+        delete this.corrida.registros[rid];
+        this.save("corrida_v2", this.corrida); this.renderCorrida();
+      });
+    },
+    renderCorrida() {
+      document.getElementById("cor-inicio").value = this.corrida.inicio || "";
+      let fim = "—";
+      if (this.corrida.inicio) {
+        const d = new Date(this.corrida.inicio + "T00:00:00");
+        d.setDate(d.getDate() + 12 * 7 - 1);
+        fim = this.brData(this.chaveData(d));
+      }
+      document.getElementById("cor-fim").value = fim;
+      const total = this.totalRuns(), feitas = this.feitasCount();
+      const pct = total ? Math.round(feitas / total * 100) : 0;
+      document.getElementById("cor-prog-txt").innerText = feitas + " de " + total + " corridas (" + pct + "%)";
+      document.getElementById("cor-prog-bar").style.width = pct + "%";
+      const cont = document.getElementById("cor-plano");
+      cont.innerHTML = "";
+      this.corrida.plano.forEach(w => {
+        const feitasSem = w.corridas.filter(r => this.corrida.registros[this.runId(w.semana, r.letra)]).length;
+        let runsHtml = "";
+        w.corridas.forEach(r => {
+          const rid = this.runId(w.semana, r.letra);
+          const reg = this.corrida.registros[rid];
+          const titulo = ("Semana " + w.semana + " · " + r.letra + " — " + r.tipoNome).replace(/'/g, "");
+          runsHtml +=
+            '<div class="sa-run ' + (reg ? "is-done" : "") + '">' +
+            '<div class="sa-run__tag">' + r.emoji + '</div>' +
+            '<div class="sa-run__body">' +
+            '<div class="sa-run__top">' + r.letra + (r.opc ? " ★" : "") + ' · ' + r.tipoNome + '</div>' +
+            '<div class="sa-run__desc">' + r.desc + '</div>' +
+            '<div class="sa-run__nums">⏱️ ' + r.ref + ' · 📏 ' + r.km + (reg ? ' · ✅ ' + reg.dist + 'km / ' + reg.tempo + 'min · ritmo ' + reg.ritmoMed + '/km' : '') + '</div>' +
+            '<div style="margin-top:6px; display:flex; gap:6px;">' +
+            '<button class="btn" onclick="SA.openCorrida(\'' + rid + '\',\'' + titulo + '\')"><i class="fa-solid fa-' + (reg ? "pen" : "stopwatch") + '"></i> ' + (reg ? "Editar" : "Registrar") + '</button>' +
+            (reg ? '<button class="sa-x" onclick="SA.delCorridaReg(\'' + rid + '\')"><i class="fa-solid fa-trash"></i></button>' : '') +
+            '</div></div></div>';
+        });
+        cont.innerHTML +=
+          '<div class="sa-week ' + (w.semana === 1 ? "is-open" : "") + '" id="week-' + w.semana + '">' +
+          '<div class="sa-week__h" onclick="document.getElementById(\'week-' + w.semana + '\').classList.toggle(\'is-open\')">' +
+          '<div><div class="sa-week__t">' + (w.icone ? w.icone + " " : "") + 'Semana ' + w.semana + '</div><div class="sa-week__foco">' + w.foco + '</div></div>' +
+          '<span class="sa-pill" style="color:var(--sa-corrida); border-color:var(--sa-corrida)">' + feitasSem + '/' + w.corridas.length + '</span></div>' +
+          '<div class="sa-week__b">' + runsHtml + '</div></div>';
+      });
+      this.renderCorLegenda();
+    },
+    renderCorLegenda() {
+      const c = document.getElementById("cor-legenda");
+      if (!c || c.dataset.done) return;
+      const tipos = [
+        ["🟢", "Leve", "Fala frases completas — base aeróbica e hábito"],
+        ["🔄", "Fartlek", "Acelera quando quiser — introduz velocidade brincando"],
+        ["🟡", "Tempo", "Desconfortável mas sustentável — eleva o limiar"],
+        ["🔵", "Intervalo", "Tiros fortes + trote — VO₂máx e velocidade"],
+        ["⚫", "Longa", "Mais devagar que o normal — resistência"],
+        ["🏁", "Ritmo/Prova", "Ritmo de prova &lt; 6:00/km — simulação dos 5 km"]
+      ];
+      let html = '<div class="sa-list" style="margin-bottom:16px;">';
+      tipos.forEach(t => html += '<div class="sa-mini"><span><b>' + t[0] + ' ' + t[1] + '</b> — ' + t[2] + '</span></div>');
+      html += '</div><p class="sa-label">Regras de ouro</p><div class="sa-list">' +
+        '<div class="sa-check"><span class="sa-check__txt">80% das corridas devem ser LEVES</span></div>' +
+        '<div class="sa-check" style="margin-top:8px;"><span class="sa-check__txt">Descanse 1–2 dias entre corridas</span></div>' +
+        '<div class="sa-check" style="margin-top:8px;"><span class="sa-check__txt">Consistência &gt; intensidade</span></div>' +
+        '<div class="sa-check" style="margin-top:8px;"><span class="sa-check__txt">Dor articular ≠ cansaço — pare se doer</span></div>' +
+        '<div class="sa-check" style="margin-top:8px;"><span class="sa-check__txt">Calibre pelo teste de conversa</span></div></div>';
+      c.innerHTML = html; c.dataset.done = "1";
+    },
+
+    /* ================================================================== */
+    /* RADAR DE CONSTÂNCIA (multi-esporte, ciclo de cliques)             */
+    /* ================================================================== */
+    mesRadar(d) { this.radarDate.setMonth(this.radarDate.getMonth() + d); this.renderRadar(); },
+    cicloRadar(chave) {
+      const ordem = [null, "musc", "corrida", "futebol"];
+      const atual = this.treinoRadar[chave] || null;
+      const prox = ordem[(ordem.indexOf(atual) + 1) % 4];
+      if (prox) this.treinoRadar[chave] = prox; else delete this.treinoRadar[chave];
+      this.save("treino_radar", this.treinoRadar);
+      if (!atual && prox) this.darXP(20, "dia ativo");   // XP só ao sair de vazio
+      this.renderRadar();
+    },
+    marcarRadar(chave, esporte) {
+      if (this.treinoRadar[chave] !== esporte) {
+        this.treinoRadar[chave] = esporte;
+        this.save("treino_radar", this.treinoRadar);
+        this.renderRadar();
+      }
+    },
+    renderRadar() {
+      const ano = this.radarDate.getFullYear(), mes = this.radarDate.getMonth();
+      const meses = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
+      document.getElementById("radar-label").innerText = meses[mes] + " " + ano;
+      const ini = new Date(ano, mes, 1).getDay();
+      const dias = new Date(ano, mes + 1, 0).getDate();
+      const hoje = this.hojeChave();
+      const icones = { musc: { i: "fa-dumbbell", c: "var(--sa-musc)" }, corrida: { i: "fa-person-running", c: "var(--sa-corrida)" }, futebol: { i: "fa-futbol", c: "var(--sa-fut)" } };
+      let html = "", cMusc = 0, cCor = 0, cFut = 0;
+      for (let i = 0; i < ini; i++) html += '<div class="sa-day is-empty"></div>';
+      for (let dia = 1; dia <= dias; dia++) {
+        const chave = ano + "-" + String(mes + 1).padStart(2, "0") + "-" + String(dia).padStart(2, "0");
+        const sp = this.treinoRadar[chave];
+        if (sp === "musc") cMusc++; else if (sp === "corrida") cCor++; else if (sp === "futebol") cFut++;
+        const ic = sp ? icones[sp] : null;
+        const inner = ic ? '<i class="fa-solid ' + ic.i + '"></i>' : dia;
+        const cls = "sa-day" + (sp ? " has-sport" : "") + (chave === hoje ? " is-today" : "");
+        const styleC = sp ? ' style="--c:' + ic.c + '"' : "";
+        html += '<div class="' + cls + '"' + styleC + ' title="Dia ' + dia + '" onclick="SA.cicloRadar(\'' + chave + '\')">' + inner + '</div>';
+      }
+      document.getElementById("radar-grid").innerHTML = html;
+      document.getElementById("radar-musc").innerText = cMusc;
+      document.getElementById("radar-cor").innerText = cCor;
+      document.getElementById("radar-fut").innerText = cFut;
+      document.getElementById("radar-total").innerText = Object.keys(this.treinoRadar).length;
+    },
+
+    /* ================================================================== */
+    /* SEEDS · dados prontos (fichas PPL, calistenia, split, plano 12 sem) */
+    /* ================================================================== */
+    SPLIT: [
+      { dia: 1, grupo: "Peito", secoes: [
+        { nome: "Superior", exs: ["Supino Inclinado", "Crucifixo Inclinado", "Flexão com Pés Elevados"] },
+        { nome: "Central", exs: ["Supino Reto", "Crucifixo Reto", "Flexão Tradicional"] },
+        { nome: "Inferior", exs: ["Crossover (cima p/ baixo)", "Mergulho (Dips)", "Flexão Declinada"] } ] },
+      { dia: 2, grupo: "Bíceps", secoes: [
+        { nome: "Porção longa", exs: ["Rosca Scott", "Rosca Inclinada"] },
+        { nome: "Porção curta", exs: ["Rosca Direta", "Rosca Concentrada"] },
+        { nome: "Antebraço", exs: ["Rosca Inversa", "Rosca de Punho"] } ] },
+      { dia: 3, grupo: "Abdômen", secoes: [
+        { nome: "Superior", exs: ["Crunch", "Crunch na Polia"] },
+        { nome: "Inferior", exs: ["Elevação de Pernas", "Elevação de Joelhos"] },
+        { nome: "Oblíquos", exs: ["Prancha Lateral", "Russian Twist"] } ] },
+      { dia: 4, grupo: "Costas", secoes: [
+        { nome: "Trapézio", exs: ["Encolhimento", "Remada Alta"] },
+        { nome: "Latíssimo", exs: ["Puxada Frontal", "Remada Curvada", "Remada Unilateral"] },
+        { nome: "Lombar", exs: ["Hiperextensão", "Stiff"] } ] },
+      { dia: 5, grupo: "Tríceps", secoes: [
+        { nome: "Cabeça longa", exs: ["Tríceps Francês", "Tríceps Testa"] },
+        { nome: "Cabeça lateral", exs: ["Tríceps na Corda", "Tríceps Pulley"] },
+        { nome: "Cabeça medial", exs: ["Tríceps Coice", "Flexão Diamante"] } ] },
+      { dia: 6, grupo: "Ombros", secoes: [
+        { nome: "Anterior", exs: ["Desenvolvimento com Barra", "Elevação Frontal"] },
+        { nome: "Medial", exs: ["Elevação Lateral", "Pike Push-up"] },
+        { nome: "Posterior", exs: ["Crucifixo Invertido", "Reverse Fly"] } ] },
+      { dia: 7, grupo: "Coxa", secoes: [
+        { nome: "Quadríceps", exs: ["Agachamento Livre", "Leg Press", "Afundo"] },
+        { nome: "Isquiotibiais", exs: ["Mesa Flexora", "Stiff"] },
+        { nome: "Adutores", exs: ["Cadeira Adutora", "Agachamento Sumô"] } ] },
+      { dia: 8, grupo: "Panturrilha", secoes: [
+        { nome: "Gastrocnêmio", exs: ["Panturrilha em Pé", "Panturrilha no Leg Press"] },
+        { nome: "Sóleo", exs: ["Panturrilha Sentado"] },
+        { nome: "Tibial anterior", exs: ["Tibial na Parede", "Caminhada nos Calcanhares"] } ] }
+    ],
+    seedMusc() {
+      return [
+        { treino: "A", titulo: "Push", emoji: "💪", sub: "Peito + Ombros + Tríceps", dia: "Segunda", exs: [
+          { grupo: "Peito", nome: "Supino Inclinado", dica: "🔼 Peito superior — cotovelos a 45°, controle a descida" },
+          { grupo: "Peito", nome: "Supino Reto", dica: "➞ Peito médio — a barra toca de leve o peito, sem quicar" },
+          { grupo: "Peito", nome: "Crucifixo Inclinado", dica: "Amplitude máxima — sinta o alongamento nas laterais" },
+          { grupo: "Peito", nome: "Crossover (cima p/ baixo)", dica: "🔽 Peito inferior — cruze as mãos à frente" },
+          { grupo: "Ombros", nome: "Desenvolvimento com Barra", dica: "Principal exercício de ombro — desça até o queixo" },
+          { grupo: "Ombros", nome: "Elevação Lateral com Halteres", dica: "➞ Deltoide medial — suba até a linha dos ombros" },
+          { grupo: "Ombros", nome: "Crucifixo Invertido", dica: "🔽 Deltoide posterior — fundamental para a postura" },
+          { grupo: "Tríceps", nome: "Tríceps na Corda", dica: "➞ Cabeça lateral — abra a corda no fim do movimento" },
+          { grupo: "Tríceps", nome: "Tríceps Francês", dica: "🔼 Cabeça longa — maximize o estiramento atrás da cabeça" } ] },
+        { treino: "B", titulo: "Pull", emoji: "🦥", sub: "Costas + Bíceps", dia: "Quarta", exs: [
+          { grupo: "Costas", nome: "Puxada Frontal", dica: "Latíssimo — puxe com os cotovelos, peito aberto" },
+          { grupo: "Costas", nome: "Remada Curvada", dica: "Dorsais — tronco firme ~45°, puxe até o abdômen" },
+          { grupo: "Costas", nome: "Remada Unilateral", dica: "Amplitude total, sem rotação do tronco" },
+          { grupo: "Costas", nome: "Hiperextensão", dica: "Lombar — suba até a linha do corpo, sem estourar" },
+          { grupo: "Costas", nome: "Encolhimento", dica: "Trapézio — suba os ombros e segure 1s no topo" },
+          { grupo: "Bíceps", nome: "Rosca Direta", dica: "Cabeça curta — cotovelos fixos, sem balançar" },
+          { grupo: "Bíceps", nome: "Rosca Martelo", dica: "Braquial/antebraço — pegada neutra, desça controlando" },
+          { grupo: "Bíceps", nome: "Rosca Scott", dica: "Pico do bíceps — não estenda 100% no fundo" },
+          { grupo: "Bíceps", nome: "Rosca Inversa", dica: "Antebraço — pegada pronada, punhos firmes" } ] },
+        { treino: "C", titulo: "Legs + Core", emoji: "🦵", sub: "Coxa + Panturrilha + Abdômen", dia: "Sexta", exs: [
+          { grupo: "Coxa", nome: "Agachamento Livre", dica: "Quadríceps — desça até a coxa paralela, joelhos alinhados" },
+          { grupo: "Coxa", nome: "Leg Press", dica: "Quadríceps/glúteo — não trave os joelhos no topo" },
+          { grupo: "Coxa", nome: "Mesa Flexora", dica: "Isquiotibiais — controle a volta, sem impulso" },
+          { grupo: "Coxa", nome: "Stiff", dica: "Posterior/glúteo — costas retas, sinta o alongamento" },
+          { grupo: "Coxa", nome: "Afundo (Lunge)", dica: "Unilateral — passo firme, joelho não passa do pé" },
+          { grupo: "Panturrilha", nome: "Panturrilha em Pé", dica: "Gastrocnêmio — amplitude total, segure no topo" },
+          { grupo: "Panturrilha", nome: "Panturrilha Sentado", dica: "Sóleo — joelho flexionado, contração máxima" },
+          { grupo: "Abdômen", nome: "Crunch", dica: "Reto superior — suba com o abdômen, não puxe o pescoço" },
+          { grupo: "Abdômen", nome: "Elevação de Pernas", dica: "Reto inferior — não arqueie a lombar" },
+          { grupo: "Abdômen", nome: "Prancha Lateral", dica: "Oblíquos — quadril alto, corpo em linha" } ] }
+      ];
+    },
+    seedCalistenia() {
+      return [
+        { treino: "A", titulo: "Push (Casa)", emoji: "💪", sub: "Peito + Ombros + Tríceps", dia: "Segunda", exs: [
+          { grupo: "Peito", nome: "Flexão Tradicional", prog: "Eleve os pés numa cadeira para focar o peito superior" },
+          { grupo: "Peito", nome: "Flexão com Mãos Largas", prog: "Quanto mais larga a pegada, mais peito — desça controlado" },
+          { grupo: "Peito", nome: "Flexão com Pés Elevados", prog: "Quanto mais alto os pés, maior o recrutamento do peito superior" },
+          { grupo: "Peito", nome: "Flexão Explosiva (Clap)", prog: "Empurre forte; se não bater palma, só tire as mãos do chão" },
+          { grupo: "Ombros", nome: "Pike Push-up", prog: "Quadril alto em V; aproxime os pés para dificultar" },
+          { grupo: "Ombros", nome: "Elevação Lateral com Garrafa", prog: "Garrafa de 1–2L vale 1–2kg — aumente o volume de água" },
+          { grupo: "Ombros", nome: "Reverse Fly no Chão", prog: "Deitado de bruços, eleve os braços em T e segure 2s" },
+          { grupo: "Tríceps", nome: "Dips na Cadeira", prog: "Afaste os pés do corpo para aumentar a dificuldade" },
+          { grupo: "Tríceps", nome: "Flexão Diamante", prog: "Mãos em losango sob o peito — foca o tríceps" } ] },
+        { treino: "B", titulo: "Pull (Casa)", emoji: "🦥", sub: "Costas + Bíceps", dia: "Quarta", exs: [
+          { grupo: "Costas", nome: "Remada Invertida (sob a mesa)", prog: "Quanto mais horizontal o corpo, mais difícil" },
+          { grupo: "Costas", nome: "Superman no Chão", prog: "Segure 2s no topo, contraindo a lombar" },
+          { grupo: "Costas", nome: "Remada Invertida Unilateral", prog: "Use uma toalha numa porta; um braço de cada vez" },
+          { grupo: "Costas", nome: "Hiperextensão Reversa", prog: "Deitado de bruços, eleve só as pernas" },
+          { grupo: "Costas", nome: "Encolhimento com Mochila", prog: "Mochila carregada; suba os ombros e segure 1s" },
+          { grupo: "Bíceps", nome: "Rosca com Mochila", prog: "Adicione livros/garrafas dentro da mochila" },
+          { grupo: "Bíceps", nome: "Rosca com Garrafa de 5L", prog: "Garrafa de 5L vale 5kg — pegada neutra (martelo)" },
+          { grupo: "Bíceps", nome: "Rosca Concentrada", prog: "Cotovelo no joelho, contração total no topo" },
+          { grupo: "Bíceps", nome: "Rosca Inversa com Mochila", prog: "Pegada pronada — fortalece o antebraço" } ] },
+        { treino: "C", titulo: "Legs + Core (Casa)", emoji: "🦵", sub: "Coxa + Panturrilha + Abdômen", dia: "Sexta", exs: [
+          { grupo: "Coxa", nome: "Agachamento com Salto", prog: "Adicione salto para potência; desça até a paralela" },
+          { grupo: "Coxa", nome: "Agachamento Búlgaro no Sofá", prog: "Pé de trás no sofá; foca cada perna" },
+          { grupo: "Coxa", nome: "Glute Bridge", prog: "Suba o quadril e segure 2s; uma perna para dificultar" },
+          { grupo: "Coxa", nome: "Stiff com Mochila", prog: "Mochila carregada; desça com as costas retas" },
+          { grupo: "Coxa", nome: "Afundo (Lunge)", prog: "Passo firme; joelho não passa da ponta do pé" },
+          { grupo: "Panturrilha", nome: "Panturrilha num Degrau", prog: "Amplitude total; uma perna para dificultar" },
+          { grupo: "Panturrilha", nome: "Panturrilha Sentado com Peso", prog: "Sentado, mochila sobre os joelhos" },
+          { grupo: "Abdômen", nome: "Crunch", prog: "Suba com o abdômen, não puxe o pescoço" },
+          { grupo: "Abdômen", nome: "Elevação de Pernas", prog: "Não arqueie a lombar; controle a descida" },
+          { grupo: "Abdômen", nome: "Prancha Lateral", prog: "Quadril alto, corpo em linha; segure o tempo-alvo" } ] }
+      ];
+    },
+    seedPlanoCorrida() {
+      return [
+        { semana: 1, foco: "Criar o hábito — sem pressão de velocidade", corridas: [
+          { letra: "A", tipoNome: "Leve", emoji: "🟢", desc: "Trote leve 20 min conversando o tempo todo. Caminhe se precisar.", ref: "20 min", km: "~2.5 km", opc: false },
+          { letra: "B", tipoNome: "Leve", emoji: "🟢", desc: "Trote leve 22 min mantendo o ritmo de conversa.", ref: "22 min", km: "~2.75 km", opc: false },
+          { letra: "C", tipoNome: "Leve", emoji: "🟢", desc: "Caminhada/trote bem leve de 20 min (opcional).", ref: "20 min", km: "~2.5 km", opc: true } ] },
+        { semana: 2, foco: "Aumentar o tempo em pé", corridas: [
+          { letra: "A", tipoNome: "Leve", emoji: "🟢", desc: "Trote leve 24 min.", ref: "24 min", km: "~3.0 km", opc: false },
+          { letra: "B", tipoNome: "Fartlek", emoji: "🔄", desc: "20 min leve + 4 acelerações livres de 20s quando quiser.", ref: "22 min", km: "~2.9 km", opc: false },
+          { letra: "C", tipoNome: "Leve", emoji: "🟢", desc: "Trote leve 22 min (opcional).", ref: "22 min", km: "~2.75 km", opc: true } ] },
+        { semana: 3, foco: "Fechar a base com confiança", corridas: [
+          { letra: "A", tipoNome: "Leve", emoji: "🟢", desc: "Trote leve 26 min.", ref: "26 min", km: "~3.25 km", opc: false },
+          { letra: "B", tipoNome: "Longa", emoji: "⚫", desc: "28 min contínuos, mais devagar que o normal.", ref: "28 min", km: "~3.3 km", opc: false },
+          { letra: "C", tipoNome: "Leve", emoji: "🟢", desc: "Trote leve 24 min (opcional).", ref: "24 min", km: "~3.0 km", opc: true } ] },
+        { semana: 4, foco: "Conhecer o desconforto controlado", corridas: [
+          { letra: "A", tipoNome: "Leve", emoji: "🟢", desc: "Trote leve 26 min.", ref: "26 min", km: "~3.25 km", opc: false },
+          { letra: "B", tipoNome: "Tempo", emoji: "🟡", desc: "10 min leve + 8 min forte mas sustentável + 6 min leve.", ref: "24 min", km: "~3.2 km", opc: false },
+          { letra: "C", tipoNome: "Intervalo", emoji: "🔵", desc: "8 min aquece + 6×(1 min forte / 1 min trote) + 6 min leve (opcional).", ref: "26 min", km: "~3.2 km", opc: true } ] },
+        { semana: 5, foco: "Elevar o limiar de lactato", corridas: [
+          { letra: "A", tipoNome: "Leve", emoji: "🟢", desc: "Trote leve 28 min.", ref: "28 min", km: "~3.5 km", opc: false },
+          { letra: "B", tipoNome: "Tempo", emoji: "🟡", desc: "10 min leve + 2×6 min tempo (3 min trote entre) + 5 min leve.", ref: "30 min", km: "~4.0 km", opc: false },
+          { letra: "C", tipoNome: "Longa", emoji: "⚫", desc: "32 min contínuos bem leves (opcional).", ref: "32 min", km: "~3.8 km", opc: true } ] },
+        { semana: 6, foco: "Tocar a velocidade", corridas: [
+          { letra: "A", tipoNome: "Leve", emoji: "🟢", desc: "Trote leve 28 min.", ref: "28 min", km: "~3.5 km", opc: false },
+          { letra: "B", tipoNome: "Intervalo", emoji: "🔵", desc: "10 min aquece + 5×(2 min forte / 2 min trote) + 5 min leve.", ref: "30 min", km: "~3.8 km", opc: false },
+          { letra: "C", tipoNome: "Leve", emoji: "🟢", desc: "Trote leve 26 min (opcional).", ref: "26 min", km: "~3.25 km", opc: true } ] },
+        { semana: 7, foco: "Recuperar — o corpo assimila os ganhos", icone: "🔄", corridas: [
+          { letra: "A", tipoNome: "Leve", emoji: "🟢", desc: "Trote bem leve 22 min.", ref: "22 min", km: "~2.75 km", opc: false },
+          { letra: "B", tipoNome: "Leve", emoji: "🟢", desc: "Trote leve 24 min, bem solto.", ref: "24 min", km: "~3.0 km", opc: false },
+          { letra: "C", tipoNome: "Leve", emoji: "🟢", desc: "Caminhada/trote 20 min (opcional).", ref: "20 min", km: "~2.5 km", opc: true } ] },
+        { semana: 8, foco: "Aumentar a potência aeróbica (VO₂máx)", corridas: [
+          { letra: "A", tipoNome: "Leve", emoji: "🟢", desc: "Trote leve 30 min.", ref: "30 min", km: "~3.75 km", opc: false },
+          { letra: "B", tipoNome: "Intervalo", emoji: "🔵", desc: "10 min aquece + 6×(2 min forte / 90s trote) + 5 min leve.", ref: "32 min", km: "~4.0 km", opc: false },
+          { letra: "C", tipoNome: "Tempo", emoji: "🟡", desc: "10 min leve + 12 min tempo + 5 min leve (opcional).", ref: "27 min", km: "~3.6 km", opc: true } ] },
+        { semana: 9, foco: "Misturar VO₂máx e ritmo de prova", corridas: [
+          { letra: "A", tipoNome: "Leve", emoji: "🟢", desc: "Trote leve 30 min.", ref: "30 min", km: "~3.75 km", opc: false },
+          { letra: "B", tipoNome: "Intervalo", emoji: "🔵", desc: "10 min aquece + 4×(3 min forte / 2 min trote) + 5 min leve.", ref: "35 min", km: "~4.3 km", opc: false },
+          { letra: "C", tipoNome: "Ritmo/Prova", emoji: "🏁", desc: "10 min leve + 3×4 min no ritmo de prova (&lt;6:00/km) + 5 min (opcional).", ref: "31 min", km: "~4.5 km", opc: true } ] },
+        { semana: 10, foco: "Ensaiar o ritmo dos 5 km", corridas: [
+          { letra: "A", tipoNome: "Leve", emoji: "🟢", desc: "Trote leve 28 min.", ref: "28 min", km: "~3.5 km", opc: false },
+          { letra: "B", tipoNome: "Ritmo/Prova", emoji: "🏁", desc: "10 min leve + 20 min contínuos no ritmo de prova (&lt;6:00/km) + 5 min.", ref: "35 min", km: "~5.0 km", opc: false },
+          { letra: "C", tipoNome: "Longa", emoji: "⚫", desc: "35 min contínuos leves (opcional).", ref: "35 min", km: "~4.0 km", opc: true } ] },
+        { semana: 11, foco: "Manter a forma e reduzir o volume", corridas: [
+          { letra: "A", tipoNome: "Leve", emoji: "🟢", desc: "Trote leve 26 min.", ref: "26 min", km: "~3.25 km", opc: false },
+          { letra: "B", tipoNome: "Ritmo/Prova", emoji: "🏁", desc: "10 min leve + 3×5 min no ritmo de prova (2 min trote) + 5 min.", ref: "33 min", km: "~4.5 km", opc: false },
+          { letra: "C", tipoNome: "Leve", emoji: "🟢", desc: "Trote leve 22 min (opcional).", ref: "22 min", km: "~2.75 km", opc: true } ] },
+        { semana: 12, foco: "Descarregar e voar na prova", icone: "🏁", corridas: [
+          { letra: "A", tipoNome: "Leve", emoji: "🟢", desc: "Trote leve 20 min, pernas soltas.", ref: "20 min", km: "~2.5 km", opc: false },
+          { letra: "B", tipoNome: "Intervalo", emoji: "🔵", desc: "10 min aquece + 4×(1 min forte / 2 min trote) + 5 min. Só para ativar.", ref: "26 min", km: "~3.0 km", opc: false },
+          { letra: "C", tipoNome: "Ritmo/Prova", emoji: "🏁", desc: "🏁 PROVA! 5 km com tudo. Comece controlado e acelere no fim. Meta: &lt; 30 min.", ref: "~30 min", km: "~5.0 km", opc: true } ] }
+      ];
+    },
+
+    /* ================================================================== */
+    /* ÁREA 2 · FUTEBOL                                                    */
+    /* ================================================================== */
+    openFut() {
+      document.getElementById("fut-data").value = this.hojeChave();
+      document.getElementById("fut-local").value = "";
+      document.getElementById("fut-g").value = 0;
+      document.getElementById("fut-a").value = 0;
+      ["fut-n","fut-c","fut-d"].forEach(id => { document.getElementById(id).value = 3; document.getElementById(id + "-val").innerText = "3"; });
+      this.openM("sa-modal-fut");
+    },
+    saveFut() {
+      const data = document.getElementById("fut-data").value; if (!data) return;
+      this.futebol.push({
+        id: Date.now(), data,
+        local: document.getElementById("fut-local").value.trim(),
+        gols: parseInt(document.getElementById("fut-g").value) || 0,
+        assist: parseInt(document.getElementById("fut-a").value) || 0,
+        nota: parseInt(document.getElementById("fut-n").value),
+        cansaco: parseInt(document.getElementById("fut-c").value),
+        dificuldade: parseInt(document.getElementById("fut-d").value)
+      });
+      this.futebol.sort((a, b) => b.data.localeCompare(a.data));
+      this.save("futebol", this.futebol); this.closeM("sa-modal-fut"); this.renderFut(); this.darXP(25, "jogo registrado");
+    },
+    delFut(id) {
+      this.confirmar("Apagar este jogo?", () => {
+        this.futebol = this.futebol.filter(j => j.id !== id);
+        this.save("futebol", this.futebol); this.renderFut();
+      });
+    },
+    renderFut() {
+      const arr = this.futebol;
+      document.getElementById("fut-jogos").innerText = arr.length;
+      document.getElementById("fut-gols").innerText = arr.reduce((s, j) => s + j.gols, 0);
+      document.getElementById("fut-assist").innerText = arr.reduce((s, j) => s + j.assist, 0);
+      document.getElementById("fut-nota").innerText = arr.length ? (arr.reduce((s, j) => s + j.nota, 0) / arr.length).toFixed(1) : "--";
+      const lista = document.getElementById("fut-lista");
+      lista.innerHTML = arr.length ? "" : '<div class="sa-empty">Nenhum jogo registrado.</div>';
+      arr.forEach(j => {
+        lista.innerHTML +=
+          '<div class="sa-item"><div class="sa-item__main">' +
+          '<div class="sa-item__title">' + this.brData(j.data) + (j.local ? ' · ' + j.local : '') + '</div>' +
+          '<div class="sa-item__sub">⚽ ' + j.gols + ' gols · 🅰️ ' + j.assist + ' assist. · nota ' + j.nota + '/5 · cansaço ' + j.cansaco + '/5 · dif. ' + j.dificuldade + '/5</div>' +
+          '</div><button class="sa-x" onclick="SA.delFut(' + j.id + ')"><i class="fa-solid fa-trash"></i></button></div>';
+      });
+    },
+
+    /* ================================================================== */
+    /* ÁREA 2 · OUTROS ESPORTES (configurável)                            */
+    /* ================================================================== */
+    openEsporte() {
+      document.getElementById("esp-nome").value = "";
+      document.getElementById("esp-campos").value = "";
+      this.openM("sa-modal-esporte");
+    },
+    saveEsporte() {
+      const nome = document.getElementById("esp-nome").value.trim(); if (!nome) return;
+      const campos = document.getElementById("esp-campos").value.split(",").map(c => c.trim()).filter(Boolean);
+      this.outros.push({ id: Date.now(), nome, campos, registros: [] });
+      this.save("outros", this.outros); this.closeM("sa-modal-esporte"); this.renderOutros();
+    },
+    delEsporte(id) {
+      this.confirmar("Apagar este esporte e todos os seus registros?", () => {
+        this.outros = this.outros.filter(e => e.id !== id);
+        this.save("outros", this.outros); this.renderOutros();
+      });
+    },
+    openEspReg(espId) {
+      const esp = this.outros.find(e => e.id === espId); if (!esp) return;
+      document.getElementById("espreg-id").value = espId;
+      document.getElementById("espreg-titulo").innerText = "Registro · " + esp.nome;
+      document.getElementById("espreg-data").value = this.hojeChave();
+      document.getElementById("espreg-nota").value = "";
+      // monta um campo de input para cada "campo configurável" do esporte
+      document.getElementById("espreg-campos").innerHTML = esp.campos.map((c, i) =>
+        '<div class="sa-field"><label class="sa-label">' + c + '</label><input type="text" class="sa-input" id="espreg-c' + i + '"></div>'
+      ).join("");
+      this.openM("sa-modal-espreg");
+    },
+    saveEspReg() {
+      const espId = parseInt(document.getElementById("espreg-id").value);
+      const esp = this.outros.find(e => e.id === espId); if (!esp) return;
+      const valores = esp.campos.map((c, i) => ({ campo: c, valor: document.getElementById("espreg-c" + i).value.trim() }));
+      esp.registros.unshift({ id: Date.now(), data: document.getElementById("espreg-data").value, valores, nota: document.getElementById("espreg-nota").value.trim() });
+      this.save("outros", this.outros); this.closeM("sa-modal-espreg"); this.renderOutros(); this.darXP(20, "registro");
+    },
+    delEspReg(espId, regId) {
+      const esp = this.outros.find(e => e.id === espId); if (!esp) return;
+      esp.registros = esp.registros.filter(r => r.id !== regId);
+      this.save("outros", this.outros); this.renderOutros();
+    },
+    renderOutros() {
+      const c = document.getElementById("outros-lista");
+      c.innerHTML = this.outros.length ? "" : '<div class="sa-empty">Nenhum esporte criado ainda.</div>';
+      this.outros.forEach(esp => {
+        let regs = esp.registros.map(r => {
+          const vals = r.valores.filter(v => v.valor).map(v => v.campo + ": " + v.valor).join(" · ");
+          return '<div class="sa-mini"><span>' + this.brData(r.data) + (vals ? ' · ' + vals : '') + (r.nota ? ' · ' + r.nota : '') + '</span>' +
+            '<button class="sa-x" onclick="SA.delEspReg(' + esp.id + ',' + r.id + ')"><i class="fa-solid fa-xmark"></i></button></div>';
+        }).join("");
+        if (!regs) regs = '<div class="sa-empty">Sem registros.</div>';
+        c.innerHTML +=
+          '<div class="card" style="background:var(--bg-soft); margin-bottom:14px;">' +
+          '<div class="sa-head"><h3 style="font-size:12px;"><i class="fa-solid fa-medal"></i> ' + esp.nome + '</h3>' +
+          '<div style="display:flex; gap:4px;"><button class="btn btn--primary" onclick="SA.openEspReg(' + esp.id + ')"><i class="fa-solid fa-plus"></i> Registro</button>' +
+          '<button class="sa-x" onclick="SA.delEsporte(' + esp.id + ')"><i class="fa-solid fa-trash"></i></button></div></div>' +
+          '<div class="sa-list">' + regs + '</div></div>';
+      });
+    },
+
+    /* ================================================================== */
+    /* ÁREA 3 · ALIMENTAÇÃO + HIDRATAÇÃO                                   */
+    /* ================================================================== */
+    openRefeicao(id) {
+      document.getElementById("ref-id").value = "";
+      document.getElementById("ref-nome").value = "";
+      document.getElementById("ref-hora").value = "";
+      document.getElementById("ref-itens").value = "";
+      document.getElementById("ref-titulo").innerHTML = '<i class="fa-solid fa-utensils"></i> Nova Refeição';
+      if (id) {
+        const r = this.nutri.dieta.find(x => x.id === id);
+        if (r) {
+          document.getElementById("ref-id").value = r.id;
+          document.getElementById("ref-nome").value = r.nome;
+          document.getElementById("ref-hora").value = r.hora;
+          document.getElementById("ref-itens").value = r.itens;
+          document.getElementById("ref-titulo").innerHTML = '<i class="fa-solid fa-pen"></i> Editar Refeição';
+        }
+      }
+      this.openM("sa-modal-refeicao");
+    },
+    saveRefeicao() {
+      const nome = document.getElementById("ref-nome").value.trim(); if (!nome) return;
+      const id = document.getElementById("ref-id").value;
+      const dados = { nome, hora: document.getElementById("ref-hora").value, itens: document.getElementById("ref-itens").value.trim() };
+      if (id) { Object.assign(this.nutri.dieta.find(x => x.id === parseInt(id)), dados); }
+      else { this.nutri.dieta.push({ id: Date.now(), ...dados }); }
+      this.nutri.dieta.sort((a, b) => (a.hora || "").localeCompare(b.hora || ""));
+      this.save("nutri", this.nutri); this.closeM("sa-modal-refeicao"); this.renderNutri();
+    },
+    delRefeicao(id) {
+      this.confirmar("Apagar esta refeição?", () => {
+        this.nutri.dieta = this.nutri.dieta.filter(r => r.id !== id);
+        this.save("nutri", this.nutri); this.renderNutri();
+      });
+    },
+    arquivarDieta() {
+      if (this.nutri.dieta.length === 0) { this.toast("Nenhuma refeição para arquivar."); return; }
+      this.perguntar("Nome do plano (ex: Seca Barriga)", "", (nome) => {
+        this.nutri.dietaHist.unshift({ id: Date.now(), data: this.hojeChave(), nome, dieta: JSON.parse(JSON.stringify(this.nutri.dieta)) });
+        this.nutri.dieta = [];
+        this.save("nutri", this.nutri); this.renderNutri(); this.toast("Plano arquivado!");
+      });
+    },
+    carregarDieta(id) {
+      const p = this.nutri.dietaHist.find(x => x.id === id); if (!p) return;
+      this.confirmar('Substituir o plano atual por "' + p.nome + '"?', () => {
+        this.nutri.dieta = JSON.parse(JSON.stringify(p.dieta));
+        this.save("nutri", this.nutri); this.renderNutri();
+      });
+    },
+    delDietaHist(id) {
+      this.confirmar("Apagar este plano salvo?", () => {
+        this.nutri.dietaHist = this.nutri.dietaHist.filter(p => p.id !== id);
+        this.save("nutri", this.nutri); this.renderNutri();
+      });
+    },
+    renderNutri() {
+      const lista = document.getElementById("refeicoes-lista");
+      lista.innerHTML = this.nutri.dieta.length ? "" : '<div class="sa-empty">Nenhuma refeição no plano atual.</div>';
+      this.nutri.dieta.forEach(r => {
+        lista.innerHTML +=
+          '<div class="sa-item"><div class="sa-item__main">' +
+          '<div class="sa-item__title">' + (r.hora ? r.hora + ' · ' : '') + r.nome + '</div>' +
+          '<div class="sa-item__sub" style="white-space:pre-line;">' + (r.itens || '') + '</div></div>' +
+          '<button class="sa-x sa-pencil" onclick="SA.openRefeicao(' + r.id + ')"><i class="fa-solid fa-pen"></i></button>' +
+          '<button class="sa-x" onclick="SA.delRefeicao(' + r.id + ')"><i class="fa-solid fa-trash"></i></button></div>';
+      });
+      const hist = document.getElementById("dietas-arquivadas");
+      hist.innerHTML = this.nutri.dietaHist.length ? "" : '<div class="sa-empty">Nenhum plano salvo.</div>';
+      this.nutri.dietaHist.forEach(p => {
+        hist.innerHTML +=
+          '<div class="sa-item"><div class="sa-item__main">' +
+          '<div class="sa-item__title">' + p.nome + '</div>' +
+          '<div class="sa-item__sub">' + this.brData(p.data) + ' · ' + p.dieta.length + ' refeições</div></div>' +
+          '<button class="sa-x" style="color:var(--accent)" onclick="SA.carregarDieta(' + p.id + ')"><i class="fa-solid fa-rotate-right"></i></button>' +
+          '<button class="sa-x" onclick="SA.delDietaHist(' + p.id + ')"><i class="fa-solid fa-trash"></i></button></div>';
+      });
+      this.renderAlimentos();
+    },
+
+    // --- códex de alimentos ---
+    openAlimento() {
+      ["ali-nome","ali-kcal","ali-obs"].forEach(id => document.getElementById(id).value = "");
+      document.getElementById("ali-macro").value = "Proteína";
+      document.getElementById("ali-vit").value = 3; document.getElementById("ali-v-val").innerText = "3";
+      this.openM("sa-modal-alimento");
+    },
+    saveAlimento() {
+      const nome = document.getElementById("ali-nome").value.trim(); if (!nome) return;
+      this.nutri.alimentos.push({
+        id: Date.now(), nome,
+        kcal: document.getElementById("ali-kcal").value,
+        macro: document.getElementById("ali-macro").value,
+        vitalidade: parseInt(document.getElementById("ali-vit").value),
+        obs: document.getElementById("ali-obs").value.trim()
+      });
+      this.save("nutri", this.nutri); this.closeM("sa-modal-alimento"); this.renderAlimentos();
+    },
+    delAlimento(id) {
+      this.confirmar("Excluir do códex?", () => {
+        this.nutri.alimentos = this.nutri.alimentos.filter(a => a.id !== id);
+        this.save("nutri", this.nutri); this.renderAlimentos();
+      });
+    },
+    renderAlimentos() {
+      const c = document.getElementById("alimentos-lista");
+      c.innerHTML = this.nutri.alimentos.length ? "" : '<div class="sa-empty">Códex vazio.</div>';
+      this.nutri.alimentos.forEach(a => {
+        const cor = a.vitalidade <= 2 ? "var(--sa-bad)" : a.vitalidade === 3 ? "var(--sa-mid)" : "var(--sa-good)";
+        const larg = (a.vitalidade / 5) * 100;
+        c.innerHTML +=
+          '<div class="card" style="background:var(--bg-soft);">' +
+          '<div class="sa-head" style="margin-bottom:10px;"><span class="sa-pill" style="color:var(--accent); border-color:var(--accent)">' + a.macro + '</span>' +
+          '<button class="sa-x" onclick="SA.delAlimento(' + a.id + ')"><i class="fa-solid fa-trash"></i></button></div>' +
+          '<div class="sa-item__title">' + a.nome + '</div>' +
+          '<div class="sa-item__sub" style="margin-bottom:10px;">' + (a.kcal ? a.kcal + ' kcal' : 'kcal n/d') + '</div>' +
+          '<div class="sa-xp__track" style="height:6px;"><div class="sa-xp__fill" style="width:' + larg + '%; background:' + cor + '"></div></div>' +
+          '<div style="font-size:9px; font-weight:800; color:var(--text-muted); margin-top:6px;">VITALIDADE ' + a.vitalidade + '/5</div>' +
+          (a.obs ? '<p style="font-size:11px; font-style:italic; color:var(--text-muted); margin-top:8px;">"' + a.obs + '"</p>' : '') +
+          '</div>';
+      });
+    },
+
+    // --- hidratação ---
+    diaAgua(d) { this.aguaDate.setDate(this.aguaDate.getDate() + d); this.renderAgua(); },
+    addAgua(ml) {
+      const chave = this.chaveData(this.aguaDate);
+      if (!this.agua.diario[chave]) this.agua.diario[chave] = { ml: 0, meta: this.agua.metaPadrao };
+      this.agua.diario[chave].ml = Math.max(0, this.agua.diario[chave].ml + ml);
+      this.save("agua", this.agua); this.renderAgua();
+    },
+    setMetaAgua() {
+      const chave = this.chaveData(this.aguaDate);
+      const atual = (this.agua.diario[chave] && this.agua.diario[chave].meta) || this.agua.metaPadrao;
+      this.perguntar("Meta de água do dia (ml)", String(atual), (v) => {
+        const n = parseInt(v); if (isNaN(n)) return;
+        if (!this.agua.diario[chave]) this.agua.diario[chave] = { ml: 0, meta: n };
+        this.agua.diario[chave].meta = n; this.agua.metaPadrao = n;
+        this.save("agua", this.agua); this.renderAgua();
+      });
+    },
+    renderAgua() {
+      const chave = this.chaveData(this.aguaDate);
+      const dia = this.agua.diario[chave] || { ml: 0, meta: this.agua.metaPadrao };
+      const ehHoje = chave === this.hojeChave();
+      document.getElementById("agua-dia").innerText = ehHoje ? "HOJE" : this.brData(chave).slice(0, 5);
+      document.getElementById("agua-ml").innerText = dia.ml;
+      document.getElementById("agua-meta").innerText = dia.meta;
+      document.getElementById("agua-fill").style.height = Math.min(100, (dia.ml / dia.meta) * 100) + "%";
+      const diasMeta = Object.values(this.agua.diario).filter(d => d.ml >= d.meta).length;
+      document.getElementById("agua-dias").innerText = diasMeta;
+    },
+
+    /* ================================================================== */
+    /* ÁREA 4 · ARQUIVOS MÉDICOS                                           */
+    /* ================================================================== */
+    openArquivo() {
+      document.getElementById("arq-cat").value = "Exames";
+      document.getElementById("arq-file").value = "";
+      document.getElementById("arq-nota").value = "";
+      this.openM("sa-modal-arquivo");
+    },
+    saveArquivo() {
+      const input = document.getElementById("arq-file");
+      if (!input.files || !input.files[0]) { this.toast("Selecione uma imagem."); return; }
+      const file = input.files[0];
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        this.arquivos.unshift({
+          id: Date.now(), nome: file.name,
+          cat: document.getElementById("arq-cat").value,
+          nota: document.getElementById("arq-nota").value.trim(),
+          dataURL: e.target.result
+        });
+        this.save("arquivos", this.arquivos); this.closeM("sa-modal-arquivo"); this.renderArquivos();
+      };
+      reader.readAsDataURL(file);
+    },
+    delArquivo(id) {
+      this.confirmar("Apagar este documento?", () => {
+        this.arquivos = this.arquivos.filter(a => a.id !== id);
+        this.save("arquivos", this.arquivos); this.renderArquivos();
+      });
+    },
+    renderArquivos() {
+      const filtro = document.getElementById("arq-filtro").value;
+      const arr = filtro === "todos" ? this.arquivos : this.arquivos.filter(a => a.cat === filtro);
+      const c = document.getElementById("arquivos-lista");
+      c.innerHTML = arr.length ? "" : '<div class="sa-empty">Nenhum documento.</div>';
+      arr.forEach(a => {
+        c.innerHTML +=
+          '<div class="card" style="background:var(--bg-soft);">' +
+          '<div class="sa-head" style="margin-bottom:10px;"><span class="sa-pill" style="color:var(--sa-arq); border-color:var(--sa-arq)">' + a.cat + '</span>' +
+          '<button class="sa-x" onclick="SA.delArquivo(' + a.id + ')"><i class="fa-solid fa-trash"></i></button></div>' +
+          '<img src="' + a.dataURL + '" onclick="window.open(this.src)" style="width:100%; height:130px; object-fit:cover; border-radius:10px; cursor:pointer; border:1px solid var(--border);">' +
+          '<div class="sa-item__sub" style="margin-top:8px;">' + a.nome + (a.nota ? ' · ' + a.nota : '') + '</div></div>';
+      });
+    },
+
+    /* ================================================================== */
+    /* PARTIDA                                                            */
+    /* ================================================================== */
+    init() {
+      // data de hoje no subtítulo
+      const hoje = new Date().toLocaleDateString("pt-BR", { weekday: "long", day: "numeric", month: "long" });
+      document.getElementById("sa-data").textContent = hoje.charAt(0).toUpperCase() + hoje.slice(1);
+
+      // ---- carrega tudo do Store ----
+      this.xp = this.load("xp", 0);
+      this.sono = this.load("sono", {
+        metaHoras: 8, registros: [],
+        noite: [
+          { texto: "Sem telas 30 min antes de dormir", ok: false, dia: "" },
+          { texto: "Deixar o quarto escuro e fresco", ok: false, dia: "" },
+          { texto: "Anotar 3 coisas do dia / pendências", ok: false, dia: "" }
+        ],
+        foco: [
+          { texto: "Celular no modo foco / longe", ok: false, dia: "" },
+          { texto: "1 tarefa por vez (Pomodoro 25min)", ok: false, dia: "" }
+        ]
+      });
+
+      // ---- periodização (hub) ----
+      this.periodizacao = this.load("periodizacao", {
+        faseAtivaId: 1,
+        fases: [
+          { id: 1, num: 1, nome: "Adaptação", foco: "Técnica e base", carga: "Leve (40–50% 1RM)", series: 3, repsMin: 15, repsMax: 20, semanas: 3, inicio: "" },
+          { id: 2, num: 2, nome: "Hipertrofia", foco: "Crescimento muscular", carga: "Moderada (65–75% 1RM)", series: 4, repsMin: 10, repsMax: 12, semanas: 4, inicio: "" },
+          { id: 3, num: 3, nome: "Força", foco: "Força máxima", carga: "Pesada (80–90% 1RM)", series: 5, repsMin: 6, repsMax: 8, semanas: 4, inicio: "" },
+          { id: 4, num: 4, nome: "Recuperação (Deload)", foco: "Deload ativo", carga: "Leve (40–50% 1RM)", series: 3, repsMin: 15, repsMax: 20, semanas: 2, inicio: "" }
+        ]
+      });
+
+      // ---- radar (com migração do radar antigo que ficava dentro de "musc") ----
+      this.treinoRadar = this.load("treino_radar", null);
+      if (this.treinoRadar === null) {
+        this.treinoRadar = {};
+        const muscAntigo = this.load("musc", null);
+        if (muscAntigo && muscAntigo.radar) {
+          Object.keys(muscAntigo.radar).forEach(k => { if (muscAntigo.radar[k]) this.treinoRadar[k] = "musc"; });
+        }
+        this.save("treino_radar", this.treinoRadar);
+      }
+
+      // ---- fichas de Força (musculação + calistenia) já preenchidas ----
+      this.musc = this.load("musc_v2", null);
+      if (this.musc === null) {
+        const antigo = this.load("musc", null);
+        this.musc = { fichas: this.seedMusc(), avaliacoes: (antigo && antigo.avaliacoes) ? antigo.avaliacoes : [] };
+        this.save("musc_v2", this.musc);
+      }
+      this.calistenia = this.load("calistenia", null);
+      if (this.calistenia === null) { this.calistenia = { fichas: this.seedCalistenia() }; this.save("calistenia", this.calistenia); }
+      this.forcaCheck = this.load("forca_check", {});
+
+      // ---- corrida (plano de 12 semanas) ----
+      this.corrida = this.load("corrida_v2", null);
+      if (this.corrida === null) { this.corrida = { inicio: "", plano: this.seedPlanoCorrida(), registros: {} }; this.save("corrida_v2", this.corrida); }
+
+      // ---- demais áreas (inalteradas) ----
+      this.futebol = this.load("futebol", []);
+      this.outros = this.load("outros", []);
+      this.nutri = this.load("nutri", { dieta: [], dietaHist: [], alimentos: [] });
+      this.agua = this.load("agua", { metaPadrao: 2500, diario: {} });
+      this.arquivos = this.load("arquivos", []);
+
+      // ---- desenha tudo ----
+      this.renderXP();
+      this.renderSono();
+      this.renderRadar();
+      this.renderPeri();
+      this.renderForca();
+      this.renderAval();
+      this.renderCorrida();
+      this.renderFut();
+      this.renderOutros();
+      this.renderNutri();
+      this.renderAgua();
+      this.renderArquivos();
+    }
+  };
+
+  // O script roda no fim do <body>, então o DOM já existe: pode iniciar.
+  SA.init();
+  </script>
+</body>
+</html>

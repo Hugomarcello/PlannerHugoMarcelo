@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="pt-br" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Planner Hugo Marcelo | Objetivos</title>
+
+  <!-- Ícones (Font Awesome) e fonte (Montserrat) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <!-- A APARÊNCIA compartilhada -->
+  <link rel="stylesheet" href="style.css">
+
+  <!-- =================================================================
+       ESTILOS SÓ DESTA PÁGINA
+       Tudo usa as variáveis do style.css, então funciona nos dois temas.
+       Pensado mobile-first: cards empilham e os toques são grandes.
+       ================================================================= -->
+  <style>
+    /* ---- DASHBOARD DE RESUMO (os 3 cartões do topo) ---- */
+    .resumo__card { display: flex; align-items: center; gap: 16px; }
+    .resumo__icon {
+      width: 52px; height: 52px; flex-shrink: 0;
+      border-radius: 14px; display: grid; place-items: center;
+      font-size: 20px; color: #fff;
+    }
+    .resumo__info { flex: 1; min-width: 0; }
+    .resumo__label {
+      font-size: 9px; font-weight: 800; text-transform: uppercase;
+      letter-spacing: 1.5px; color: var(--text-muted);
+    }
+    .resumo__num { font-size: 30px; font-weight: 900; letter-spacing: -1px; line-height: 1.1; }
+    .resumo__sub {
+      font-size: 9px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 1px; color: var(--text-muted); margin-top: 2px;
+    }
+
+    /* O anel de progresso (SVG) do "Avanço Global" */
+    .anel-wrap { position: relative; width: 64px; height: 64px; flex-shrink: 0; }
+    .anel { width: 64px; height: 64px; transform: rotate(-90deg); }
+    .anel circle { fill: none; stroke-width: 8; }
+    .anel__track { stroke: var(--border); }
+    .anel__fill  { stroke: var(--accent); stroke-linecap: round; transition: stroke-dashoffset .5s ease; }
+    .anel__num {
+      position: absolute; inset: 0; display: grid; place-items: center;
+      font-size: 15px; font-weight: 900; color: var(--text-strong);
+    }
+
+    /* ---- ABAS (horizonte: Longo Prazo / Ano) ---- */
+    .abas { display: flex; gap: 8px; margin: 22px 0 14px; flex-wrap: wrap; }
+    .aba {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 10px 18px; border-radius: 12px;
+      background: var(--panel); border: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;
+      transition: all .15s;
+    }
+    .aba:hover { color: var(--text-strong); border-color: var(--accent); }
+    .aba.is-active { background: var(--accent); color: #fff; border-color: var(--accent); box-shadow: var(--glow); }
+
+    /* ---- CHIPS (filtro por categoria) ---- */
+    .chips { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 22px; }
+    .chip {
+      padding: 7px 14px; border-radius: 99px;
+      background: var(--bg-soft); border: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;
+      transition: all .15s;
+    }
+    .chip:hover { color: var(--text-strong); border-color: var(--accent); }
+    .chip.is-active { color: var(--accent); border-color: var(--accent); background: var(--accent-soft); }
+
+    /* ---- BARRA DE PROGRESSO (reutilizada em cards e resumo) ---- */
+    .barra { width: 100%; height: 8px; background: var(--bg-soft); border: 1px solid var(--border);
+             border-radius: 99px; overflow: hidden; }
+    .barra--mini { height: 6px; }
+    .barra__fill { height: 100%; background: var(--accent); border-radius: 99px; transition: width .35s ease; }
+
+    /* ---- CARD DE OBJETIVO ---- */
+    .obj { display: flex; flex-direction: column; gap: 14px; position: relative; }
+    .obj__top { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+    .obj__head { flex: 1; min-width: 0; }
+    .obj__title { font-size: 16px; font-weight: 800; line-height: 1.3; margin-top: 8px; }
+    .obj__acoes { display: flex; gap: 4px; flex-shrink: 0; }
+    .obj__acao {
+      width: 34px; height: 34px; border-radius: 8px; color: var(--text-muted);
+      display: grid; place-items: center; font-size: 13px; transition: all .15s;
+    }
+    .obj__acao:hover { background: var(--bg-soft); color: var(--text-strong); }
+    .obj__acao--perigo:hover { color: #ef4444; }
+
+    /* Etiqueta de categoria (cada área tem sua cor) */
+    .tag {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 3px 10px; border-radius: 99px;
+      font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;
+      border: 1px solid currentColor;
+    }
+    .tag i { font-size: 9px; }
+    .tag--pessoal      { color: #06b6d4; background: rgba(6,182,212,.12); }
+    .tag--profissional { color: #3b82f6; background: rgba(59,130,246,.12); }
+    .tag--financeiro   { color: #f59e0b; background: rgba(245,158,11,.12); }
+    .tag--saude        { color: #ef4444; background: rgba(239,68,68,.12); }
+    .tag--estudos      { color: #8b5cf6; background: rgba(139,92,246,.12); }
+
+    /* Prazo editável (você digita "5 anos", "até 2030"...) */
+    .obj__prazo { display: inline-flex; align-items: center; gap: 6px; color: var(--text-muted); }
+    .obj__prazo i { font-size: 10px; }
+    .obj__prazo input {
+      background: transparent; border: 1px dashed var(--border); border-radius: 8px;
+      color: var(--text-muted); font-family: inherit; font-size: 11px; font-weight: 700;
+      padding: 4px 8px; width: 110px; outline: none; transition: all .15s;
+    }
+    .obj__prazo input:focus { border-color: var(--accent); color: var(--text-strong); border-style: solid; }
+
+    /* Linha do progresso (rótulo + %) */
+    .obj__prog-top { display: flex; justify-content: space-between; align-items: center;
+                     font-size: 10px; font-weight: 800; text-transform: uppercase;
+                     letter-spacing: 1px; color: var(--text-muted); margin-bottom: 6px; }
+    .obj__pct { color: var(--text-strong); font-size: 13px; }
+
+    /* ---- ETAPAS dentro do card (o que move a barra agora) ---- */
+    .etapas { display: flex; flex-direction: column; gap: 8px;
+              border-top: 1px dashed var(--border); padding-top: 12px; }
+    .etapas__label { font-size: 9px; font-weight: 800; text-transform: uppercase;
+                     letter-spacing: 1.5px; color: var(--text-muted); }
+
+    /* Etapa tipo "concluir" (caixa de marcar) */
+    .check { display: flex; align-items: center; gap: 10px; cursor: pointer; min-height: 34px; }
+    .check input { width: 18px; height: 18px; accent-color: var(--accent); cursor: pointer; flex-shrink: 0; }
+    .check__txt { font-size: 13px; font-weight: 600; color: var(--text-strong); }
+    .check__txt.feito { text-decoration: line-through; color: var(--text-muted); }
+
+    /* Etapa tipo "medir" (atual / alvo + mini barra) */
+    .etapa__top { display: flex; justify-content: space-between; align-items: center;
+                  gap: 8px; margin-bottom: 5px; }
+    .etapa__txt { font-size: 12px; font-weight: 600; color: var(--text-strong);
+                  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .etapa__val { font-size: 11px; font-weight: 700; color: var(--text-muted); white-space: nowrap; }
+    .etapa__input {
+      width: 70px; background: var(--bg-soft); border: 1px solid var(--border);
+      border-radius: 6px; color: var(--text-strong); font-family: inherit;
+      font-size: 11px; font-weight: 700; padding: 4px 6px; text-align: right; outline: none;
+    }
+    .etapa__input:focus { border-color: var(--accent); }
+
+    /* Adicionar etapa rápido no próprio card */
+    .etapa-add__input {
+      width: 100%; margin-top: 4px; background: transparent;
+      border: 1px dashed var(--border); border-radius: 8px;
+      color: var(--text-strong); font-family: inherit; font-size: 12px; padding: 9px 10px; outline: none;
+    }
+    .etapa-add__input:focus { border-color: var(--accent); border-style: solid; }
+    .etapa-add__input::placeholder { color: var(--text-muted); }
+    .etapas__vazio { font-size: 11px; color: var(--text-muted); font-style: italic; }
+
+    /* Estado de CONQUISTA (objetivo em 100%) */
+    .obj--conquistada { border-color: #fbbf24; box-shadow: 0 0 22px rgba(251,191,36,.28); }
+    .obj--conquistada .barra__fill { background: #fbbf24; }
+    .selo {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 4px 10px; border-radius: 99px; background: rgba(251,191,36,.15);
+      color: #fbbf24; font-size: 9px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px;
+    }
+
+    /* Objetivo arquivado fica apagadinho */
+    .obj--arquivada { opacity: .6; }
+
+    /* Estado vazio (nenhum objetivo no filtro atual) */
+    .vazio { text-align: center; padding: 60px 20px; color: var(--text-muted); }
+    .vazio i { font-size: 40px; opacity: .5; margin-bottom: 14px; display: block; }
+    .vazio p { font-size: 13px; font-weight: 700; }
+
+    /* ---- CAMPOS DO FORMULÁRIO (modal de novo/editar) ---- */
+    .modal__box--wide { max-width: 600px; }
+    .modal__body--scroll { max-height: 78vh; overflow-y: auto; }
+    .campo { margin-bottom: 16px; }
+    .campo > label { display: block; font-size: 10px; font-weight: 800; text-transform: uppercase;
+                     letter-spacing: 1px; color: var(--text-muted); margin-bottom: 6px; }
+    .input {
+      width: 100%; background: var(--bg-soft); border: 1px solid var(--border);
+      border-radius: 10px; padding: 11px 12px; color: var(--text-strong);
+      font-family: inherit; font-size: 13px; font-weight: 600; outline: none; transition: border-color .15s;
+    }
+    .input:focus { border-color: var(--accent); }
+    .input--sm { width: 92px; padding: 8px 10px; text-align: right; }
+    .form-row { display: flex; gap: 12px; flex-wrap: wrap; }
+    .form-row .campo { flex: 1; min-width: 140px; }
+
+    /* Bloco SMART e bloco Etapas dentro do modal */
+    .bloco { border: 1px solid var(--border); border-radius: 12px; padding: 14px;
+             background: var(--bg-soft); margin-bottom: 16px; }
+    .bloco__titulo { font-size: 11px; font-weight: 900; text-transform: uppercase;
+                     letter-spacing: 1px; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; }
+    .bloco__titulo i { color: var(--accent); }
+    .bloco__dica { font-size: 11px; color: var(--text-muted); margin-bottom: 14px; line-height: 1.4; }
+    .smart-linha { margin-bottom: 10px; }
+    .smart-linha label { display: block; font-size: 10px; font-weight: 700;
+                         color: var(--text-muted); margin-bottom: 4px; }
+    .smart-linha label b { color: var(--accent); }
+
+    /* Linha de edição de uma etapa no modal (empilha bem no celular) */
+    .etapa-edit { border: 1px solid var(--border); border-radius: 10px; padding: 10px;
+                  margin-bottom: 8px; background: var(--panel); }
+    .etapa-edit__l1 { display: flex; gap: 8px; align-items: center; }
+    .etapa-edit__l1 .input { flex: 1; }
+    .etapa-edit__l2 { display: flex; gap: 8px; align-items: center; margin-top: 8px; flex-wrap: wrap; }
+    .etapa-edit__tipo { width: 100%; }
+    .etapa-edit__medida { display: flex; gap: 8px; align-items: center; }
+    .etapa-edit__medida span { color: var(--text-muted); font-weight: 800; }
+    .kr-del { width: 38px; height: 38px; flex-shrink: 0; border-radius: 8px; color: var(--text-muted);
+              display: grid; place-items: center; transition: all .15s; }
+    .kr-del:hover { color: #ef4444; background: var(--bg-soft); }
+    .btn-add-kr { font-size: 11px; font-weight: 800; color: var(--accent);
+                  display: inline-flex; align-items: center; gap: 6px; padding: 8px 0; }
+
+    .modal__rodape { display: flex; justify-content: flex-end; gap: 10px;
+                     padding: 16px 20px; border-top: 1px solid var(--border); background: var(--panel); }
+
+    /* Ajustes finos pra telas pequenas */
+    @media (max-width: 560px) {
+      .resumo__num { font-size: 26px; }
+      .aba, .chip { flex: 1; justify-content: center; }
+    }
+  </style>
+</head>
+
+<!-- data-page="objetivos" diz ao app.js qual item do menu destacar -->
+<body class="app" data-page="objetivos">
+
+  <!-- Sidebar e overlay (a sidebar é montada pelo app.js) -->
+  <div id="sidebar-container"></div>
+  <div id="overlay" class="overlay" onclick="fecharMenu()"></div>
+
+  <!-- COLUNA DE CONTEÚDO -->
+  <main class="main">
+
+    <!-- Cabeçalho padrão do projeto -->
+    <header class="header">
+      <div class="header__left">
+        <button class="btn btn--icon btn--menu" onclick="abrirMenu()" aria-label="Abrir menu">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+        <div>
+          <h1 class="header__title">Objetivos</h1>
+          <p class="header__subtitle">Framework SMART + OKR</p>
+        </div>
+      </div>
+      <div class="header__actions">
+        <button class="btn btn--primary" onclick="abrirNovo()">
+          <i class="fa-solid fa-plus"></i> <span>Novo objetivo</span>
+        </button>
+        <button class="btn" onclick="abrirSync()">
+          <i class="fa-solid fa-cloud-arrow-up" style="color: var(--accent)"></i>
+          <span>Backup</span>
+        </button>
+        <button class="btn btn--icon" id="btn-tema" onclick="Tema.alternar()" aria-label="Trocar tema">
+          <i class="fa-solid fa-moon"></i>
+        </button>
+      </div>
+    </header>
+
+    <!-- Conteúdo específico desta página -->
+    <div class="container fade-up">
+
+      <!-- DASHBOARD DE RESUMO (3 cartões) -->
+      <section class="grid grid--3" id="dashboard"></section>
+
+      <!-- ABAS: horizonte (Longo Prazo primeiro, depois Ano) -->
+      <div class="abas">
+        <button class="aba" data-h="longo" onclick="setHorizonte('longo')"><i class="fa-solid fa-mountain-sun"></i> Longo Prazo</button>
+        <button class="aba" data-h="ano"   onclick="setHorizonte('ano')"><i class="fa-solid fa-calendar-day"></i> Objetivos do Ano</button>
+      </div>
+
+      <!-- CHIPS: filtro por categoria -->
+      <div class="chips">
+        <button class="chip" data-c="todas"        onclick="setCategoria('todas')">Todas</button>
+        <button class="chip" data-c="profissional" onclick="setCategoria('profissional')">Profissional</button>
+        <button class="chip" data-c="saude"        onclick="setCategoria('saude')">Saúde</button>
+        <button class="chip" data-c="estudos"      onclick="setCategoria('estudos')">Estudos</button>
+        <button class="chip" data-c="pessoal"      onclick="setCategoria('pessoal')">Pessoal</button>
+        <button class="chip" data-c="financeiro"   onclick="setCategoria('financeiro')">Financeiro</button>
+        <button class="chip" data-c="arquivadas"   onclick="setCategoria('arquivadas')"><i class="fa-solid fa-box-archive"></i> Arquivadas</button>
+      </div>
+
+      <!-- LISTA DE OBJETIVOS (cards gerados pelo script) -->
+      <section class="grid grid--2" id="lista-objetivos"></section>
+
+    </div>
+
+    <!-- Rodapé de atalhos (montado pelo app.js) -->
+    <div id="footer-container"></div>
+  </main>
+
+  <!-- ===== MODAL DE BACKUP / SYNC (igual em todas as páginas) ===== -->
+  <div id="modal-sync" class="modal">
+    <div class="modal__box">
+      <div class="modal__head">
+        <h3><i class="fa-solid fa-cloud-arrow-up" style="color:var(--accent)"></i> Backup & Transferência</h3>
+        <button class="modal__close" onclick="fecharSync()"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal__body">
+        <p>Sem nuvem por enquanto: use isto pra levar seus dados entre celular e computador.</p>
+        <button class="btn" onclick="exportarBackup()" style="width:100%; justify-content:center;">
+          <i class="fa-solid fa-download"></i> Exportar (baixar arquivo)
+        </button>
+        <input type="file" id="input-import" accept=".json" onchange="importarBackup(event)" style="display:none;">
+        <button class="btn btn--primary" onclick="document.getElementById('input-import').click()" style="width:100%; justify-content:center;">
+          <i class="fa-solid fa-upload"></i> Importar (restaurar backup)
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== MODAL DE NOVO / EDITAR OBJETIVO ===== -->
+  <div id="modal-obj" class="modal">
+    <div class="modal__box modal__box--wide">
+      <div class="modal__head">
+        <h3><i class="fa-solid fa-bullseye" style="color:var(--accent)"></i> <span id="modal-obj-titulo">Novo objetivo</span></h3>
+        <button class="modal__close" onclick="fecharModalObj()"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <div class="modal__body modal__body--scroll">
+
+        <!-- O essencial -->
+        <div class="campo">
+          <label>Título do objetivo</label>
+          <input type="text" id="f-titulo" class="input" placeholder="Ex: Ler 6 livros este ano">
+        </div>
+
+        <div class="form-row">
+          <div class="campo">
+            <label>Categoria</label>
+            <select id="f-categoria" class="input">
+              <option value="pessoal">Pessoal</option>
+              <option value="profissional">Profissional</option>
+              <option value="financeiro">Financeiro</option>
+              <option value="saude">Saúde</option>
+              <option value="estudos">Estudos</option>
+            </select>
+          </div>
+          <div class="campo">
+            <label>Horizonte</label>
+            <select id="f-horizonte" class="input">
+              <option value="longo">Longo Prazo</option>
+              <option value="ano">Objetivos do Ano</option>
+            </select>
+          </div>
+          <div class="campo">
+            <label>Prazo (editável)</label>
+            <input type="text" id="f-prazo" class="input" placeholder="Ex: 2026, 5 anos, até 2030">
+          </div>
+        </div>
+
+        <!-- Bloco SMART -->
+        <div class="bloco">
+          <p class="bloco__titulo"><i class="fa-solid fa-microscope"></i> Definição S.M.A.R.T <span style="color:var(--text-muted); font-weight:600;">(opcional)</span></p>
+          <p class="bloco__dica">Ajuda a deixar o objetivo claro e mensurável antes de quebrá-lo em etapas.</p>
+          <div class="smart-linha"><label><b>S</b> — Específico: o que exatamente você quer?</label><input type="text" id="f-s" class="input"></div>
+          <div class="smart-linha"><label><b>M</b> — Mensurável: como vai medir?</label><input type="text" id="f-m" class="input"></div>
+          <div class="smart-linha"><label><b>A</b> — Atingível: que passos/recursos precisa?</label><input type="text" id="f-a" class="input"></div>
+          <div class="smart-linha"><label><b>R</b> — Relevante: por que isso importa?</label><input type="text" id="f-r" class="input"></div>
+          <div class="smart-linha"><label><b>T</b> — Tempo: qual o prazo?</label><input type="text" id="f-t" class="input"></div>
+        </div>
+
+        <!-- Bloco ETAPAS (o que move a barra de progresso) -->
+        <div class="bloco">
+          <p class="bloco__titulo"><i class="fa-solid fa-list-check"></i> Etapas / Resultados-chave</p>
+          <p class="bloco__dica">Cada etapa pode ser de <b>concluir</b> (sim/não) ou de <b>medir</b> (atual → alvo). O progresso do objetivo é a <b>média</b> de todas elas.</p>
+          <div id="etapas-lista"></div>
+          <button class="btn-add-kr" onclick="addFormEtapa('check')"><i class="fa-solid fa-plus"></i> Adicionar etapa</button>
+        </div>
+
+      </div>
+
+      <div class="modal__rodape">
+        <button class="btn" onclick="fecharModalObj()">Cancelar</button>
+        <button class="btn btn--primary" onclick="salvarObjetivo()"><i class="fa-solid fa-check"></i> Salvar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- O COMPORTAMENTO compartilhado (sempre por último) -->
+  <script src="app.js"></script>
+
+  <!-- =================================================================
+       SCRIPT SÓ DESTA PÁGINA — toda a lógica dos Objetivos
+       ================================================================= -->
+  <script>
+  /* -------------------------------------------------------------------
+     1. DADOS DE EXEMPLO (seus objetivos reais)
+        Cada objetivo tem ETAPAS. Cada etapa é de um tipo:
+          tipo "check"  -> { feito: true/false }      (conta 0% ou 100%)
+          tipo "medida" -> { atual, alvo }            (conta atual/alvo %)
+        A barra do objetivo é a MÉDIA das etapas.
+     ------------------------------------------------------------------- */
+  const SEED = [
+    /* ===== Longo Prazo ===== */
+    { id: "s-patrimonio", titulo: "R$ 500 mil de patrimônio", categoria: "financeiro", horizonte: "longo",
+      prazo: "10 anos", arquivada: false,
+      smart: { s: "Atingir R$ 500 mil de patrimônio total", m: "Soma de investimentos + reservas",
+               a: "Aportes mensais consistentes", r: "Liberdade e renda passiva", t: "10 anos" },
+      etapas: [
+        { id: "e1", tipo: "medida", texto: "Patrimônio total (R$)", atual: 80000, alvo: 500000 },
+        { id: "e2", tipo: "medida", texto: "Investido (R$)", atual: 40000, alvo: 200000 },
+        { id: "e3", tipo: "medida", texto: "Renda passiva mensal (R$)", atual: 0, alvo: 2000 },
+      ] },
+
+    { id: "s-escola", titulo: "Ter uma escola de futebol própria", categoria: "profissional", horizonte: "longo",
+      prazo: "5 anos", arquivada: false, smart: { s:"", m:"", a:"", r:"", t:"" },
+      etapas: [
+        { id: "e1", tipo: "check", texto: "Definir o conceito da escola", feito: true },
+        { id: "e2", tipo: "check", texto: "Plano de negócio", feito: false },
+        { id: "e3", tipo: "check", texto: "Identidade visual", feito: false },
+        { id: "e4", tipo: "check", texto: "Primeira turma própria", feito: false },
+      ] },
+
+    { id: "s-livros50", titulo: "Ter lido 50 livros", categoria: "pessoal", horizonte: "longo",
+      prazo: "10 anos", arquivada: false, smart: { s:"", m:"", a:"", r:"", t:"" },
+      etapas: [ { id: "e1", tipo: "medida", texto: "Livros lidos (vida)", atual: 10, alvo: 50 } ] },
+
+    { id: "s-ativo", titulo: "Manter-se ativo fisicamente", categoria: "saude", horizonte: "longo",
+      prazo: "sempre", arquivada: false, smart: { s:"", m:"", a:"", r:"", t:"" },
+      etapas: [ { id: "e1", tipo: "medida", texto: "Treinos por semana (média)", atual: 4, alvo: 5 } ] },
+
+    { id: "s-laila", titulo: "Casamento no civil com a Laila", categoria: "pessoal", horizonte: "longo",
+      prazo: "até 2027", arquivada: false, smart: { s:"", m:"", a:"", r:"", t:"" },
+      etapas: [
+        { id: "e1", tipo: "check", texto: "Juntar documentos", feito: true },
+        { id: "e2", tipo: "check", texto: "Marcar no cartório", feito: false },
+        { id: "e3", tipo: "check", texto: "Cerimônia civil", feito: false },
+      ] },
+
+    { id: "s-carro", titulo: "Ter um carro", categoria: "financeiro", horizonte: "longo",
+      prazo: "3 anos", arquivada: false, smart: { s:"", m:"", a:"", r:"", t:"" },
+      etapas: [ { id: "e1", tipo: "medida", texto: "Valor guardado (R$)", atual: 0, alvo: 40000 } ] },
+
+    { id: "s-pai", titulo: "Ser pai", categoria: "pessoal", horizonte: "longo",
+      prazo: "5 anos", arquivada: false, smart: { s:"", m:"", a:"", r:"", t:"" },
+      etapas: [ { id: "e1", tipo: "check", texto: "Planejamento financeiro e familiar", feito: false } ] },
+
+    /* ===== Objetivos do Ano ===== */
+    { id: "s-lazer", titulo: "12 atividades significativas de lazer", categoria: "pessoal", horizonte: "ano",
+      prazo: "2026", arquivada: false, smart: { s:"", m:"", a:"", r:"", t:"" },
+      etapas: [
+        { id: "e1", tipo: "check", texto: "Visitar o Inhotim", feito: false },
+        { id: "e2", tipo: "check", texto: "Kart com amigos", feito: true },
+        { id: "e3", tipo: "check", texto: "Boliche", feito: false },
+        { id: "e4", tipo: "check", texto: "Parque Mangabeiras", feito: true },
+        { id: "e5", tipo: "check", texto: "Sessão de cinema especial", feito: false },
+        { id: "e6", tipo: "check", texto: "Trilha / dia ao ar livre", feito: false },
+      ] },
+
+    { id: "s-livros6", titulo: "Ler 6 livros", categoria: "pessoal", horizonte: "ano",
+      prazo: "2026", arquivada: false, smart: { s:"", m:"", a:"", r:"", t:"" },
+      etapas: [ { id: "e1", tipo: "medida", texto: "Livros lidos", atual: 2, alvo: 6 } ] },
+
+    { id: "s-curso", titulo: "Concluir o Curso Viver de Renda", categoria: "estudos", horizonte: "ano",
+      prazo: "2026", arquivada: false, smart: { s:"", m:"", a:"", r:"", t:"" },
+      etapas: [ { id: "e1", tipo: "medida", texto: "Módulos concluídos", atual: 5, alvo: 10 } ] },
+
+    { id: "s-fat", titulo: "Faturar R$ 4.000/mês", categoria: "financeiro", horizonte: "ano",
+      prazo: "2026", arquivada: false, smart: { s:"", m:"", a:"", r:"", t:"" },
+      etapas: [ { id: "e1", tipo: "medida", texto: "Faturamento mensal (R$)", atual: 1000, alvo: 4000 } ] },
+
+    { id: "s-site", titulo: "Criar o site/planner profissional", categoria: "profissional", horizonte: "ano",
+      prazo: "2026", arquivada: false, smart: { s:"", m:"", a:"", r:"", t:"" },
+      etapas: [
+        { id: "e1", tipo: "check", texto: "Página Visão Geral", feito: true },
+        { id: "e2", tipo: "check", texto: "Página Objetivos", feito: true },
+        { id: "e3", tipo: "check", texto: "Página Tarefas", feito: false },
+        { id: "e4", tipo: "check", texto: "Página Hábitos", feito: false },
+      ] },
+
+    { id: "s-checkup", titulo: "Check-up médico + oftalmologista", categoria: "saude", horizonte: "ano",
+      prazo: "2026", arquivada: false, smart: { s:"", m:"", a:"", r:"", t:"" },
+      etapas: [
+        { id: "e1", tipo: "check", texto: "Consulta clínico geral", feito: false },
+        { id: "e2", tipo: "check", texto: "Consulta oftalmologista", feito: false },
+      ] },
+  ];
+
+
+  /* -------------------------------------------------------------------
+     2. ESTADO  — carrega do Store; migra dados antigos se precisar
+     ------------------------------------------------------------------- */
+  let objetivos = Store.ler("objetivos", null);
+
+  // Detecta os dados de exemplo da versão ANTIGA (tinham "krs" e ids "s-").
+  // Se ainda forem só os exemplos antigos intactos, troca pelo novo modelo.
+  function pareceSeedAntigo(arr) {
+    return Array.isArray(arr) && arr.length > 0
+      && arr.every(o => typeof o.id === "string" && o.id.startsWith("s-"))
+      && arr.some(o => o.krs !== undefined);
+  }
+
+  if (objetivos === null || pareceSeedAntigo(objetivos)) {
+    objetivos = SEED;
+  } else {
+    // Migra qualquer objetivo no formato antigo, sem perder seus dados
+    objetivos.forEach(o => {
+      if (o.krs && !o.etapas) {
+        o.etapas = o.krs.map(k => ({ id: k.id || uid(), tipo: "medida",
+                                     texto: k.texto, atual: k.atual, alvo: k.alvo }));
+        delete o.krs;
+      }
+      if (!o.etapas) o.etapas = [];
+    });
+  }
+  salvar();
+
+  let horizonteAtivo = "longo";   // começa no Longo Prazo (1ª aba)
+  let categoriaAtiva = "todas";   // "todas" | categoria | "arquivadas"
+  let editandoId = null;          // id em edição (null = criando novo)
+  let formEtapas = [];            // etapas temporárias do formulário
+
+  function salvar() { Store.salvar("objetivos", objetivos); }
+  function acharObj(id) { return objetivos.find(o => o.id === id); }
+  function uid() { return "o" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+
+
+  /* -------------------------------------------------------------------
+     3. CÁLCULOS  — progresso (sempre a partir das etapas) e formatação
+     ------------------------------------------------------------------- */
+  function progressoEtapa(e) {
+    if (e.tipo === "check") return e.feito ? 100 : 0;
+    const alvo = Number(e.alvo) || 0, atual = Number(e.atual) || 0;
+    if (alvo <= 0) return 0;
+    return Math.min(100, Math.max(0, Math.round((atual / alvo) * 100)));
+  }
+  function progressoDe(o) {
+    if (o.etapas && o.etapas.length) {
+      const soma = o.etapas.reduce((acc, e) => acc + progressoEtapa(e), 0);
+      return Math.round(soma / o.etapas.length);
+    }
+    return 0; // sem etapas, sem progresso (não há mais barra manual)
+  }
+  function fmt(n) { return (Number(n) || 0).toLocaleString("pt-BR"); }
+
+  const CATS = {
+    pessoal:      { nome: "Pessoal",      icone: "fa-user" },
+    profissional: { nome: "Profissional", icone: "fa-briefcase" },
+    financeiro:   { nome: "Financeiro",   icone: "fa-wallet" },
+    saude:        { nome: "Saúde",        icone: "fa-heart-pulse" },
+    estudos:      { nome: "Estudos",      icone: "fa-book-open" },
+  };
+
+
+  /* -------------------------------------------------------------------
+     4. DESENHAR O DASHBOARD (os 3 cartões do topo)
+     ------------------------------------------------------------------- */
+  function renderDashboard() {
+    const ativas = objetivos.filter(o => !o.arquivada && o.horizonte === horizonteAtivo);
+    const conquistadas = ativas.filter(o => progressoDe(o) === 100).length;
+    const emExecucao = ativas.length - conquistadas;
+    const media = ativas.length
+      ? Math.round(ativas.reduce((acc, o) => acc + progressoDe(o), 0) / ativas.length)
+      : 0;
+
+    const r = 28, circ = 2 * Math.PI * r, offset = circ * (1 - media / 100);
+
+    document.getElementById("dashboard").innerHTML = `
+      <div class="card resumo__card">
+        <div class="anel-wrap">
+          <svg class="anel" viewBox="0 0 64 64">
+            <circle class="anel__track" cx="32" cy="32" r="${r}"></circle>
+            <circle class="anel__fill"  cx="32" cy="32" r="${r}"
+                    style="stroke-dasharray:${circ}; stroke-dashoffset:${offset}"></circle>
+          </svg>
+          <div class="anel__num">${media}%</div>
+        </div>
+        <div class="resumo__info">
+          <p class="resumo__label">Avanço Global</p>
+          <p class="resumo__num">${media}%</p>
+          <p class="resumo__sub">Média das metas ativas</p>
+        </div>
+      </div>
+
+      <div class="card resumo__card">
+        <div class="resumo__icon" style="background:#f59e0b;"><i class="fa-solid fa-fire"></i></div>
+        <div class="resumo__info">
+          <p class="resumo__label">Metas Ativas</p>
+          <p class="resumo__num">${emExecucao}</p>
+          <p class="resumo__sub">Em execução</p>
+        </div>
+      </div>
+
+      <div class="card resumo__card">
+        <div class="resumo__icon" style="background:#fbbf24;"><i class="fa-solid fa-trophy"></i></div>
+        <div class="resumo__info">
+          <p class="resumo__label">Conquistadas</p>
+          <p class="resumo__num">${conquistadas}</p>
+          <p class="resumo__sub">Histórico do período</p>
+        </div>
+      </div>`;
+  }
+
+
+  /* -------------------------------------------------------------------
+     5. DESENHAR A LISTA DE OBJETIVOS (os cards)
+     ------------------------------------------------------------------- */
+  function renderLista() {
+    document.querySelectorAll(".aba").forEach(b => b.classList.toggle("is-active", b.dataset.h === horizonteAtivo));
+    document.querySelectorAll(".chip").forEach(b => b.classList.toggle("is-active", b.dataset.c === categoriaAtiva));
+
+    const lista = objetivos.filter(o => {
+      if (o.horizonte !== horizonteAtivo) return false;
+      if (categoriaAtiva === "arquivadas") return o.arquivada === true;
+      if (o.arquivada) return false;
+      if (categoriaAtiva === "todas") return true;
+      return o.categoria === categoriaAtiva;
+    });
+
+    const container = document.getElementById("lista-objetivos");
+    if (lista.length === 0) {
+      container.innerHTML = `
+        <div class="vazio" style="grid-column:1/-1;">
+          <i class="fa-solid fa-bullseye"></i>
+          <p>Nenhum objetivo aqui ainda.</p>
+        </div>`;
+      return;
+    }
+    container.innerHTML = lista.map(o => montarCard(o)).join("");
+  }
+
+  // Monta o HTML de UMA etapa dentro do card
+  function montarEtapa(o, e) {
+    if (e.tipo === "check") {
+      return `
+        <label class="check">
+          <input type="checkbox" ${e.feito ? "checked" : ""} onchange="toggleEtapa('${o.id}','${e.id}')">
+          <span class="check__txt ${e.feito ? "feito" : ""}">${e.texto || "Etapa"}</span>
+        </label>`;
+    }
+    // tipo "medida"
+    return `
+      <div>
+        <div class="etapa__top">
+          <span class="etapa__txt">${e.texto || "Resultado-chave"}</span>
+          <span class="etapa__val">
+            <input class="etapa__input" type="number" value="${e.atual}"
+                   onchange="setMedida('${o.id}','${e.id}', this.value)"> / ${fmt(e.alvo)}
+          </span>
+        </div>
+        <div class="barra barra--mini"><div class="barra__fill" style="width:${progressoEtapa(e)}%"></div></div>
+      </div>`;
+  }
+
+  // Monta o HTML de UM card
+  function montarCard(o) {
+    const prog = progressoDe(o);
+    const concluido = prog === 100 && o.etapas.length > 0;
+    const cat = CATS[o.categoria] || CATS.pessoal;
+
+    const tag = `<span class="tag tag--${o.categoria}"><i class="fa-solid ${cat.icone}"></i> ${cat.nome}</span>`;
+
+    const etapasHTML = o.etapas.length
+      ? o.etapas.map(e => montarEtapa(o, e)).join("")
+      : `<p class="etapas__vazio">Sem etapas ainda. Adicione abaixo para medir o progresso.</p>`;
+
+    return `
+      <div class="card obj ${concluido ? "obj--conquistada" : ""} ${o.arquivada ? "obj--arquivada" : ""}" id="card-${o.id}">
+        <div class="obj__top">
+          <div class="obj__head">
+            ${concluido ? `<span class="selo"><i class="fa-solid fa-trophy"></i> Conquistado</span>` : tag}
+            <h3 class="obj__title">${o.titulo}</h3>
+          </div>
+          <div class="obj__acoes">
+            <button class="obj__acao" title="Editar" onclick="abrirEditar('${o.id}')"><i class="fa-solid fa-pen"></i></button>
+            <button class="obj__acao" title="${o.arquivada ? "Restaurar" : "Arquivar"}" onclick="arquivar('${o.id}')">
+              <i class="fa-solid ${o.arquivada ? "fa-box-open" : "fa-box-archive"}"></i>
+            </button>
+            <button class="obj__acao obj__acao--perigo" title="Excluir" onclick="excluir('${o.id}')"><i class="fa-solid fa-trash"></i></button>
+          </div>
+        </div>
+
+        <span class="obj__prazo">
+          <i class="fa-solid fa-flag-checkered"></i>
+          <input type="text" value="${o.prazo || ""}" placeholder="prazo" onchange="setPrazo('${o.id}', this.value)">
+        </span>
+
+        <div>
+          <div class="obj__prog-top">
+            <span>Progresso</span>
+            <span class="obj__pct">${prog}%</span>
+          </div>
+          <div class="barra"><div class="barra__fill" style="width:${prog}%"></div></div>
+        </div>
+
+        <div class="etapas">
+          <span class="etapas__label">Etapas</span>
+          ${etapasHTML}
+          <input class="etapa-add__input" placeholder="+ Adicionar etapa e apertar Enter"
+                 onkeydown="if(event.key==='Enter'){ addEtapaRapida('${o.id}', this); }">
+        </div>
+      </div>`;
+  }
+
+  function render() { renderDashboard(); renderLista(); }
+
+
+  /* -------------------------------------------------------------------
+     6. AÇÕES NAS ETAPAS DO CARD
+     ------------------------------------------------------------------- */
+  function toggleEtapa(objId, etapaId) {
+    const o = acharObj(objId); if (!o) return;
+    const e = o.etapas.find(x => x.id === etapaId); if (!e) return;
+    e.feito = !e.feito; salvar(); render();
+  }
+  function setMedida(objId, etapaId, val) {
+    const o = acharObj(objId); if (!o) return;
+    const e = o.etapas.find(x => x.id === etapaId); if (!e) return;
+    e.atual = Number(val) || 0; salvar(); render();
+  }
+  function addEtapaRapida(objId, el) {
+    const txt = el.value.trim(); if (!txt) return;
+    const o = acharObj(objId); if (!o) return;
+    o.etapas.push({ id: uid(), tipo: "check", texto: txt, feito: false });
+    salvar(); render();
+    // mantém o foco no campo de adicionar pra você emendar vários seguidos
+    const novo = document.querySelector("#card-" + objId + " .etapa-add__input");
+    if (novo) novo.focus();
+  }
+  function setPrazo(id, val) {
+    const o = acharObj(id); if (!o) return;
+    o.prazo = val.trim(); salvar();
+  }
+
+
+  /* -------------------------------------------------------------------
+     7. ARQUIVAR / EXCLUIR
+     ------------------------------------------------------------------- */
+  function arquivar(id) {
+    const o = acharObj(id); if (!o) return;
+    o.arquivada = !o.arquivada; salvar(); render();
+  }
+  function excluir(id) {
+    const o = acharObj(id); if (!o) return;
+    if (!confirm(`Excluir o objetivo "${o.titulo}"? Isso não pode ser desfeito.`)) return;
+    objetivos = objetivos.filter(x => x.id !== id); salvar(); render();
+  }
+
+
+  /* -------------------------------------------------------------------
+     8. FILTROS (abas e chips)
+     ------------------------------------------------------------------- */
+  function setHorizonte(h) { horizonteAtivo = h; render(); }
+  function setCategoria(c) { categoriaAtiva = c; render(); }
+
+
+  /* -------------------------------------------------------------------
+     9. MODAL DE NOVO / EDITAR
+     ------------------------------------------------------------------- */
+  function abrirModalObj() { document.getElementById("modal-obj").classList.add("is-open"); }
+  function fecharModalObj() { document.getElementById("modal-obj").classList.remove("is-open"); }
+  const campo = id => document.getElementById(id);
+
+  function abrirNovo() {
+    editandoId = null;
+    document.getElementById("modal-obj-titulo").textContent = "Novo objetivo";
+    campo("f-titulo").value = "";
+    campo("f-categoria").value = "pessoal";
+    campo("f-horizonte").value = horizonteAtivo;
+    campo("f-prazo").value = horizonteAtivo === "ano" ? String(new Date().getFullYear()) : "5 anos";
+    ["s", "m", "a", "r", "t"].forEach(k => campo("f-" + k).value = "");
+    formEtapas = [];
+    renderFormEtapas();
+    abrirModalObj();
+  }
+
+  function abrirEditar(id) {
+    const o = acharObj(id); if (!o) return;
+    editandoId = id;
+    document.getElementById("modal-obj-titulo").textContent = "Editar objetivo";
+    campo("f-titulo").value = o.titulo;
+    campo("f-categoria").value = o.categoria;
+    campo("f-horizonte").value = o.horizonte;
+    campo("f-prazo").value = o.prazo || "";
+    const sm = o.smart || {};
+    ["s", "m", "a", "r", "t"].forEach(k => campo("f-" + k).value = sm[k] || "");
+    formEtapas = (o.etapas || []).map(e => ({ ...e }));
+    renderFormEtapas();
+    abrirModalObj();
+  }
+
+  function salvarObjetivo() {
+    const titulo = campo("f-titulo").value.trim();
+    if (!titulo) { alert("Dê um título ao objetivo."); return; }
+
+    const etapas = formEtapas
+      .filter(e => (e.texto || "").trim())
+      .map(e => e.tipo === "check"
+        ? { id: e.id, tipo: "check", texto: e.texto.trim(), feito: !!e.feito }
+        : { id: e.id, tipo: "medida", texto: e.texto.trim(), atual: Number(e.atual) || 0, alvo: Number(e.alvo) || 0 });
+
+    const dados = {
+      id: editandoId || uid(),
+      titulo,
+      categoria: campo("f-categoria").value,
+      horizonte: campo("f-horizonte").value,
+      prazo: campo("f-prazo").value.trim(),
+      smart: { s: campo("f-s").value, m: campo("f-m").value, a: campo("f-a").value, r: campo("f-r").value, t: campo("f-t").value },
+      etapas,
+      arquivada: false,
+    };
+
+    if (editandoId) {
+      const i = objetivos.findIndex(o => o.id === editandoId);
+      if (i >= 0) { dados.arquivada = objetivos[i].arquivada; objetivos[i] = dados; }
+    } else {
+      objetivos.push(dados);
+    }
+    salvar();
+    fecharModalObj();
+    horizonteAtivo = dados.horizonte; // pula pra aba onde o objetivo está
+    render();
+  }
+
+
+  /* -------------------------------------------------------------------
+     10. ETAPAS DENTRO DO FORMULÁRIO (linhas dinâmicas, com tipo)
+     ------------------------------------------------------------------- */
+  function renderFormEtapas() {
+    document.getElementById("etapas-lista").innerHTML = formEtapas.map(e => {
+      const medida = e.tipo === "medida" ? `
+        <div class="etapa-edit__medida">
+          <input class="input input--sm" type="number" placeholder="Atual" value="${e.atual ?? ""}"
+                 onchange="updFormEtapa('${e.id}','atual', this.value)">
+          <span>/</span>
+          <input class="input input--sm" type="number" placeholder="Alvo" value="${e.alvo ?? ""}"
+                 onchange="updFormEtapa('${e.id}','alvo', this.value)">
+        </div>` : "";
+      return `
+        <div class="etapa-edit">
+          <div class="etapa-edit__l1">
+            <input class="input" placeholder="Descreva a etapa (ex: Visitar o Inhotim)" value="${e.texto || ""}"
+                   onchange="updFormEtapa('${e.id}','texto', this.value)">
+            <button class="kr-del" title="Remover" onclick="delFormEtapa('${e.id}')"><i class="fa-solid fa-xmark"></i></button>
+          </div>
+          <div class="etapa-edit__l2">
+            <select class="input etapa-edit__tipo" onchange="updFormEtapa('${e.id}','tipo', this.value)">
+              <option value="check"  ${e.tipo === "check" ? "selected" : ""}>✔ Concluir (sim / não)</option>
+              <option value="medida" ${e.tipo === "medida" ? "selected" : ""}>📊 Medir (atual / alvo)</option>
+            </select>
+            ${medida}
+          </div>
+        </div>`;
+    }).join("");
+  }
+  function addFormEtapa(tipo) {
+    formEtapas.push({ id: uid(), tipo: tipo || "check", texto: "", feito: false, atual: 0, alvo: 0 });
+    renderFormEtapas();
+  }
+  function updFormEtapa(id, nome, val) {
+    const e = formEtapas.find(x => x.id === id); if (!e) return;
+    if (nome === "atual" || nome === "alvo") e[nome] = Number(val) || 0;
+    else e[nome] = val;
+    if (nome === "tipo") renderFormEtapas(); // redesenha pra mostrar/ocultar atual+alvo
+  }
+  function delFormEtapa(id) { formEtapas = formEtapas.filter(x => x.id !== id); renderFormEtapas(); }
+
+
+  /* -------------------------------------------------------------------
+     11. PARTIDA — desenha tudo ao abrir a página
+     ------------------------------------------------------------------- */
+  render();
+  </script>
+</body>
+</html>

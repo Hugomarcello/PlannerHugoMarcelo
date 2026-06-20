@@ -1,0 +1,1514 @@
+<!DOCTYPE html>
+<html lang="pt-br" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Planner Hugo Marcelo | Tarefas</title>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+
+  <!-- ===================================================================
+       ESTILOS SÓ DESTA PÁGINA
+       Tudo aqui começa com "tk-" (de "tasks") pra não brigar com o
+       style.css compartilhado. Estilo que vale só pra Tarefas mora aqui.
+       =================================================================== -->
+  <style>
+    /* Nesta página o conteúdo pode ser mais largo que o padrão (1200px),
+       pra aproveitar melhor as telas grandes. Vale só aqui. */
+    .container { max-width: 1480px; }
+
+    /* O layout mestre-detalhe: lista à esquerda, detalhe à direita.
+       No celular vira uma coluna só (a gente troca de tela por botão). */
+    .tk-layout {
+      display: grid;
+      grid-template-columns: 380px 1fr;
+      gap: 24px;
+      align-items: start;
+    }
+
+    /* ---------- COLUNA DA ESQUERDA: a lista ---------- */
+    .tk-lista {
+      position: sticky;            /* a lista "gruda" e acompanha a rolagem */
+      top: 88px;                   /* desce o tanto da altura do header fixo */
+      align-self: start;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      max-height: calc(100dvh - 110px);
+    }
+
+    /* Barra de filtros de status (Pendentes / Concluídas) */
+    .tk-status {
+      display: flex;
+      gap: 8px;
+      background: var(--bg-soft);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 5px;
+    }
+    .tk-status button {
+      flex: 1;
+      padding: 9px;
+      border-radius: 8px;
+      font-size: 10px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase;
+      color: var(--text-muted);
+      transition: all .15s;
+    }
+    .tk-status button.is-active {
+      background: var(--accent);
+      color: #fff;
+      box-shadow: var(--glow);
+    }
+
+    /* Campo de criação rápida */
+    .tk-add { display: flex; gap: 8px; }
+    .tk-add input {
+      flex: 1;
+      background: var(--bg-soft);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px;
+      color: var(--text-strong);
+      font-family: inherit; font-size: 13px; font-weight: 600;
+      outline: none;
+      transition: border-color .15s;
+    }
+    .tk-add input:focus { border-color: var(--accent); }
+    .tk-add button {
+      width: 46px;
+      border-radius: 10px;
+      background: var(--accent); color: #fff;
+      font-size: 14px;
+      display: grid; place-items: center;
+      transition: filter .15s;
+    }
+    .tk-add button:hover { filter: brightness(1.1); }
+
+    /* Linha de filtros por categoria + ordenação */
+    .tk-filtros {
+      display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
+    }
+    .tk-chip {
+      padding: 6px 11px;
+      border-radius: 99px;
+      background: var(--bg-soft);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 10px; font-weight: 700; letter-spacing: .5px;
+      display: inline-flex; align-items: center; gap: 6px;
+      transition: all .15s;
+      white-space: nowrap;
+    }
+    .tk-chip:hover { color: var(--text-strong); border-color: var(--text-muted); }
+    .tk-chip.is-active { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
+    .tk-chip .ponto { width: 8px; height: 8px; border-radius: 99px; }
+
+    .tk-ordenar {
+      margin-left: auto;
+      background: var(--bg-soft);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text-muted);
+      font-family: inherit; font-size: 10px; font-weight: 700;
+      padding: 7px 8px;
+      outline: none;
+    }
+
+    /* A pilha de tarefas (área que rola sozinha) */
+    .tk-itens {
+      flex: 1;
+      overflow-y: auto;
+      display: flex; flex-direction: column; gap: 8px;
+      padding-right: 4px;
+    }
+
+    /* Cabeçalho de grupo (aparece quando você ordena por Categoria) */
+    .tk-grupo {
+      font-size: 9px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase;
+      color: var(--text-muted);
+      padding: 12px 4px 2px;
+      display: flex; align-items: center; gap: 7px;
+    }
+    .tk-grupo .ponto { width: 9px; height: 9px; border-radius: 99px; }
+
+    /* Cada cartãozinho de tarefa na lista */
+    .tk-item {
+      display: flex; align-items: flex-start; gap: 11px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--border);
+      border-radius: 12px;
+      padding: 12px;
+      cursor: pointer;
+      transition: border-color .15s, transform .1s;
+    }
+    .tk-item:hover { border-color: var(--text-muted); }
+    .tk-item:active { transform: scale(.99); }
+    .tk-item.is-active { border-color: var(--accent); background: var(--accent-soft); }
+    .tk-item.prio-alta  { border-left-color: #ef4444; }
+    .tk-item.prio-media { border-left-color: #f59e0b; }
+    .tk-item.prio-baixa { border-left-color: #22c55e; }
+
+    /* A "bolinha" de concluir */
+    .tk-check {
+      flex-shrink: 0;
+      width: 20px; height: 20px;
+      border-radius: 99px;
+      border: 2px solid var(--text-muted);
+      display: grid; place-items: center;
+      margin-top: 1px;
+      transition: all .15s;
+    }
+    .tk-check:hover { border-color: var(--accent); }
+    .tk-check i { font-size: 10px; color: #fff; opacity: 0; }
+    .tk-item.is-feita .tk-check { background: var(--accent); border-color: var(--accent); }
+    .tk-item.is-feita .tk-check i { opacity: 1; }
+
+    .tk-item__corpo { flex: 1; min-width: 0; }
+    .tk-item__titulo {
+      font-size: 13px; font-weight: 700; color: var(--text-strong);
+      line-height: 1.35;
+    }
+    .tk-item.is-feita .tk-item__titulo { text-decoration: line-through; color: var(--text-muted); }
+    .tk-item__meta {
+      display: flex; flex-wrap: wrap; align-items: center; gap: 6px;
+      margin-top: 7px;
+    }
+
+    /* Etiqueta de categoria (pequena, colorida) */
+    .tk-tag {
+      font-size: 9px; font-weight: 800; letter-spacing: .5px;
+      padding: 3px 8px; border-radius: 99px;
+      display: inline-flex; align-items: center; gap: 5px;
+    }
+    .tk-tag .ponto { width: 6px; height: 6px; border-radius: 99px; }
+
+    /* Selo de prazo */
+    .tk-prazo {
+      font-size: 9px; font-weight: 700; color: var(--text-muted);
+      display: inline-flex; align-items: center; gap: 4px;
+    }
+    .tk-prazo.atrasada { color: #ef4444; }
+
+    /* ---------- COLUNA DA DIREITA: o detalhe ---------- */
+    .tk-detalhe { min-height: 60vh; }
+
+    .tk-vazio {
+      min-height: 60vh;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      text-align: center; color: var(--text-muted);
+      border: 2px dashed var(--border);
+      border-radius: 16px;
+    }
+    .tk-vazio i { font-size: 46px; margin-bottom: 16px; opacity: .5; }
+    .tk-vazio h3 { font-size: 14px; font-weight: 900; letter-spacing: 1px; text-transform: uppercase; color: var(--text-strong); }
+    .tk-vazio p { font-size: 12px; margin-top: 6px; max-width: 280px; }
+
+    .tk-back {
+      display: none;                /* só aparece no celular */
+      margin-bottom: 14px;
+    }
+
+    /* Cabeçalho do detalhe */
+    .tk-det-titulo {
+      width: 100%;
+      background: transparent; border: none;
+      color: var(--text-strong);
+      font-family: inherit; font-size: 22px; font-weight: 900; letter-spacing: -.5px;
+      outline: none;
+      padding: 4px 0;
+      border-bottom: 2px solid transparent;
+      transition: border-color .15s;
+    }
+    .tk-det-titulo:focus { border-bottom-color: var(--accent); }
+
+    .tk-det-controles {
+      display: flex; flex-wrap: wrap; gap: 10px; align-items: center;
+      margin: 16px 0;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    .tk-control {
+      display: flex; flex-direction: column; gap: 5px;
+    }
+    .tk-control > label {
+      font-size: 8px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase;
+      color: var(--text-muted);
+    }
+    .tk-control select, .tk-control input {
+      background: var(--bg-soft); border: 1px solid var(--border);
+      border-radius: 9px; padding: 8px 10px;
+      color: var(--text-strong);
+      font-family: inherit; font-size: 12px; font-weight: 700;
+      outline: none; transition: border-color .15s;
+    }
+    .tk-control select:focus, .tk-control input:focus { border-color: var(--accent); }
+    .tk-det-acoes { margin-left: auto; display: flex; gap: 8px; align-self: flex-end; }
+
+    /* Botões de ação coloridos (concluir/excluir) */
+    .tk-btn-danger { border-color: rgba(239,68,68,.4) !important; color: #ef4444 !important; }
+    .tk-btn-danger:hover { background: rgba(239,68,68,.12); }
+
+    /* Blocos de conteúdo do detalhe */
+    .tk-bloco { margin-top: 22px; }
+    .tk-bloco__label {
+      font-size: 11px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase;
+      color: var(--text-strong);
+      display: flex; align-items: center; gap: 8px; margin-bottom: 10px;
+    }
+    .tk-bloco__label i { color: var(--accent); }
+
+    .tk-textarea {
+      width: 100%;
+      min-height: 110px;
+      resize: vertical;
+      background: var(--bg-soft); border: 1px solid var(--border);
+      border-radius: 12px; padding: 14px;
+      color: var(--text-strong);
+      font-family: inherit; font-size: 13px; line-height: 1.6; font-weight: 500;
+      outline: none; transition: border-color .15s;
+    }
+    .tk-textarea:focus { border-color: var(--accent); }
+
+    /* Subtarefas */
+    .tk-progress-trilho {
+      height: 7px; border-radius: 99px; background: var(--bg-soft);
+      overflow: hidden; margin-bottom: 12px; border: 1px solid var(--border);
+    }
+    .tk-progress-barra {
+      height: 100%; width: 0%;
+      background: var(--accent); border-radius: 99px;
+      transition: width .3s ease;
+    }
+    .tk-sub {
+      display: flex; align-items: center; gap: 10px;
+      background: var(--bg-soft); border: 1px solid var(--border);
+      border-radius: 10px; padding: 10px 12px; margin-bottom: 7px;
+    }
+    .tk-sub__check {
+      flex-shrink: 0; width: 18px; height: 18px; border-radius: 6px;
+      border: 2px solid var(--text-muted); display: grid; place-items: center;
+      cursor: pointer; transition: all .15s;
+    }
+    .tk-sub__check:hover { border-color: var(--accent); }
+    .tk-sub__check i { font-size: 9px; color: #fff; opacity: 0; }
+    .tk-sub.is-feita .tk-sub__check { background: var(--accent); border-color: var(--accent); }
+    .tk-sub.is-feita .tk-sub__check i { opacity: 1; }
+    .tk-sub__texto { flex: 1; font-size: 13px; font-weight: 600; color: var(--text-strong); }
+    .tk-sub.is-feita .tk-sub__texto { text-decoration: line-through; color: var(--text-muted); }
+    .tk-sub__del { color: var(--text-muted); font-size: 12px; padding: 4px; }
+    .tk-sub__del:hover { color: #ef4444; }
+
+    .tk-sub-add { display: flex; gap: 8px; margin-top: 4px; }
+    .tk-sub-add input {
+      flex: 1; background: var(--bg-soft); border: 1px solid var(--border);
+      border-radius: 10px; padding: 10px 12px;
+      color: var(--text-strong); font-family: inherit; font-size: 13px; font-weight: 600;
+      outline: none; transition: border-color .15s;
+    }
+    .tk-sub-add input:focus { border-color: var(--accent); }
+    .tk-sub-add button {
+      width: 42px; border-radius: 10px;
+      background: var(--bg-soft); border: 1px solid var(--border); color: var(--text-muted);
+      transition: all .15s;
+    }
+    .tk-sub-add button:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* Lista de tags dentro do modal de gerenciar categorias */
+    .tk-tag-linha {
+      display: flex; align-items: center; gap: 10px;
+      background: var(--bg-soft); border: 1px solid var(--border);
+      border-radius: 10px; padding: 10px 12px; margin-bottom: 8px;
+    }
+    .tk-tag-linha .ponto { width: 14px; height: 14px; border-radius: 99px; flex-shrink: 0; }
+    .tk-tag-linha span { flex: 1; font-size: 13px; font-weight: 700; }
+    .tk-tag-linha button { color: var(--text-muted); padding: 6px; font-size: 12px; }
+    .tk-tag-linha button:hover { color: #ef4444; }
+    /* Versão editável: a cor e o nome viram campos */
+    .tk-tag-linha input[type=color] {
+      width: 30px; height: 30px; border-radius: 8px; border: 1px solid var(--border);
+      background: var(--panel); cursor: pointer; padding: 3px; flex-shrink: 0;
+    }
+    .tk-tag-linha .tk-tag-nome {
+      flex: 1; min-width: 0;
+      background: transparent; border: 1px solid transparent; border-radius: 8px;
+      padding: 6px 8px;
+      color: var(--text-strong); font-family: inherit; font-size: 13px; font-weight: 700;
+      outline: none; transition: border-color .15s, background .15s;
+    }
+    .tk-tag-linha .tk-tag-nome:hover { background: var(--panel); }
+    .tk-tag-linha .tk-tag-nome:focus { border-color: var(--accent); background: var(--panel); }
+
+    .tk-novatag { display: flex; gap: 8px; margin-top: 6px; }
+    .tk-novatag input[type=text] {
+      flex: 1; background: var(--bg-soft); border: 1px solid var(--border);
+      border-radius: 10px; padding: 10px 12px; color: var(--text-strong);
+      font-family: inherit; font-size: 13px; font-weight: 600; outline: none;
+    }
+    .tk-novatag input[type=color] {
+      width: 44px; height: 42px; border-radius: 10px; border: 1px solid var(--border);
+      background: var(--bg-soft); cursor: pointer; padding: 4px;
+    }
+
+    .tk-mini-vazio { font-size: 12px; color: var(--text-muted); text-align: center; padding: 18px; }
+
+    /* ---------- Anexos ---------- */
+    .tk-anexo {
+      display: flex; align-items: center; gap: 11px;
+      background: var(--bg-soft); border: 1px solid var(--border);
+      border-radius: 10px; padding: 9px 11px; margin-bottom: 7px;
+    }
+    .tk-anexo__thumb {
+      flex-shrink: 0;
+      width: 40px; height: 40px; border-radius: 8px;
+      display: grid; place-items: center;
+      background: var(--panel); border: 1px solid var(--border);
+      color: var(--accent); font-size: 16px;
+      overflow: hidden;
+    }
+    .tk-anexo__thumb img { width: 100%; height: 100%; object-fit: cover; }
+    .tk-anexo__info { flex: 1; min-width: 0; }
+    .tk-anexo__nome {
+      font-size: 12px; font-weight: 700; color: var(--text-strong);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .tk-anexo__tam { font-size: 10px; color: var(--text-muted); margin-top: 2px; }
+    .tk-anexo__acoes { display: flex; gap: 4px; flex-shrink: 0; }
+    .tk-anexo__acoes button {
+      width: 30px; height: 30px; border-radius: 8px;
+      color: var(--text-muted); font-size: 12px;
+      display: grid; place-items: center; transition: all .15s;
+    }
+    .tk-anexo__acoes button:hover { color: var(--accent); background: var(--panel); }
+    .tk-anexo__acoes button.del:hover { color: #ef4444; }
+
+    /* Medidor de espaço usado pelo planner */
+    .tk-uso { margin-top: 14px; }
+    .tk-uso__topo {
+      display: flex; justify-content: space-between;
+      font-size: 9px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase;
+      color: var(--text-muted); margin-bottom: 6px;
+    }
+    .tk-uso__topo i { color: var(--accent); }
+    .tk-uso__trilho {
+      height: 6px; border-radius: 99px; background: var(--bg-soft);
+      border: 1px solid var(--border); overflow: hidden;
+    }
+    .tk-uso__barra { height: 100%; width: 0%; background: var(--accent); transition: width .3s, background .3s; }
+    .tk-uso__barra.cheio { background: #ef4444; }
+
+    /* ---------- Abas (Foco / Visão Geral) ---------- */
+    .tk-abas {
+      display: inline-flex; gap: 6px;
+      background: var(--bg-soft); border: 1px solid var(--border);
+      border-radius: 12px; padding: 5px; margin-bottom: 20px;
+    }
+    .tk-abas button {
+      padding: 9px 16px; border-radius: 8px;
+      font-size: 11px; font-weight: 800; letter-spacing: .5px; text-transform: uppercase;
+      color: var(--text-muted);
+      display: inline-flex; align-items: center; gap: 7px;
+      transition: all .15s;
+    }
+    .tk-abas button.is-active { background: var(--accent); color: #fff; box-shadow: var(--glow); }
+
+    /* Barra acima do quadro (botão de gerenciar categorias) */
+    .tk-geral-topo { display: flex; justify-content: flex-end; margin-bottom: 14px; }
+
+    /* ---------- Quadro (Visão Geral): cards lado a lado ---------- */
+    .tk-quadro {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+      gap: 16px;
+      align-items: start;
+    }
+    .tk-col {
+      background: var(--panel); border: 1px solid var(--border);
+      border-radius: 14px; padding: 14px;
+      display: flex; flex-direction: column;
+    }
+    .tk-col__head {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 8px; margin-bottom: 12px; padding-bottom: 10px;
+      border-bottom: 1px solid var(--border);
+    }
+    .tk-col__nome {
+      font-size: 11px; font-weight: 800; letter-spacing: .5px; text-transform: uppercase;
+      color: var(--text-strong);
+      display: flex; align-items: center; gap: 8px;
+    }
+    .tk-col__nome .ponto { width: 9px; height: 9px; border-radius: 99px; flex-shrink: 0; }
+    .tk-col__cont {
+      font-size: 11px; font-weight: 800; color: var(--text-muted);
+      background: var(--bg-soft); border: 1px solid var(--border);
+      border-radius: 99px; padding: 2px 9px; flex-shrink: 0;
+    }
+    .tk-col__itens { display: flex; flex-direction: column; gap: 4px; margin-bottom: 10px; }
+
+    .tk-q-item {
+      display: flex; align-items: center; gap: 9px;
+      padding: 8px; border-radius: 9px;
+      cursor: pointer; transition: background .15s;
+    }
+    .tk-q-item:hover { background: var(--bg-soft); }
+    .tk-q-check {
+      flex-shrink: 0; width: 18px; height: 18px; border-radius: 99px;
+      border: 2px solid var(--text-muted); display: grid; place-items: center;
+      transition: all .15s;
+    }
+    .tk-q-check:hover { border-color: var(--accent); }
+    .tk-q-check i { font-size: 9px; color: #fff; opacity: 0; }
+    .tk-q-titulo { flex: 1; font-size: 13px; font-weight: 600; color: var(--text-strong); line-height: 1.3; }
+    .tk-q-prazo { font-size: 10px; font-weight: 700; color: var(--text-muted); flex-shrink: 0; }
+    .tk-q-prazo.atrasada { color: #ef4444; }
+    .tk-q-prio { width: 8px; height: 8px; border-radius: 99px; flex-shrink: 0; }
+    .tk-q-vazio { font-size: 11px; color: var(--text-muted); font-style: italic; padding: 6px 4px; }
+
+    .tk-q-add { display: flex; gap: 6px; margin-top: auto; }
+    .tk-q-add input {
+      flex: 1; background: var(--bg-soft); border: 1px solid var(--border);
+      border-radius: 9px; padding: 9px 10px;
+      color: var(--text-strong); font-family: inherit; font-size: 12px; font-weight: 600;
+      outline: none; transition: border-color .15s;
+    }
+    .tk-q-add input:focus { border-color: var(--accent); }
+    .tk-q-add button {
+      width: 38px; border-radius: 9px;
+      background: var(--bg-soft); border: 1px solid var(--border); color: var(--text-muted);
+      transition: all .15s;
+    }
+    .tk-q-add button:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* ---------- CELULAR: vira uma coluna só ---------- */
+    @media (max-width: 900px) {
+      .tk-layout { grid-template-columns: 1fr; }
+      .tk-lista { position: static; max-height: none; }
+      .tk-detalhe { display: none; }                       /* esconde detalhe */
+      .tk-layout.ver-detalhe .tk-lista { display: none; }  /* ao abrir tarefa: */
+      .tk-layout.ver-detalhe .tk-detalhe { display: block; } /* mostra só detalhe */
+      .tk-back { display: inline-flex; }
+      .tk-det-acoes { margin-left: 0; width: 100%; }
+    }
+  </style>
+</head>
+
+<body class="app" data-page="tarefas">
+
+  <div id="sidebar-container"></div>
+  <div id="overlay" class="overlay" onclick="fecharMenu()"></div>
+
+  <main class="main">
+
+    <!-- Cabeçalho padrão do projeto -->
+    <header class="header">
+      <div class="header__left">
+        <button class="btn btn--icon btn--menu" onclick="abrirMenu()" aria-label="Abrir menu">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+        <div>
+          <h1 class="header__title">Tarefas</h1>
+          <p class="header__subtitle">Transformar intenção em execução</p>
+        </div>
+      </div>
+      <div class="header__actions">
+        <button class="btn" onclick="abrirSync()">
+          <i class="fa-solid fa-cloud-arrow-up" style="color: var(--accent)"></i>
+          <span>Backup</span>
+        </button>
+        <button class="btn btn--icon" id="btn-tema" onclick="Tema.alternar()" aria-label="Trocar tema">
+          <i class="fa-solid fa-moon"></i>
+        </button>
+      </div>
+    </header>
+
+    <!-- CONTEÚDO DESTA PÁGINA -->
+    <div class="container fade-up">
+
+      <!-- Abas: alterna entre o modo Foco (lista+detalhe) e a Visão Geral (quadro) -->
+      <div class="tk-abas">
+        <button id="aba-btn-foco" class="is-active" onclick="setAba('foco')">
+          <i class="fa-solid fa-bullseye"></i> Foco
+        </button>
+        <button id="aba-btn-geral" onclick="setAba('geral')">
+          <i class="fa-solid fa-table-cells-large"></i> Visão Geral
+        </button>
+      </div>
+
+      <!-- ================= ABA: FOCO (o que já existia, intacto) ================= -->
+      <div id="aba-foco">
+      <div class="tk-layout" id="tk-layout">
+
+        <!-- ========================= ESQUERDA: LISTA ========================= -->
+        <section class="tk-lista">
+
+          <!-- Filtro Pendentes / Concluídas -->
+          <div class="tk-status">
+            <button id="status-pendentes" class="is-active" onclick="setStatus('pendentes')">
+              <i class="fa-solid fa-bolt"></i> Pendentes
+            </button>
+            <button id="status-concluidas" onclick="setStatus('concluidas')">
+              <i class="fa-solid fa-box-archive"></i> Concluídas
+            </button>
+          </div>
+
+          <!-- Criação rápida -->
+          <form class="tk-add" onsubmit="event.preventDefault(); novaTarefa();">
+            <input type="text" id="tk-nova" placeholder="Nova tarefa... (Enter para adicionar)">
+            <button type="submit" aria-label="Adicionar tarefa"><i class="fa-solid fa-plus"></i></button>
+          </form>
+
+          <!-- Filtro por categoria + ordenação -->
+          <div class="tk-filtros" id="tk-filtros"></div>
+
+          <!-- A pilha de tarefas -->
+          <div class="tk-itens" id="tk-itens"></div>
+        </section>
+
+        <!-- ========================= DIREITA: DETALHE ========================= -->
+        <section class="tk-detalhe">
+
+          <!-- Estado vazio (quando nada está selecionado) -->
+          <div class="tk-vazio" id="tk-vazio">
+            <i class="fa-solid fa-list-check"></i>
+            <h3>Central de Execução</h3>
+            <p>Selecione uma tarefa na lista para detalhar o plano, subtarefas e anotações.</p>
+          </div>
+
+          <!-- Painel da tarefa aberta -->
+          <div class="card" id="tk-painel" style="display:none;">
+
+            <button class="btn tk-back" onclick="voltarLista()">
+              <i class="fa-solid fa-arrow-left"></i> <span>Voltar para a lista</span>
+            </button>
+
+            <!-- Título editável -->
+            <input type="text" class="tk-det-titulo" id="tk-d-titulo"
+                   placeholder="Título da tarefa" oninput="atualizar('titulo', this.value)">
+
+            <!-- Controles do cabeçalho: prazo, prioridade, categoria + ações -->
+            <div class="tk-det-controles">
+              <div class="tk-control">
+                <label>Prazo</label>
+                <input type="date" id="tk-d-prazo" onchange="atualizar('prazo', this.value)">
+              </div>
+              <div class="tk-control">
+                <label>Prioridade</label>
+                <select id="tk-d-prio" onchange="atualizar('prioridade', this.value)">
+                  <option value="alta">🔴 Alta</option>
+                  <option value="media">🟠 Média</option>
+                  <option value="baixa">🟢 Baixa</option>
+                </select>
+              </div>
+              <div class="tk-control">
+                <label>Categoria</label>
+                <select id="tk-d-tag" onchange="atualizar('tag', this.value)"></select>
+              </div>
+
+              <div class="tk-det-acoes">
+                <button class="btn btn--primary" id="tk-d-concluir" onclick="alternarConcluir()">
+                  <i class="fa-solid fa-check"></i> <span>Concluir</span>
+                </button>
+                <button class="btn btn--icon tk-btn-danger" onclick="excluirAtiva()" aria-label="Excluir tarefa" title="Excluir">
+                  <i class="fa-solid fa-trash"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- Bloco: como resolver (plano de execução) -->
+            <div class="tk-bloco">
+              <p class="tk-bloco__label"><i class="fa-solid fa-lightbulb"></i> Como resolver</p>
+              <textarea class="tk-textarea" id="tk-d-plano"
+                placeholder="Escreva o passo a passo, a estratégia, links, contatos... tudo que te ajuda a resolver."
+                oninput="atualizar('plano', this.value)"></textarea>
+            </div>
+
+            <!-- Bloco: subtarefas -->
+            <div class="tk-bloco">
+              <p class="tk-bloco__label"><i class="fa-solid fa-list-ul"></i> Subtarefas <span id="tk-sub-cont" style="color:var(--text-muted); font-weight:700;"></span></p>
+              <div class="tk-progress-trilho"><div class="tk-progress-barra" id="tk-sub-barra"></div></div>
+              <div id="tk-sub-lista"></div>
+              <form class="tk-sub-add" onsubmit="event.preventDefault(); addSub();">
+                <input type="text" id="tk-sub-nova" placeholder="Adicionar subtarefa...">
+                <button type="submit" aria-label="Adicionar subtarefa"><i class="fa-solid fa-plus"></i></button>
+              </form>
+            </div>
+
+            <!-- Bloco: anexos (arquivos do computador) -->
+            <div class="tk-bloco">
+              <p class="tk-bloco__label"><i class="fa-solid fa-paperclip"></i> Anexos</p>
+
+              <!-- input de arquivo escondido + botão bonito que o aciona -->
+              <input type="file" id="tk-anexo-input" style="display:none" onchange="addAnexo(event)">
+              <button class="btn" onclick="document.getElementById('tk-anexo-input').click()" style="width:100%; justify-content:center;">
+                <i class="fa-solid fa-upload"></i> Anexar arquivo (até 700KB)
+              </button>
+
+              <div id="tk-anexo-lista" style="margin-top:12px;"></div>
+
+              <!-- medidor de espaço do planner -->
+              <div class="tk-uso">
+                <div class="tk-uso__topo">
+                  <span><i class="fa-solid fa-database"></i> Espaço usado</span>
+                  <span id="tk-uso-texto">—</span>
+                </div>
+                <div class="tk-uso__trilho"><div class="tk-uso__barra" id="tk-uso-barra"></div></div>
+              </div>
+            </div>
+
+            <!-- Bloco: anotações de fechamento -->
+            <div class="tk-bloco">
+              <p class="tk-bloco__label"><i class="fa-solid fa-flag-checkered"></i> Anotações de fechamento</p>
+              <textarea class="tk-textarea" id="tk-d-fechamento"
+                placeholder="O que aprendeu? Como ficou resolvido? Anote aqui antes de arquivar."
+                oninput="atualizar('fechamento', this.value)"></textarea>
+            </div>
+
+          </div>
+        </section>
+
+      </div><!-- /.tk-layout -->
+      </div><!-- /#aba-foco -->
+
+      <!-- ================= ABA: VISÃO GERAL (o quadro de cards) ================= -->
+      <div id="aba-geral" style="display:none;">
+        <div class="tk-geral-topo">
+          <button class="btn" onclick="abrirTags()">
+            <i class="fa-solid fa-tags" style="color:var(--accent)"></i>
+            <span>Gerenciar categorias</span>
+          </button>
+        </div>
+        <div class="tk-quadro" id="tk-quadro"></div>
+      </div>
+
+    </div>
+
+    <div id="footer-container"></div>
+  </main>
+
+  <!-- MODAL DE BACKUP (igual em todas as páginas) -->
+  <div id="modal-sync" class="modal">
+    <div class="modal__box">
+      <div class="modal__head">
+        <h3><i class="fa-solid fa-cloud-arrow-up" style="color:var(--accent)"></i> Backup & Transferência</h3>
+        <button class="modal__close" onclick="fecharSync()"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal__body">
+        <p>Sem nuvem por enquanto: use isto pra levar seus dados entre celular e computador.</p>
+        <button class="btn" onclick="exportarBackup()" style="width:100%; justify-content:center;">
+          <i class="fa-solid fa-download"></i> Exportar (baixar arquivo)
+        </button>
+        <input type="file" id="input-import" accept=".json" onchange="importarBackup(event)" style="display:none;">
+        <button class="btn btn--primary" onclick="document.getElementById('input-import').click()" style="width:100%; justify-content:center;">
+          <i class="fa-solid fa-upload"></i> Importar (restaurar backup)
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL DE GERENCIAR CATEGORIAS (só desta página) -->
+  <div id="modal-tags" class="modal">
+    <div class="modal__box">
+      <div class="modal__head">
+        <h3><i class="fa-solid fa-tags" style="color:var(--accent)"></i> Categorias (Tags)</h3>
+        <button class="modal__close" onclick="fecharTags()"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal__body">
+        <p>Crie categorias pra classificar suas tarefas (ex.: Saúde, Estudos, Casa).</p>
+        <div id="tk-tag-lista"></div>
+        <form class="tk-novatag" onsubmit="event.preventDefault(); criarTag();">
+          <input type="text" id="tk-tag-nome" placeholder="Nome da categoria...">
+          <input type="color" id="tk-tag-cor" value="#10b981" title="Cor da categoria">
+          <button type="submit" class="btn btn--primary" style="padding:0 14px;"><i class="fa-solid fa-plus"></i></button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- COMPORTAMENTO compartilhado -->
+  <script src="app.js"></script>
+
+  <!-- ===================================================================
+       SCRIPT SÓ DESTA PÁGINA — toda a lógica das Tarefas
+       Lê-se de cima pra baixo. Cada seção tem um título explicando.
+       =================================================================== -->
+  <script>
+  (function () {
+    "use strict";
+
+    /* =================================================================
+       1. ESTADO — as "variáveis vivas" da página enquanto ela está aberta
+       ================================================================= */
+
+    // Categorias que já vêm prontas na PRIMEIRA vez que você abre a página.
+    // Depois disso, mandam as suas (criar/excluir pela engrenagem).
+    const TAGS_PADRAO = [
+      { nome: "Pessoal",      cor: "#3b82f6" },
+      { nome: "Saúde",        cor: "#14b8a6" },
+      { nome: "Estudos",      cor: "#8b5cf6" },
+      { nome: "Casa",         cor: "#f59e0b" },
+      { nome: "Moto/Garagem", cor: "#ec4899" },
+      { nome: "Financeiro",   cor: "#22c55e" },
+      { nome: "Trabalho",     cor: "#06b6d4" },
+    ];
+
+    let TAREFAS = Store.ler("tarefas", []);        // todas as tarefas
+    let TAGS    = Store.ler("tarefas_tags", null); // categorias
+
+    // Só semeia as categorias padrão se você NUNCA mexeu nelas (null = nunca salvou).
+    // Assim, se um dia você apagar todas, elas não voltam sozinhas.
+    if (TAGS === null) { TAGS = TAGS_PADRAO.slice(); salvarTags(); }
+
+    // MIGRAÇÃO: tarefas criadas antes desta função não têm o campo "anexos".
+    // Aqui garantimos que toda tarefa tenha a "gaveta" (um array vazio), pra
+    // o resto do código nunca quebrar tentando ler algo que não existe.
+    let precisaMigrar = false;
+    TAREFAS.forEach(function (t) {
+      if (!Array.isArray(t.anexos)) { t.anexos = []; precisaMigrar = true; }
+    });
+    if (precisaMigrar) salvar();
+
+    let filtroStatus = "pendentes"; // "pendentes" ou "concluidas"
+    let filtroTag    = "todas";     // "todas", "sem" ou o nome de uma categoria
+    let ordenarPor   = "prioridade";
+    let ativaId      = null;        // qual tarefa está aberta no detalhe
+    let abaAtual     = Store.ler("tarefas_aba", "foco"); // "foco" ou "geral"
+
+    const ORDEM_PRIO = { alta: 0, media: 1, baixa: 2 }; // pra ordenar por prioridade
+    const LIMITE_ANEXO = 700 * 1024; // 700KB por arquivo (localStorage é pequeno!)
+
+    /* =================================================================
+       2. PERSISTÊNCIA — gravar no cofre (Store) com o prefixo planner_
+       ================================================================= */
+    function salvar()     { Store.salvar("tarefas", TAREFAS); }
+    function salvarTags() { Store.salvar("tarefas_tags", TAGS); }
+
+    function acharTarefa(id) { return TAREFAS.find(function (t) { return t.id === id; }); }
+    function acharTag(nome)  { return TAGS.find(function (t) { return t.nome === nome; }); }
+
+    /* =================================================================
+       3. HELPERS — funçõezinhas de apoio
+       ================================================================= */
+    // Evita que texto digitado quebre o HTML (segurança básica)
+    function escapar(txt) {
+      return String(txt || "").replace(/[&<>"']/g, function (c) {
+        return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+      });
+    }
+    // "2026-06-08" -> "08/06"
+    function fmtData(iso) {
+      if (!iso) return "";
+      const p = iso.split("-");
+      return p[2] + "/" + p[1];
+    }
+    // A tarefa está atrasada? (prazo passou e ainda não foi concluída)
+    function atrasada(t) {
+      if (!t.prazo || t.concluida) return false;
+      const hoje = new Date().toISOString().split("T")[0];
+      return t.prazo < hoje;
+    }
+    function corDaTag(nome) {
+      const tg = acharTag(nome);
+      return tg ? tg.cor : "var(--text-muted)";
+    }
+
+    /* =================================================================
+       4. CRIAR TAREFA — a partir do campo de criação rápida
+       ================================================================= */
+    window.novaTarefa = function () {
+      const campo = document.getElementById("tk-nova");
+      const titulo = campo.value.trim();
+      if (!titulo) return;
+
+      const tarefa = {
+        id: "t" + Date.now(),
+        titulo: titulo,
+        prioridade: "media",
+        prazo: "",
+        tag: "",              // "" = Sem categoria
+        plano: "",
+        subtarefas: [],
+        fechamento: "",
+        anexos: [],            // arquivos anexados (Rota 1: guardados aqui mesmo)
+        concluida: false,
+        criadaEm: Date.now()
+      };
+
+      TAREFAS.unshift(tarefa); // entra no topo
+      salvar();
+      campo.value = "";
+      renderLista();
+      abrirTarefa(tarefa.id);  // já abre pra você detalhar
+    };
+
+    /* =================================================================
+       5. RENDERIZAR A LISTA — filtra, ordena e desenha os cartões
+       ================================================================= */
+    function renderLista() {
+      renderFiltros();
+
+      const area = document.getElementById("tk-itens");
+
+      // 5.1 Filtra por status (pendente x concluída)
+      let lista = TAREFAS.filter(function (t) {
+        return filtroStatus === "concluidas" ? t.concluida : !t.concluida;
+      });
+
+      // 5.2 Filtra por categoria
+      if (filtroTag === "sem") {
+        lista = lista.filter(function (t) { return !t.tag; });
+      } else if (filtroTag !== "todas") {
+        lista = lista.filter(function (t) { return t.tag === filtroTag; });
+      }
+
+      // 5.3 Ordena
+      lista.sort(function (a, b) {
+        if (ordenarPor === "prioridade") return ORDEM_PRIO[a.prioridade] - ORDEM_PRIO[b.prioridade];
+        if (ordenarPor === "recentes")   return b.criadaEm - a.criadaEm;
+        if (ordenarPor === "prazo") {
+          // sem prazo vai pro fim
+          if (!a.prazo) return 1;
+          if (!b.prazo) return -1;
+          return a.prazo.localeCompare(b.prazo);
+        }
+        if (ordenarPor === "categoria") {
+          return (a.tag || "zzz").localeCompare(b.tag || "zzz");
+        }
+        return 0;
+      });
+
+      // 5.4 Caso não tenha nada
+      if (lista.length === 0) {
+        area.innerHTML = '<p class="tk-mini-vazio">Nenhuma tarefa aqui ainda.</p>';
+        return;
+      }
+
+      // 5.5 Monta o HTML. Se ordenado por categoria, agrupa com cabeçalhos.
+      let html = "";
+      let grupoAtual = null;
+      lista.forEach(function (t) {
+        if (ordenarPor === "categoria") {
+          const nomeGrupo = t.tag || "Sem categoria";
+          if (nomeGrupo !== grupoAtual) {
+            grupoAtual = nomeGrupo;
+            html += '<p class="tk-grupo"><span class="ponto" style="background:' +
+                    corDaTag(t.tag) + '"></span>' + escapar(nomeGrupo) + "</p>";
+          }
+        }
+        html += itemHTML(t);
+      });
+      area.innerHTML = html;
+    }
+
+    // Desenha UM cartão de tarefa
+    function itemHTML(t) {
+      const ativo = t.id === ativaId ? " is-active" : "";
+      const feita = t.concluida ? " is-feita" : "";
+
+      // etiqueta de categoria (se tiver)
+      let tagHTML = "";
+      if (t.tag) {
+        const cor = corDaTag(t.tag);
+        tagHTML = '<span class="tk-tag" style="background:' + cor + '22; color:' + cor +
+                  '"><span class="ponto" style="background:' + cor + '"></span>' + escapar(t.tag) + "</span>";
+      }
+
+      // selo de prazo (se tiver)
+      let prazoHTML = "";
+      if (t.prazo) {
+        prazoHTML = '<span class="tk-prazo' + (atrasada(t) ? " atrasada" : "") +
+                    '"><i class="fa-solid fa-calendar-day"></i> ' + fmtData(t.prazo) + "</span>";
+      }
+
+      // contador de subtarefas (se tiver)
+      let subHTML = "";
+      if (t.subtarefas.length) {
+        const feitas = t.subtarefas.filter(function (s) { return s.feita; }).length;
+        subHTML = '<span class="tk-prazo"><i class="fa-solid fa-list-ul"></i> ' +
+                  feitas + "/" + t.subtarefas.length + "</span>";
+      }
+
+      // clipe de anexos (se tiver)
+      let anexoHTML = "";
+      if (t.anexos && t.anexos.length) {
+        anexoHTML = '<span class="tk-prazo"><i class="fa-solid fa-paperclip"></i> ' +
+                    t.anexos.length + "</span>";
+      }
+
+      return '' +
+        '<div class="tk-item prio-' + t.prioridade + ativo + feita + '" onclick="abrirTarefa(\'' + t.id + '\')">' +
+          '<div class="tk-check" onclick="event.stopPropagation(); alternarConcluirId(\'' + t.id + '\')"><i class="fa-solid fa-check"></i></div>' +
+          '<div class="tk-item__corpo">' +
+            '<div class="tk-item__titulo">' + escapar(t.titulo) + "</div>" +
+            '<div class="tk-item__meta">' + tagHTML + prazoHTML + subHTML + anexoHTML + "</div>" +
+          "</div>" +
+        "</div>";
+    }
+
+    /* =================================================================
+       6. FILTROS — chips de categoria + menu de ordenação
+       ================================================================= */
+    function renderFiltros() {
+      const cont = document.getElementById("tk-filtros");
+      let html = "";
+
+      html += chip("todas", "Todas", null);
+      html += chip("sem", "Sem categoria", "var(--text-muted)");
+      TAGS.forEach(function (tg) { html += chip(tg.nome, tg.nome, tg.cor); });
+
+      // engrenagem pra gerenciar categorias
+      html += '<button class="tk-chip" onclick="abrirTags()" title="Gerenciar categorias">' +
+              '<i class="fa-solid fa-gear"></i></button>';
+
+      // menu de ordenação
+      html += '<select class="tk-ordenar" id="tk-ordenar" onchange="setOrdenar(this.value)">' +
+                '<option value="prioridade">Ordenar: Prioridade</option>' +
+                '<option value="prazo">Ordenar: Prazo</option>' +
+                '<option value="categoria">Ordenar: Categoria</option>' +
+                '<option value="recentes">Ordenar: Recentes</option>' +
+              "</select>";
+
+      cont.innerHTML = html;
+      document.getElementById("tk-ordenar").value = ordenarPor;
+    }
+
+    function chip(valor, rotulo, cor) {
+      const ativo = filtroTag === valor ? " is-active" : "";
+      const ponto = cor ? '<span class="ponto" style="background:' + cor + '"></span>' : "";
+      return '<button class="tk-chip' + ativo + '" onclick="setTag(\'' + valor + '\')">' +
+             ponto + escapar(rotulo) + "</button>";
+    }
+
+    window.setStatus = function (s) {
+      filtroStatus = s;
+      document.getElementById("status-pendentes").classList.toggle("is-active", s === "pendentes");
+      document.getElementById("status-concluidas").classList.toggle("is-active", s === "concluidas");
+      renderLista();
+    };
+    window.setTag = function (valor) { filtroTag = valor; renderLista(); };
+    window.setOrdenar = function (valor) { ordenarPor = valor; renderLista(); };
+
+    /* =================================================================
+       7. ABRIR / FECHAR O DETALHE DE UMA TAREFA
+       ================================================================= */
+    window.abrirTarefa = function (id) {
+      const t = acharTarefa(id);
+      if (!t) return;
+      ativaId = id;
+
+      document.getElementById("tk-vazio").style.display = "none";
+      document.getElementById("tk-painel").style.display = "block";
+      document.getElementById("tk-layout").classList.add("ver-detalhe"); // celular
+
+      // preenche os campos
+      document.getElementById("tk-d-titulo").value = t.titulo;
+      document.getElementById("tk-d-prazo").value = t.prazo;
+      document.getElementById("tk-d-prio").value = t.prioridade;
+      document.getElementById("tk-d-plano").value = t.plano;
+      document.getElementById("tk-d-fechamento").value = t.fechamento;
+
+      preencherSelectTags(t.tag);
+      atualizarBotaoConcluir(t);
+      renderSubs();
+      renderAnexos();
+      renderLista(); // pra destacar o item ativo
+    };
+
+    window.voltarLista = function () {
+      document.getElementById("tk-layout").classList.remove("ver-detalhe");
+    };
+
+    // Preenche o <select> de categorias do detalhe
+    function preencherSelectTags(selecionada) {
+      const sel = document.getElementById("tk-d-tag");
+      let html = '<option value="">Sem categoria</option>';
+      TAGS.forEach(function (tg) {
+        html += '<option value="' + escapar(tg.nome) + '">' + escapar(tg.nome) + "</option>";
+      });
+      sel.innerHTML = html;
+      sel.value = selecionada || "";
+    }
+
+    function atualizarBotaoConcluir(t) {
+      const btn = document.getElementById("tk-d-concluir");
+      if (t.concluida) {
+        btn.innerHTML = '<i class="fa-solid fa-rotate-left"></i> <span>Reabrir</span>';
+        btn.classList.remove("btn--primary");
+      } else {
+        btn.innerHTML = '<i class="fa-solid fa-check"></i> <span>Concluir</span>';
+        btn.classList.add("btn--primary");
+      }
+    }
+
+    /* =================================================================
+       8. EDITAR CAMPOS — salva conforme você digita/escolhe
+       ================================================================= */
+    window.atualizar = function (campo, valor) {
+      const t = acharTarefa(ativaId);
+      if (!t) return;
+      t[campo] = valor;
+      salvar();
+      // alguns campos mudam a aparência do cartão na lista -> redesenha
+      if (campo === "titulo" || campo === "prioridade" || campo === "prazo" || campo === "tag") {
+        renderLista();
+      }
+    };
+
+    /* =================================================================
+       9. CONCLUIR / REABRIR / EXCLUIR
+       ================================================================= */
+    window.alternarConcluir = function () { alternarConcluirId(ativaId); };
+
+    window.alternarConcluirId = function (id) {
+      const t = acharTarefa(id);
+      if (!t) return;
+      t.concluida = !t.concluida;
+      salvar();
+      if (id === ativaId) atualizarBotaoConcluir(t);
+      renderLista();
+    };
+
+    window.excluirAtiva = function () {
+      const t = acharTarefa(ativaId);
+      if (!t) return;
+      if (!confirm('Excluir a tarefa "' + t.titulo + '"? Isso não pode ser desfeito.')) return;
+      TAREFAS = TAREFAS.filter(function (x) { return x.id !== ativaId; });
+      salvar();
+      ativaId = null;
+      document.getElementById("tk-painel").style.display = "none";
+      document.getElementById("tk-vazio").style.display = "flex";
+      voltarLista();
+      renderLista();
+    };
+
+    /* =================================================================
+       10. SUBTAREFAS — adicionar, marcar, apagar + barra de progresso
+       ================================================================= */
+    window.addSub = function () {
+      const t = acharTarefa(ativaId);
+      const campo = document.getElementById("tk-sub-nova");
+      const texto = campo.value.trim();
+      if (!t || !texto) return;
+      t.subtarefas.push({ id: "s" + Date.now(), texto: texto, feita: false });
+      salvar();
+      campo.value = "";
+      renderSubs();
+      renderLista();
+    };
+
+    window.toggleSub = function (subId) {
+      const t = acharTarefa(ativaId);
+      const s = t.subtarefas.find(function (x) { return x.id === subId; });
+      if (s) { s.feita = !s.feita; salvar(); renderSubs(); renderLista(); }
+    };
+
+    window.delSub = function (subId) {
+      const t = acharTarefa(ativaId);
+      t.subtarefas = t.subtarefas.filter(function (x) { return x.id !== subId; });
+      salvar();
+      renderSubs();
+      renderLista();
+    };
+
+    function renderSubs() {
+      const t = acharTarefa(ativaId);
+      if (!t) return;
+      const lista = document.getElementById("tk-sub-lista");
+
+      let html = "";
+      t.subtarefas.forEach(function (s) {
+        html += '<div class="tk-sub' + (s.feita ? " is-feita" : "") + '">' +
+          '<div class="tk-sub__check" onclick="toggleSub(\'' + s.id + '\')"><i class="fa-solid fa-check"></i></div>' +
+          '<span class="tk-sub__texto">' + escapar(s.texto) + "</span>" +
+          '<button class="tk-sub__del" onclick="delSub(\'' + s.id + '\')" aria-label="Apagar subtarefa"><i class="fa-solid fa-xmark"></i></button>' +
+        "</div>";
+      });
+      lista.innerHTML = html;
+
+      // barra de progresso + contador
+      const total = t.subtarefas.length;
+      const feitas = t.subtarefas.filter(function (s) { return s.feita; }).length;
+      const pct = total ? Math.round((feitas / total) * 100) : 0;
+      document.getElementById("tk-sub-barra").style.width = pct + "%";
+      document.getElementById("tk-sub-cont").textContent = total ? "(" + feitas + "/" + total + ")" : "";
+    }
+
+    /* =================================================================
+       10b. ANEXOS — anexar arquivos do PC (guardados aqui mesmo, Rota 1)
+       -----------------------------------------------------------------
+       O arquivo é lido e convertido em texto base64 (um "data URL") e
+       guardado junto da tarefa. Como o localStorage é pequeno, há um
+       limite por arquivo e um medidor de espaço logo abaixo.
+       ================================================================= */
+    window.addAnexo = function (evento) {
+      const t = acharTarefa(ativaId);
+      const arquivo = evento.target.files[0];
+      if (!t || !arquivo) return;
+
+      // Trava de tamanho: protege o planner inteiro de estourar
+      if (arquivo.size > LIMITE_ANEXO) {
+        alert('"' + arquivo.name + '" tem ' + fmtTamanho(arquivo.size) +
+              ".\nO limite é 700KB por arquivo, porque o localStorage é pequeno.\n\n" +
+              "Dica: comprima a imagem ou o PDF antes de anexar.");
+        evento.target.value = "";
+        return;
+      }
+
+      // FileReader lê o arquivo e devolve o conteúdo como base64 (data URL)
+      const leitor = new FileReader();
+      leitor.onload = function (e) {
+        const anexo = {
+          id: "a" + Date.now(),
+          nome: arquivo.name,
+          tipo: arquivo.type || "application/octet-stream",
+          tamanho: arquivo.size,
+          dados: e.target.result   // o arquivo inteiro, em texto base64
+        };
+        t.anexos.push(anexo);
+
+        // Se o navegador disser que NÃO há espaço, desfazemos e avisamos.
+        try {
+          salvar();
+        } catch (err) {
+          t.anexos.pop();
+          alert("Não consegui salvar: o espaço do navegador encheu.\n" +
+                "Remova anexos antigos (ou faça um backup) pra liberar espaço.");
+        }
+        renderAnexos();
+        renderLista();
+      };
+      leitor.readAsDataURL(arquivo);
+      evento.target.value = ""; // permite reanexar o mesmo arquivo depois
+    };
+
+    // Baixar/abrir um anexo: o data URL já carrega o arquivo inteiro
+    window.baixarAnexo = function (anexoId) {
+      const t = acharTarefa(ativaId);
+      const a = t.anexos.find(function (x) { return x.id === anexoId; });
+      if (!a) return;
+      const link = document.createElement("a");
+      link.href = a.dados;
+      link.download = a.nome;
+      link.click();
+    };
+
+    window.delAnexo = function (anexoId) {
+      const t = acharTarefa(ativaId);
+      const a = t.anexos.find(function (x) { return x.id === anexoId; });
+      if (!a) return;
+      if (!confirm('Remover o anexo "' + a.nome + '"?')) return;
+      t.anexos = t.anexos.filter(function (x) { return x.id !== anexoId; });
+      salvar();
+      renderAnexos();
+      renderLista();
+    };
+
+    function renderAnexos() {
+      const t = acharTarefa(ativaId);
+      if (!t) return;
+      const lista = document.getElementById("tk-anexo-lista");
+
+      let html = "";
+      t.anexos.forEach(function (a) {
+        // Imagem mostra miniatura de verdade; outros tipos mostram um ícone
+        let thumb;
+        if (a.tipo.indexOf("image/") === 0) {
+          thumb = '<img src="' + a.dados + '" alt="">';
+        } else {
+          thumb = '<i class="fa-solid ' + iconePorTipo(a.tipo) + '"></i>';
+        }
+        html += '<div class="tk-anexo">' +
+          '<div class="tk-anexo__thumb">' + thumb + "</div>" +
+          '<div class="tk-anexo__info">' +
+            '<div class="tk-anexo__nome">' + escapar(a.nome) + "</div>" +
+            '<div class="tk-anexo__tam">' + fmtTamanho(a.tamanho) + "</div>" +
+          "</div>" +
+          '<div class="tk-anexo__acoes">' +
+            '<button onclick="baixarAnexo(\'' + a.id + '\')" title="Baixar/abrir" aria-label="Baixar"><i class="fa-solid fa-download"></i></button>' +
+            '<button class="del" onclick="delAnexo(\'' + a.id + '\')" title="Remover" aria-label="Remover"><i class="fa-solid fa-trash"></i></button>' +
+          "</div>" +
+        "</div>";
+      });
+      lista.innerHTML = html;
+
+      atualizarMedidor();
+    }
+
+    // Soma o tamanho de tudo que o planner guardou no navegador
+    function usoLocalStorage() {
+      let total = 0;
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (k.indexOf("planner_") === 0) {
+          total += (localStorage.getItem(k) || "").length + k.length;
+        }
+      }
+      return total; // em caracteres (≈ bytes)
+    }
+
+    function atualizarMedidor() {
+      const usado = usoLocalStorage();
+      const limite = 5 * 1024 * 1024; // ~5MB de orçamento estimado
+      const pct = Math.min(100, Math.round((usado / limite) * 100));
+      document.getElementById("tk-uso-texto").textContent = fmtTamanho(usado) + " de ~5 MB";
+      const barra = document.getElementById("tk-uso-barra");
+      barra.style.width = pct + "%";
+      barra.classList.toggle("cheio", pct >= 80); // fica vermelho quando aperta
+    }
+
+    // "12345" -> "12 KB"
+    function fmtTamanho(bytes) {
+      if (bytes < 1024) return bytes + " B";
+      if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(0) + " KB";
+      return (bytes / (1024 * 1024)).toFixed(1) + " MB";
+    }
+
+    // Escolhe um ícone pelo tipo do arquivo
+    function iconePorTipo(tipo) {
+      if (tipo.indexOf("pdf") !== -1) return "fa-file-pdf";
+      if (tipo.indexOf("word") !== -1 || tipo.indexOf("document") !== -1) return "fa-file-word";
+      if (tipo.indexOf("sheet") !== -1 || tipo.indexOf("excel") !== -1) return "fa-file-excel";
+      if (tipo.indexOf("zip") !== -1 || tipo.indexOf("compressed") !== -1) return "fa-file-zipper";
+      if (tipo.indexOf("text") !== -1) return "fa-file-lines";
+      return "fa-file";
+    }
+
+    /* =================================================================
+       10c. VISÃO GERAL — o quadro de cards por categoria
+       -----------------------------------------------------------------
+       NÃO existe dado próprio aqui. O quadro só DESENHA DE OUTRO JEITO
+       as mesmas TAREFAS. Por isso criar/concluir aqui reflete na hora
+       no modo Foco, e vice-versa: "uma verdade, duas telas".
+       ================================================================= */
+    const COR_PRIO = { alta: "#ef4444", media: "#f59e0b", baixa: "#22c55e" };
+
+    // Troca a aba visível e lembra a escolha
+    window.setAba = function (qual) {
+      abaAtual = qual;
+      Store.salvar("tarefas_aba", qual);
+      document.getElementById("aba-foco").style.display  = qual === "foco"  ? "block" : "none";
+      document.getElementById("aba-geral").style.display = qual === "geral" ? "block" : "none";
+      document.getElementById("aba-btn-foco").classList.toggle("is-active", qual === "foco");
+      document.getElementById("aba-btn-geral").classList.toggle("is-active", qual === "geral");
+      if (qual === "geral") renderQuadro(); // o quadro é remontado toda vez que aparece -> sempre atualizado
+    };
+
+    function renderQuadro() {
+      const cont = document.getElementById("tk-quadro");
+
+      // Uma coluna por categoria...
+      let html = "";
+      TAGS.forEach(function (tg) { html += colunaHTML(tg.nome, tg.cor, true); });
+
+      // ...e a coluna "Sem categoria" só aparece se houver algo pendente lá
+      const temSem = TAREFAS.some(function (t) { return !t.tag && !t.concluida; });
+      if (temSem) html += colunaHTML("", "var(--text-muted)", false);
+
+      cont.innerHTML = html;
+    }
+
+    // Desenha UMA coluna (card) do quadro
+    function colunaHTML(nomeCat, cor, comAdd) {
+      const rotulo = nomeCat || "Sem categoria";
+
+      // pendentes desta categoria
+      const pend = TAREFAS.filter(function (t) {
+        return !t.concluida && (nomeCat ? t.tag === nomeCat : !t.tag);
+      });
+
+      // a listinha de tarefas
+      let itens = "";
+      if (pend.length === 0) {
+        itens = '<p class="tk-q-vazio">Nada pendente aqui.</p>';
+      } else {
+        pend.forEach(function (t) {
+          let prazo = "";
+          if (t.prazo) {
+            prazo = '<span class="tk-q-prazo' + (atrasada(t) ? " atrasada" : "") + '">' + fmtData(t.prazo) + "</span>";
+          }
+          itens += '<div class="tk-q-item" onclick="quadroAbrir(\'' + t.id + '\')">' +
+            '<div class="tk-q-check" onclick="event.stopPropagation(); quadroConcluir(\'' + t.id + '\')"><i class="fa-solid fa-check"></i></div>' +
+            '<span class="tk-q-titulo">' + escapar(t.titulo) + "</span>" +
+            prazo +
+            '<span class="tk-q-prio" style="background:' + COR_PRIO[t.prioridade] + '"></span>' +
+          "</div>";
+        });
+      }
+
+      // campo de adicionar (só nas colunas de categoria)
+      let add = "";
+      if (comAdd) {
+        add = '<form class="tk-q-add" data-cat="' + escapar(nomeCat) + '" onsubmit="event.preventDefault(); novaTarefaQuadro(this);">' +
+          '<input type="text" placeholder="+ Adicionar...">' +
+          '<button type="submit" aria-label="Adicionar"><i class="fa-solid fa-plus"></i></button>' +
+        "</form>";
+      }
+
+      return '<div class="tk-col">' +
+        '<div class="tk-col__head">' +
+          '<span class="tk-col__nome"><span class="ponto" style="background:' + cor + '"></span>' + escapar(rotulo) + "</span>" +
+          '<span class="tk-col__cont">' + pend.length + "</span>" +
+        "</div>" +
+        '<div class="tk-col__itens">' + itens + "</div>" +
+        add +
+      "</div>";
+    }
+
+    // Cria uma tarefa direto pela coluna (já com a categoria daquela coluna)
+    window.novaTarefaQuadro = function (form) {
+      const input = form.querySelector("input");
+      const titulo = input.value.trim();
+      if (!titulo) return;
+
+      TAREFAS.unshift({
+        id: "t" + Date.now(),
+        titulo: titulo,
+        prioridade: "media",
+        prazo: "",
+        tag: form.dataset.cat || "",  // a categoria vem do data-cat da coluna
+        plano: "",
+        subtarefas: [],
+        fechamento: "",
+        anexos: [],
+        concluida: false,
+        criadaEm: Date.now()
+      });
+      salvar();
+      input.value = "";
+      renderQuadro();
+      renderLista(); // mantém o modo Foco em dia também
+    };
+
+    // Concluir (ou reabrir) direto pelo quadro
+    window.quadroConcluir = function (id) {
+      const t = acharTarefa(id);
+      if (!t) return;
+      t.concluida = !t.concluida;
+      salvar();
+      if (id === ativaId) atualizarBotaoConcluir(t);
+      renderQuadro();
+      renderLista();
+    };
+
+    // Clicar numa tarefa do quadro abre ela no modo Foco pra detalhar
+    window.quadroAbrir = function (id) {
+      window.setAba("foco");
+      window.abrirTarefa(id);
+    };
+
+    /* =================================================================
+       11. CATEGORIAS (TAGS) — modal de gerenciamento
+       ================================================================= */
+    window.abrirTags = function () {
+      renderListaTags();
+      document.getElementById("modal-tags").classList.add("is-open");
+    };
+    window.fecharTags = function () {
+      document.getElementById("modal-tags").classList.remove("is-open");
+    };
+
+    function renderListaTags() {
+      const cont = document.getElementById("tk-tag-lista");
+      if (TAGS.length === 0) {
+        cont.innerHTML = '<p class="tk-mini-vazio">Nenhuma categoria ainda. Crie a primeira abaixo.</p>';
+        return;
+      }
+      let html = "";
+      TAGS.forEach(function (tg, i) {
+        // i = posição da categoria na lista. Passamos o índice (e não o nome)
+        // pros botões pra não quebrar caso o nome tenha aspas/acentos.
+        html += '<div class="tk-tag-linha">' +
+          '<input type="color" value="' + tg.cor + '" onchange="editarTagCor(' + i + ', this.value)" title="Mudar a cor">' +
+          '<input type="text" class="tk-tag-nome" value="' + escapar(tg.nome) + '" onchange="editarTagNome(' + i + ', this.value)" aria-label="Nome da categoria">' +
+          '<button class="del" onclick="excluirTagIdx(' + i + ')" aria-label="Excluir categoria"><i class="fa-solid fa-trash"></i></button>' +
+        "</div>";
+      });
+      cont.innerHTML = html;
+    }
+
+    // Trocar a COR de uma categoria — reflete em todo lugar que usa a cor
+    window.editarTagCor = function (i, cor) {
+      const tg = TAGS[i];
+      if (!tg) return;
+      tg.cor = cor;
+      salvarTags();
+      renderFiltros();
+      renderLista();
+      if (abaAtual === "geral") renderQuadro();
+    };
+
+    // Renomear uma categoria — e levar o novo nome a TODAS as tarefas que a usam
+    window.editarTagNome = function (i, novoBruto) {
+      const tg = TAGS[i];
+      if (!tg) return;
+      const antigo = tg.nome;
+      const novo = (novoBruto || "").trim();
+
+      if (!novo) { renderListaTags(); return; }   // vazio: desfaz (volta o nome antigo)
+      if (novo === antigo) return;                // não mudou nada
+      if (acharTag(novo)) {                        // já existe outra com esse nome
+        alert("Já existe uma categoria com esse nome.");
+        renderListaTags();
+        return;
+      }
+
+      tg.nome = novo;
+      // propaga: toda tarefa marcada com o nome antigo passa a usar o novo
+      TAREFAS.forEach(function (t) { if (t.tag === antigo) t.tag = novo; });
+      if (filtroTag === antigo) filtroTag = novo; // mantém o filtro coerente
+
+      salvarTags();
+      salvar();
+      renderListaTags();
+      renderFiltros();
+      renderLista();
+      if (abaAtual === "geral") renderQuadro();
+      if (ativaId) preencherSelectTags(acharTarefa(ativaId).tag);
+    };
+
+    // Excluir pela posição (reaproveita a lógica de excluirTag, que já cuida de tudo)
+    window.excluirTagIdx = function (i) {
+      const tg = TAGS[i];
+      if (tg) window.excluirTag(tg.nome);
+    };
+
+    window.criarTag = function () {
+      const nome = document.getElementById("tk-tag-nome").value.trim();
+      const cor = document.getElementById("tk-tag-cor").value;
+      if (!nome) return;
+      if (acharTag(nome)) { alert("Já existe uma categoria com esse nome."); return; }
+
+      TAGS.push({ nome: nome, cor: cor });
+      salvarTags();
+      document.getElementById("tk-tag-nome").value = "";
+      renderListaTags();
+      renderFiltros();
+      if (abaAtual === "geral") renderQuadro();
+      if (ativaId) preencherSelectTags(acharTarefa(ativaId).tag);
+    };
+
+    window.excluirTag = function (nome) {
+      if (!confirm('Excluir a categoria "' + nome + '"? As tarefas que a usam ficam "Sem categoria".')) return;
+      TAGS = TAGS.filter(function (tg) { return tg.nome !== nome; });
+      // tira a categoria das tarefas que a usavam
+      TAREFAS.forEach(function (t) { if (t.tag === nome) t.tag = ""; });
+      if (filtroTag === nome) filtroTag = "todas";
+      salvarTags();
+      salvar();
+      renderListaTags();
+      renderLista();
+      if (abaAtual === "geral") renderQuadro();
+      if (ativaId) preencherSelectTags(acharTarefa(ativaId).tag);
+    };
+
+    /* =================================================================
+       12. PARTIDA — desenha a lista assim que a página carrega
+       ================================================================= */
+    renderLista();
+    setAba(abaAtual); // restaura a aba (Foco ou Visão Geral) que você usou por último
+
+  })();
+  </script>
+</body>
+</html>
