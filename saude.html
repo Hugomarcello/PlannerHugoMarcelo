@@ -313,6 +313,21 @@
     .sa-day.has-sport { border-color:var(--c); background:color-mix(in srgb, var(--c) 16%, transparent); }
     .sa-day.has-sport i { color:var(--c); font-size:13px; }
 
+    /* ===== Ajustes pedidos: radar compacto + fichas mais finas ===== */
+    .sa-radar { max-width:430px; }
+    .sa-radar .sa-stats { gap:6px; margin-bottom:10px; }
+    .sa-radar .sa-stat { padding:7px 4px; }
+    .sa-radar .sa-stat__num { font-size:16px; }
+    .sa-radar .sa-stat__lbl { font-size:8px; margin-top:3px; }
+    .sa-radar .sa-cal, .sa-radar .sa-cal-week { max-width:300px; margin-left:auto; margin-right:auto; gap:4px; }
+    .sa-radar .sa-day { font-size:10px; border-radius:6px; }
+
+    .sa-count { font-size:11px; font-weight:800; color:var(--text-strong); border:1px solid var(--border); border-radius:8px; padding:4px 10px; white-space:nowrap; }
+    .sa-exr { padding:10px 12px; }
+    .sa-exr__line { display:flex; flex-wrap:wrap; align-items:center; gap:6px; }
+    .sa-exr__nome { font-size:12px; font-weight:800; margin-right:2px; }
+    .sa-tag2 { font-size:10px; font-weight:700; padding:2px 8px; border:1px solid var(--border); border-radius:8px; color:var(--text-muted); white-space:nowrap; }
+
     @media (max-width:520px){
       .sa-row2 { grid-template-columns:1fr; }
       .sa-xp { flex-direction:column; text-align:center; }
@@ -427,7 +442,7 @@
       <section id="sa-panel-treino" class="sa-panel">
 
         <!-- ===== RADAR DE CONSTÂNCIA (topo, compartilhado) ===== -->
-        <div class="card sa-card-top" style="margin-bottom:20px;">
+        <div class="card sa-card-top sa-radar" style="margin-bottom:20px;">
           <div class="sa-head">
             <h3><i class="fa-solid fa-fire" style="color:var(--accent)"></i> Radar de Constância</h3>
             <div style="display:flex; gap:6px;">
@@ -733,11 +748,11 @@
       <div class="modal__body sa-modal-body">
         <div class="sa-row2">
           <div class="sa-field"><label class="sa-label">Data</label><input type="date" class="sa-input" id="aval-data"></div>
-          <div class="sa-field"><label class="sa-label">Altura (cm)</label><input type="number" step="0.1" class="sa-input" id="aval-altura" placeholder="178"></div>
+          <div class="sa-field"><label class="sa-label">Altura (cm)</label><input type="number" step="0.1" class="sa-input" id="aval-altura" placeholder="178" oninput="SA.previewAval()"></div>
         </div>
         <div class="sa-row2">
-          <div class="sa-field"><label class="sa-label">Peso (kg)</label><input type="number" step="0.1" class="sa-input" id="aval-peso" placeholder="75.5"></div>
-          <div class="sa-field"><label class="sa-label">Gordura (%)</label><input type="number" step="0.1" class="sa-input" id="aval-gordura" placeholder="18"></div>
+          <div class="sa-field"><label class="sa-label">Peso (kg)</label><input type="number" step="0.1" class="sa-input" id="aval-peso" placeholder="75.5" oninput="SA.previewAval()"></div>
+          <div class="sa-field"><label class="sa-label">Gordura (%)</label><input type="number" step="0.1" class="sa-input" id="aval-gordura" placeholder="18" oninput="SA.previewAval()"></div>
         </div>
         <p class="sa-label" style="margin-top:4px;">Circunferências (cm)</p>
         <div class="sa-row2">
@@ -745,8 +760,8 @@
           <div class="sa-field"><label class="sa-label">Peito</label><input type="number" step="0.1" class="sa-input" id="aval-peito"></div>
         </div>
         <div class="sa-row2">
-          <div class="sa-field"><label class="sa-label">Cintura</label><input type="number" step="0.1" class="sa-input" id="aval-cintura"></div>
-          <div class="sa-field"><label class="sa-label">Quadril</label><input type="number" step="0.1" class="sa-input" id="aval-quadril"></div>
+          <div class="sa-field"><label class="sa-label">Cintura</label><input type="number" step="0.1" class="sa-input" id="aval-cintura" oninput="SA.previewAval()"></div>
+          <div class="sa-field"><label class="sa-label">Quadril</label><input type="number" step="0.1" class="sa-input" id="aval-quadril" oninput="SA.previewAval()"></div>
         </div>
         <div class="sa-row2">
           <div class="sa-field"><label class="sa-label">Braço relaxado</label><input type="number" step="0.1" class="sa-input" id="aval-bracor"></div>
@@ -766,6 +781,7 @@
         </div>
         <div class="sa-field"><label class="sa-label">Observações</label><textarea class="sa-input" id="aval-nota"></textarea></div>
         <p style="font-size:10px; color:var(--text-muted); margin:-4px 0 12px;"><i class="fa-solid fa-circle-info"></i> IMC, massa magra e relação cintura-quadril são calculados automaticamente.</p>
+        <div id="aval-preview" class="sa-fase-banner" style="margin-bottom:14px;"></div>
         <button class="btn btn--primary" style="width:100%; justify-content:center;" onclick="SA.saveAval()">Salvar avaliação</button>
       </div>
     </div>
@@ -1302,28 +1318,29 @@
       let html =
         '<div class="sa-head" style="margin-top:6px;"><h3 style="font-size:12px;">' + ficha.emoji + ' Treino ' + ficha.treino + ' — ' + ficha.titulo + ' <span style="color:var(--text-muted); font-weight:600;">· ' + ficha.sub + '</span></h3>' +
         '<button class="sa-x sa-pencil" onclick="SA.openEx(-1)" title="Adicionar exercício"><i class="fa-solid fa-plus"></i></button></div>' +
-        '<p style="font-size:10px; color:var(--text-muted); margin-bottom:10px;"><i class="fa-regular fa-calendar"></i> Sugestão: ' + ficha.dia + ' · <b>' + feitos + '/' + total + '</b> feitos hoje</p>' +
-        '<div class="sa-xp__track" style="margin-bottom:14px;"><div class="sa-xp__fill" style="width:' + (total ? feitos / total * 100 : 0) + '%"></div></div>' +
+        '<div style="display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:14px;">' +
+        '<span style="font-size:10px; color:var(--text-muted);"><i class="fa-regular fa-calendar"></i> Sugestão: ' + ficha.dia + '</span>' +
+        '<span class="sa-count">' + feitos + ' / ' + total + ' feitos hoje</span></div>' +
         '<div class="sa-list">';
       ficha.exs.forEach((e, i) => {
         const done = this.exFeito(i);
         const series = e.series || f.series;
         const reps = e.reps || (f.repsMin + "–" + f.repsMax);
-        const cargaOuProg = this.forcaModo === "academia"
-          ? '<span>🏋️ ' + f.carga + '</span>'
-          : '<span>🔧 ' + (e.prog || "—") + '</span>';
         const textoDica = this.forcaModo === "academia" ? (e.dica || "") : (e.prog || "");
+        const cargaTag = this.forcaModo === "academia" ? '<span class="sa-tag2">' + f.carga + '</span>' : '';
         html +=
           '<div class="sa-exr ' + (done ? "is-done" : "") + '">' +
           '<div class="sa-exr__chk" onclick="SA.toggleEx(' + i + ')"><i class="fa-solid fa-check"></i></div>' +
-          '<div class="sa-exr__n">' + (i + 1) + '</div>' +
           '<div class="sa-exr__body">' +
-          '<div class="sa-exr__nome">' + e.nome + ' <span class="sa-pill" style="color:var(--text-muted); border-color:var(--border)">' + e.grupo + '</span></div>' +
-          '<div class="sa-exr__meta"><span>📊 ' + series + ' séries</span><span>🔁 ' + reps + ' reps</span>' + cargaOuProg + '</div>' +
+          '<div class="sa-exr__line">' +
+          '<span class="sa-exr__nome">' + (i + 1) + '. ' + e.nome + '</span>' +
+          '<span class="sa-tag2">' + e.grupo + '</span>' +
+          '<span class="sa-tag2">' + series + ' séries</span>' +
+          '<span class="sa-tag2">' + reps + ' reps</span>' + cargaTag +
+          '<button class="sa-x sa-pencil" onclick="SA.openEx(' + i + ')" style="margin-left:auto;"><i class="fa-solid fa-pen"></i></button>' +
+          '<button class="sa-x" onclick="SA.delEx(' + i + ')"><i class="fa-solid fa-trash"></i></button>' +
+          '</div>' +
           (textoDica ? '<div class="sa-exr__dica">' + textoDica + '</div>' : '') +
-          '<div style="margin-top:6px; display:flex; gap:4px;">' +
-          '<button class="sa-x sa-pencil" onclick="SA.openEx(' + i + ')"><i class="fa-solid fa-pen"></i></button>' +
-          '<button class="sa-x" onclick="SA.delEx(' + i + ')"><i class="fa-solid fa-trash"></i></button></div>' +
           '</div></div>';
       });
       html += '</div>';
@@ -1380,7 +1397,22 @@
       document.getElementById("aval-data").value = this.hojeChave();
       const ult = this.musc.avaliacoes[this.musc.avaliacoes.length - 1];
       if (ult && ult.altura) document.getElementById("aval-altura").value = ult.altura;
+      this.previewAval();
       this.openM("sa-modal-aval");
+    },
+    // calcula IMC, massa magra e cintura/quadril AO VIVO enquanto você digita
+    previewAval() {
+      const g = id => { const v = parseFloat(document.getElementById(id).value); return isNaN(v) ? null : v; };
+      const peso = g("aval-peso"), alt = g("aval-altura"), gord = g("aval-gordura"), cint = g("aval-cintura"), quad = g("aval-quadril");
+      const imc = (peso && alt) ? (peso / Math.pow(alt / 100, 2)) : null;
+      const magra = (peso && gord != null) ? peso * (1 - gord / 100) : null;
+      const rcq = (cint && quad) ? cint / quad : null;
+      let cls = "—";
+      if (imc != null) cls = imc < 18.5 ? "abaixo" : imc < 25 ? "normal" : imc < 30 ? "sobrepeso" : "obesidade";
+      document.getElementById("aval-preview").innerHTML =
+        '<span>IMC: <b>' + (imc != null ? imc.toFixed(1) + " (" + cls + ")" : "—") + '</b></span>' +
+        '<span>Massa magra: <b>' + (magra != null ? magra.toFixed(1) + " kg" : "—") + '</b></span>' +
+        '<span>Cintura/Quadril: <b>' + (rcq != null ? rcq.toFixed(2) : "—") + '</b></span>';
     },
     saveAval() {
       const g = id => { const v = parseFloat(document.getElementById(id).value); return isNaN(v) ? null : v; };

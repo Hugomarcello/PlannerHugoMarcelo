@@ -1,0 +1,1018 @@
+<!DOCTYPE html>
+<html lang="pt-br" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Planner Hugo Marcelo | Rotinas e Hábitos</title>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+
+  <!-- =====================================================================
+       ESTILOS SÓ DESTA PÁGINA  (prefixo rt- = "rotinas")
+       Tudo aqui não vaza pra outras páginas. Reaproveitamos o style.css
+       para cards, botões e modais; aqui ficam só as peças exclusivas.
+       ===================================================================== -->
+  <style>
+    /* Cores semânticas: cada período do dia tem a sua cor.
+       Ficam em :root pra também valerem dentro dos modais. */
+    :root {
+      --rt-manha: #f59e0b;   /* laranja  */
+      --rt-tarde: #3b82f6;   /* azul     */
+      --rt-noite: #8b5cf6;   /* roxo     */
+      --rt-feito: #10b981;   /* verde — feito / desempenho forte  */
+      --rt-medio: #f59e0b;   /* âmbar — desempenho médio no gráfico */
+      --rt-falho: #ef4444;   /* vermelho — falhou / desempenho fraco */
+    }
+
+    /* ---------- 1. CARD DE PERFIL / XP ---------- */
+    .rt-hero {
+      display: flex; align-items: center; gap: 22px;
+      flex-wrap: wrap;
+      position: relative; overflow: hidden;
+      border-left: 4px solid var(--accent);
+    }
+    .rt-hero__ghost {  /* ícone gigante decorativo de fundo */
+      position: absolute; right: -20px; bottom: -28px;
+      font-size: 150px; color: var(--accent); opacity: .05; pointer-events: none;
+    }
+    .rt-avatar {
+      position: relative; flex-shrink: 0; z-index: 1;
+    }
+    .rt-avatar__ring {
+      width: 84px; height: 84px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--rt-tarde), var(--rt-noite));
+      display: grid; place-items: center;
+      color: #fff; font-size: 32px;
+      box-shadow: 0 8px 22px -6px rgba(59,130,246,.5);
+      border: 4px solid var(--bg);
+    }
+    .rt-avatar__lvl {
+      position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%);
+      background: var(--text-strong); color: var(--bg);
+      padding: 3px 10px; border-radius: 99px;
+      font-size: 10px; font-weight: 900; letter-spacing: 1px; white-space: nowrap;
+    }
+    .rt-hero__info { flex: 1; min-width: 200px; z-index: 1; }
+    .rt-hero__top {
+      display: flex; justify-content: space-between; align-items: flex-end;
+      gap: 10px; flex-wrap: wrap; margin-bottom: 10px;
+    }
+    .rt-hero__titulo { font-size: 20px; font-weight: 900; letter-spacing: -.5px; }
+    .rt-hero__sub {
+      font-size: 9px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 2px; color: var(--text-muted); margin-top: 2px;
+    }
+    .rt-xp-num { display: flex; align-items: center; gap: 8px; }
+    .rt-xp-num b { font-size: 18px; font-weight: 900; color: var(--rt-tarde); }
+    .rt-xp-num span { font-size: 12px; color: var(--text-muted); font-weight: 700; }
+    .rt-xp-edit {
+      width: 30px; height: 30px; border-radius: 8px;
+      border: 1px solid var(--border); background: var(--bg);
+      color: var(--text-muted); display: grid; place-items: center;
+      transition: all .15s;
+    }
+    .rt-xp-edit:hover { color: var(--rt-tarde); border-color: var(--rt-tarde); }
+    .rt-xp-track {
+      width: 100%; height: 14px; border-radius: 99px;
+      background: var(--bg); border: 1px solid var(--border);
+      overflow: hidden; box-shadow: inset 0 1px 3px rgba(0,0,0,.3);
+    }
+    .rt-xp-fill {
+      height: 100%; border-radius: 99px;
+      background: linear-gradient(90deg, var(--rt-tarde), var(--rt-noite));
+      transition: width 1s cubic-bezier(.2,.8,.2,1);
+    }
+    .rt-streak {
+      flex-shrink: 0; z-index: 1;
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: 18px; padding: 14px 22px;
+      display: flex; flex-direction: column; align-items: center;
+      min-width: 110px;
+    }
+    .rt-streak i { font-size: 26px; color: var(--rt-manha);
+      filter: drop-shadow(0 0 8px rgba(245,158,11,.5)); margin-bottom: 4px; }
+    .rt-streak b { font-size: 26px; font-weight: 900; line-height: 1; }
+    .rt-streak span {
+      font-size: 9px; font-weight: 800; text-transform: uppercase;
+      letter-spacing: 2px; color: var(--text-muted); margin-top: 4px;
+    }
+
+    /* ---------- 2. PÓDIO + GRÁFICO ---------- */
+    .rt-podio-row {
+      display: flex; align-items: center; justify-content: space-between;
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: 12px; padding: 12px; margin-top: 12px;
+    }
+    .rt-podio-row:first-of-type { margin-top: 0; }
+    .rt-podio-left { display: flex; align-items: center; gap: 12px; min-width: 0; }
+    .rt-podio-ico {
+      width: 34px; height: 34px; border-radius: 10px;
+      display: grid; place-items: center; flex-shrink: 0; font-size: 14px;
+    }
+    .rt-podio-ico--up { background: rgba(16,185,129,.12); color: var(--rt-feito); }
+    .rt-podio-ico--down { background: rgba(239,68,68,.12); color: var(--rt-falho); }
+    .rt-podio-lbl {
+      font-size: 8px; font-weight: 800; text-transform: uppercase;
+      letter-spacing: 1.5px; color: var(--text-muted);
+    }
+    .rt-podio-nome {
+      font-size: 11px; font-weight: 900; text-transform: uppercase;
+      color: var(--text-strong); white-space: nowrap; overflow: hidden;
+      text-overflow: ellipsis; max-width: 150px;
+    }
+    .rt-podio-val { font-size: 15px; font-weight: 900; flex-shrink: 0; }
+    .rt-podio-val--up { color: var(--rt-feito); }
+    .rt-podio-val--down { color: var(--rt-falho); }
+
+    /* Gráfico "barras turbinadas": cor por desempenho, números fixos e linha de meta */
+    .rt-chart { position: relative; display: flex; gap: 8px; margin-top: 8px; }
+    .rt-chart__col { flex: 1; display: flex; flex-direction: column; align-items: center; }
+    .rt-chart__pct { font-size: 11px; font-weight: 800; height: 18px; line-height: 18px; }
+    .rt-chart__track {
+      width: 100%; height: 100px;
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: 8px 8px 4px 4px;
+      display: flex; align-items: flex-end; overflow: hidden;
+    }
+    .rt-chart__bar { width: 100%; transition: height .6s cubic-bezier(.2,.8,.2,1); }
+    .rt-chart__bar--forte { background: var(--rt-feito); }
+    .rt-chart__bar--medio { background: var(--rt-medio); }
+    .rt-chart__bar--fraco { background: var(--rt-fraco); }
+    .rt-chart__bar--full  { background: linear-gradient(180deg, #34d399, var(--rt-feito)); }
+    .rt-chart__day {
+      font-size: 9px; font-weight: 800; text-transform: uppercase;
+      letter-spacing: 1px; color: var(--text-muted); margin-top: 6px;
+    }
+    /* Linha de meta (80%): 18px do rótulo + 20% da pista de 100px = 38px do topo */
+    .rt-chart__meta {
+      position: absolute; left: 0; right: 0; top: 38px;
+      border-top: 1px dashed var(--text-muted); opacity: .45; pointer-events: none;
+    }
+    .rt-chart__meta span {
+      position: absolute; right: 0; top: -8px;
+      font-size: 8px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;
+      color: var(--text-muted); background: var(--panel); padding: 0 5px;
+    }
+    .rt-chart-media {
+      font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;
+      color: var(--rt-feito); background: var(--accent-soft);
+      padding: 4px 9px; border-radius: 99px; white-space: nowrap;
+    }
+
+    /* ---------- 3. NAVEGAÇÃO DE DATA (dia / semana) ---------- */
+    .rt-nav {
+      display: flex; align-items: center; gap: 6px;
+      background: var(--panel); border: 1px solid var(--border);
+      border-radius: 12px; padding: 5px;
+    }
+    .rt-nav__btn {
+      width: 32px; height: 32px; border-radius: 8px;
+      display: grid; place-items: center;
+      color: var(--text-muted); transition: all .15s;
+    }
+    .rt-nav__btn:hover { background: var(--bg-soft); color: var(--text-strong); }
+    .rt-nav__btn:active { transform: scale(.92); }
+    .rt-nav__label {
+      font-size: 10px; font-weight: 900; text-transform: uppercase;
+      letter-spacing: 1px; min-width: 118px; text-align: center;
+    }
+    .rt-nav__hoje {
+      font-size: 9px; font-weight: 800; text-transform: uppercase;
+      letter-spacing: 1px; padding: 7px 12px; border-radius: 8px;
+      background: var(--accent-soft); color: var(--accent);
+      transition: all .15s;
+    }
+    .rt-nav__hoje:hover { background: var(--accent); color: #fff; }
+
+    .rt-section-head {
+      display: flex; justify-content: space-between; align-items: center;
+      gap: 12px; flex-wrap: wrap; margin-bottom: 16px;
+    }
+    .rt-section-title {
+      font-size: 13px; font-weight: 900; text-transform: uppercase;
+      letter-spacing: 1.5px; display: flex; align-items: center; gap: 8px;
+    }
+
+    /* ---------- 4. RITUAIS DIÁRIOS (manhã/tarde/noite) ---------- */
+    .rt-periodos { display: grid; gap: 16px; grid-template-columns: 1fr; }
+    .rt-periodo__head {
+      display: flex; justify-content: space-between; align-items: center;
+      border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-bottom: 12px;
+    }
+    .rt-periodo__nome {
+      font-size: 11px; font-weight: 900; text-transform: uppercase;
+      letter-spacing: 1.5px; display: flex; align-items: center; gap: 8px;
+    }
+    .rt-add {
+      font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;
+      padding: 5px 10px; border-radius: 7px; transition: all .15s;
+    }
+    .rt-rotina {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 8px; border-radius: 10px; border: 1px solid transparent;
+      transition: all .15s;
+    }
+    .rt-rotina:hover { background: var(--bg); border-color: var(--border); }
+    .rt-rotina__left { display: flex; align-items: center; gap: 10px; min-width: 0; }
+    .rt-check {
+      width: 22px; height: 22px; border-radius: 6px; flex-shrink: 0;
+      border: 2px solid var(--border); background: var(--bg);
+      display: grid; place-items: center; cursor: pointer;
+      color: transparent; font-size: 11px; transition: all .15s;
+    }
+    .rt-rotina__txt {
+      font-size: 12px; font-weight: 700; text-transform: uppercase;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px;
+    }
+    .rt-rotina__txt--done { color: var(--text-muted); text-decoration: line-through; opacity: .6; }
+    .rt-del {
+      width: 26px; height: 26px; flex-shrink: 0;
+      color: var(--text-muted); opacity: 0; transition: all .15s;
+      display: grid; place-items: center; border-radius: 6px;
+    }
+    .rt-rotina:hover .rt-del,
+    .rt-habito:hover .rt-del { opacity: 1; }
+    .rt-del:hover { color: var(--rt-falho); }
+    .rt-empty {
+      font-size: 10px; font-style: italic; font-weight: 700;
+      color: var(--text-muted); padding: 8px 0;
+    }
+
+    /* ---------- 5. RASTREADOR DE HÁBITOS (grade semanal) ---------- */
+    .rt-tracker-scroll { overflow-x: auto; padding-bottom: 6px; }
+    .rt-tracker-scroll::-webkit-scrollbar { height: 6px; }
+    .rt-grid { min-width: 660px; }
+    .rt-grid__head {
+      display: flex; align-items: center;
+      border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-bottom: 12px;
+      font-size: 9px; font-weight: 800; text-transform: uppercase;
+      letter-spacing: 1px; color: var(--text-muted);
+    }
+    .rt-grid__head-nome { width: 30%; }
+    .rt-grid__head-dias { flex: 1; display: grid; grid-template-columns: repeat(7,1fr); text-align: center; gap: 6px; }
+    .rt-grid__head-dias b { display: block; font-size: 8px; opacity: .55; }
+    .rt-grid__head-total { width: 64px; text-align: right; }
+
+    .rt-habito {
+      display: flex; align-items: center; gap: 8px;
+      padding: 8px; border-radius: 12px; border: 1px solid transparent;
+      transition: all .15s; margin-bottom: 4px;
+    }
+    .rt-habito:hover { background: var(--bg); border-color: var(--border); }
+    .rt-habito__nome {
+      width: 30%; display: flex; align-items: center; justify-content: space-between; gap: 6px;
+    }
+    .rt-habito__nome span {
+      font-size: 11px; font-weight: 900; text-transform: uppercase;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .rt-habito__dias { flex: 1; display: grid; grid-template-columns: repeat(7,1fr); gap: 6px; }
+    .rt-cell {
+      width: 30px; height: 30px; margin: 0 auto; border-radius: 8px;
+      border: 2px solid var(--border); background: var(--bg);
+      display: grid; place-items: center; cursor: pointer;
+      color: transparent; font-size: 11px; transition: all .12s;
+    }
+    .rt-cell:hover { border-color: var(--rt-feito); background: rgba(16,185,129,.08); }
+    .rt-cell:active { transform: scale(.9); }
+    .rt-cell--feito {
+      background: var(--rt-feito); border-color: var(--rt-feito); color: #fff;
+      box-shadow: 0 3px 10px -3px rgba(16,185,129,.6);
+    }
+    .rt-cell--falho {
+      background: var(--rt-falho); border-color: var(--rt-falho); color: #fff;
+      box-shadow: 0 3px 10px -3px rgba(239,68,68,.6);
+    }
+    .rt-habito__total { width: 64px; text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+    .rt-habito__pct { font-size: 11px; font-weight: 900; color: var(--rt-feito); }
+    .rt-mini-bar { width: 100%; height: 4px; border-radius: 99px; background: var(--bg); overflow: hidden; }
+    .rt-mini-bar > div { height: 100%; background: var(--rt-feito); border-radius: 99px; transition: width .4s; }
+
+    /* ---------- 6. PLAYBOOK ---------- */
+    .rt-playbook {
+      width: 100%; min-height: 130px; resize: vertical;
+      background: var(--bg); border: 1px solid var(--border); border-radius: 14px;
+      padding: 14px; color: var(--text-strong);
+      font-family: inherit; font-size: 13px; font-weight: 600; line-height: 1.6;
+      outline: none; transition: border-color .15s;
+    }
+    .rt-playbook:focus { border-color: var(--accent); }
+    .rt-playbook::placeholder { color: var(--text-muted); }
+
+    /* ---------- PEÇAS DOS MINI-MODAIS (reusam .modal do style.css) ---------- */
+    .rt-modal-input {
+      width: 100%; background: var(--bg-soft); border: 1px solid var(--border);
+      border-radius: 10px; padding: 12px; color: var(--text-strong);
+      font-family: inherit; font-size: 14px; font-weight: 600; outline: none;
+    }
+    .rt-modal-input:focus { border-color: var(--accent); }
+    .rt-modal-acoes { display: flex; gap: 10px; }
+    .rt-modal-acoes .btn { flex: 1; justify-content: center; }
+
+    /* ---------- ANIMAÇÃO DO "+XP" QUE SOBE NA TELA ---------- */
+    .rt-xp-pop {
+      position: fixed; top: 50%; left: 50%; z-index: 9998;
+      transform: translate(-50%,-50%);
+      font-size: 34px; font-weight: 900; color: var(--rt-tarde);
+      text-shadow: 0 4px 12px rgba(0,0,0,.5); pointer-events: none;
+      animation: rtXpPop .9s cubic-bezier(.17,.89,.32,1.27) forwards;
+    }
+    @keyframes rtXpPop {
+      0%   { opacity: 1; transform: translate(-50%,-50%) scale(1); }
+      100% { opacity: 0; transform: translate(-50%,-130px) scale(1.6); }
+    }
+
+    /* ---------- DESKTOP ---------- */
+    @media (min-width: 900px) {
+      .rt-periodos { grid-template-columns: repeat(3, 1fr); }
+      .rt-stats { display: grid; grid-template-columns: 1fr 2fr; gap: 20px; }
+      .rt-avatar__ring { width: 92px; height: 92px; font-size: 36px; }
+    }
+  </style>
+</head>
+
+<body class="app" data-page="habitos">
+
+  <div id="sidebar-container"></div>
+  <div id="overlay" class="overlay" onclick="fecharMenu()"></div>
+
+  <main class="main">
+
+    <!-- Cabeçalho padrão -->
+    <header class="header">
+      <div class="header__left">
+        <button class="btn btn--icon btn--menu" onclick="abrirMenu()" aria-label="Abrir menu">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+        <div>
+          <h1 class="header__title">Rotinas &amp; Hábitos</h1>
+          <p class="header__subtitle">Disciplina é liberdade</p>
+        </div>
+      </div>
+      <div class="header__actions">
+        <button class="btn" onclick="abrirSync()">
+          <i class="fa-solid fa-cloud-arrow-up" style="color: var(--accent)"></i>
+          <span>Backup</span>
+        </button>
+        <button class="btn btn--icon" id="btn-tema" onclick="Tema.alternar()" aria-label="Trocar tema">
+          <i class="fa-solid fa-moon"></i>
+        </button>
+      </div>
+    </header>
+
+    <div class="container fade-up">
+
+      <!-- ============ 1. PERFIL / XP / OFENSIVA ============ -->
+      <section class="card rt-hero" style="margin-bottom: 20px;">
+        <i class="fa-solid fa-gamepad rt-hero__ghost"></i>
+
+        <div class="rt-avatar">
+          <div class="rt-avatar__ring"><i class="fa-solid fa-fire-flame-curved"></i></div>
+          <div class="rt-avatar__lvl">NÍVEL <span id="ui-level">1</span></div>
+        </div>
+
+        <div class="rt-hero__info">
+          <div class="rt-hero__top">
+            <div>
+              <p class="rt-hero__titulo">Mestre da Execução</p>
+              <p class="rt-hero__sub">Consistência diária gera resultados</p>
+            </div>
+            <div class="rt-xp-num">
+              <b id="ui-xp-atual">0</b>
+              <span>/ <span id="ui-xp-max">10</span> XP</span>
+              <button class="rt-xp-edit" onclick="editarXP()" title="Editar XP manualmente">
+                <i class="fa-solid fa-pen" style="font-size:10px"></i>
+              </button>
+            </div>
+          </div>
+          <div class="rt-xp-track"><div class="rt-xp-fill" id="ui-xp-bar" style="width:0%"></div></div>
+        </div>
+
+        <div class="rt-streak" title="Dias seguidos cumprindo TODAS as rotinas do dia">
+          <i class="fa-solid fa-fire"></i>
+          <b id="ui-streak">0</b>
+          <span>Ofensiva</span>
+        </div>
+      </section>
+
+      <!-- ============ 2. PÓDIO + GRÁFICO ============ -->
+      <section class="rt-stats" style="margin-bottom: 24px;">
+        <div class="card">
+          <h2 class="card__title"><i class="fa-solid fa-ranking-star"></i> Pódio da semana</h2>
+          <div class="rt-podio-row">
+            <div class="rt-podio-left">
+              <div class="rt-podio-ico rt-podio-ico--up"><i class="fa-solid fa-arrow-trend-up"></i></div>
+              <div style="min-width:0">
+                <p class="rt-podio-lbl">Melhor desempenho</p>
+                <p class="rt-podio-nome" id="stat-melhor-nome">—</p>
+              </div>
+            </div>
+            <span class="rt-podio-val rt-podio-val--up" id="stat-melhor-val">0/7</span>
+          </div>
+          <div class="rt-podio-row">
+            <div class="rt-podio-left">
+              <div class="rt-podio-ico rt-podio-ico--down"><i class="fa-solid fa-arrow-trend-down"></i></div>
+              <div style="min-width:0">
+                <p class="rt-podio-lbl">Precisa de atenção</p>
+                <p class="rt-podio-nome" id="stat-pior-nome">—</p>
+              </div>
+            </div>
+            <span class="rt-podio-val rt-podio-val--down" id="stat-pior-val">0/7</span>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="rt-section-head" style="margin-bottom:4px">
+            <h2 class="card__title" style="margin-bottom:0"><i class="fa-solid fa-chart-simple"></i> Produtividade semanal</h2>
+            <div style="display:flex; gap:8px; align-items:center;">
+              <span class="rt-chart-media" id="media-semana">—</span>
+              <span class="rt-nav__label" id="label-grafico" style="min-width:auto;color:var(--text-muted)">—</span>
+            </div>
+          </div>
+          <div class="rt-chart" id="chart-bars"></div>
+        </div>
+      </section>
+
+      <!-- ============ 3. RITUAIS DIÁRIOS ============ -->
+      <section style="margin-bottom: 24px;">
+        <div class="rt-section-head">
+          <h2 class="rt-section-title"><i class="fa-solid fa-sun" style="color:var(--rt-manha)"></i> Rituais diários</h2>
+          <div class="rt-nav">
+            <button class="rt-nav__btn" onclick="mudarDia(-1)"><i class="fa-solid fa-chevron-left"></i></button>
+            <span class="rt-nav__label" id="label-dia">Hoje</span>
+            <button class="rt-nav__btn" onclick="mudarDia(1)"><i class="fa-solid fa-chevron-right"></i></button>
+            <button class="rt-nav__hoje" onclick="irParaHoje()">Hoje</button>
+          </div>
+        </div>
+
+        <div class="rt-periodos">
+          <div class="card">
+            <div class="rt-periodo__head">
+              <span class="rt-periodo__nome"><i class="fa-solid fa-mug-hot" style="color:var(--rt-manha)"></i> Manhã</span>
+              <button class="rt-add" style="background:rgba(245,158,11,.12);color:var(--rt-manha)" onclick="addRotina('manha')">+ Add</button>
+            </div>
+            <div id="lista-manha"></div>
+          </div>
+          <div class="card">
+            <div class="rt-periodo__head">
+              <span class="rt-periodo__nome"><i class="fa-solid fa-bolt" style="color:var(--rt-tarde)"></i> Tarde</span>
+              <button class="rt-add" style="background:rgba(59,130,246,.12);color:var(--rt-tarde)" onclick="addRotina('tarde')">+ Add</button>
+            </div>
+            <div id="lista-tarde"></div>
+          </div>
+          <div class="card">
+            <div class="rt-periodo__head">
+              <span class="rt-periodo__nome"><i class="fa-solid fa-moon" style="color:var(--rt-noite)"></i> Noite</span>
+              <button class="rt-add" style="background:rgba(139,92,246,.12);color:var(--rt-noite)" onclick="addRotina('noite')">+ Add</button>
+            </div>
+            <div id="lista-noite"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 4. RASTREADOR DE HÁBITOS ============ -->
+      <section class="card" style="margin-bottom: 24px;">
+        <div class="rt-section-head" style="border-bottom:1px solid var(--border); padding-bottom:16px;">
+          <h2 class="rt-section-title"><i class="fa-solid fa-calendar-week" style="color:var(--rt-feito)"></i> Rastreador de hábitos</h2>
+          <div style="display:flex; gap:10px; align-items:center;">
+            <div class="rt-nav">
+              <button class="rt-nav__btn" onclick="mudarSemana(-1)"><i class="fa-solid fa-chevron-left"></i></button>
+              <span class="rt-nav__label" id="label-semana">—</span>
+              <button class="rt-nav__btn" onclick="mudarSemana(1)"><i class="fa-solid fa-chevron-right"></i></button>
+            </div>
+            <button class="btn btn--primary btn--icon" onclick="addHabito()" title="Novo hábito"><i class="fa-solid fa-plus"></i></button>
+          </div>
+        </div>
+
+        <div class="rt-tracker-scroll">
+          <div class="rt-grid">
+            <div class="rt-grid__head">
+              <div class="rt-grid__head-nome">Hábito</div>
+              <div class="rt-grid__head-dias" id="cab-dias"></div>
+              <div class="rt-grid__head-total">Semana</div>
+            </div>
+            <div id="lista-habitos"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 5. PLAYBOOK ============ -->
+      <section class="card">
+        <h2 class="card__title"><i class="fa-solid fa-book-open"></i> Playbook de comportamento</h2>
+        <textarea id="playbook-texto" class="rt-playbook" onblur="salvarPlaybook()"
+          placeholder="Suas regras inegociáveis, mantras e estratégias pra vencer a procrastinação..."></textarea>
+      </section>
+
+    </div>
+
+    <div id="footer-container"></div>
+  </main>
+
+  <!-- MODAL DE BACKUP — igual em todas as páginas -->
+  <div id="modal-sync" class="modal">
+    <div class="modal__box">
+      <div class="modal__head">
+        <h3><i class="fa-solid fa-cloud-arrow-up" style="color:var(--accent)"></i> Backup &amp; Transferência</h3>
+        <button class="modal__close" onclick="fecharSync()"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal__body">
+        <p>Sem nuvem por enquanto: use isto pra levar seus dados entre celular e computador.</p>
+        <button class="btn" onclick="exportarBackup()" style="width:100%; justify-content:center;">
+          <i class="fa-solid fa-download"></i> Exportar (baixar arquivo)
+        </button>
+        <input type="file" id="input-import" accept=".json" onchange="importarBackup(event)" style="display:none;">
+        <button class="btn btn--primary" onclick="document.getElementById('input-import').click()" style="width:100%; justify-content:center;">
+          <i class="fa-solid fa-upload"></i> Importar (restaurar backup)
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MINI-MODAL GENÉRICO (input ou confirmação) — só desta página -->
+  <div id="rt-modal" class="modal">
+    <div class="modal__box">
+      <div class="modal__head">
+        <h3 id="rt-modal-titulo"><i class="fa-solid fa-pen"></i> Título</h3>
+        <button class="modal__close" onclick="fecharRtModal()"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal__body">
+        <p id="rt-modal-msg" style="display:none"></p>
+        <input id="rt-modal-input" class="rt-modal-input" type="text" autocomplete="off">
+        <div class="rt-modal-acoes">
+          <button class="btn" onclick="fecharRtModal()">Cancelar</button>
+          <button class="btn btn--primary" id="rt-modal-ok">Confirmar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- COMPORTAMENTO compartilhado (sidebar, tema, Store, backup) -->
+  <script src="app.js"></script>
+
+  <!-- ===================================================================
+       SCRIPT SÓ DESTA PÁGINA
+       Toda a lógica de rotinas, hábitos, XP e nível mora aqui.
+       Os dados vão SEMPRE pelo Store, na chave "habitos" (vira
+       planner_habitos no localStorage e entra no backup automático).
+       =================================================================== -->
+  <script>
+  /* ---------- ESTRUTURA PADRÃO DOS DADOS ----------
+     xp       -> pontos de execução acumulados
+     playbook -> texto livre das suas regras
+     rotinas  -> 3 listas; cada item guarda um histórico data->feito
+     habitos  -> lista; cada item guarda um histórico data->estado
+                 (1 = feito, -1 = falhou, ausente = vazio)            */
+  const PADRAO = { xp: 0, playbook: '', rotinas: { manha: [], tarde: [], noite: [] }, habitos: [] };
+
+  let db = Store.ler('habitos', PADRAO);
+
+  // Rede de segurança: se um backup vier incompleto, completamos a estrutura.
+  db.rotinas = db.rotinas || { manha: [], tarde: [], noite: [] };
+  ['manha', 'tarde', 'noite'].forEach(p => { db.rotinas[p] = db.rotinas[p] || []; });
+  db.habitos = Array.isArray(db.habitos) ? db.habitos : [];
+  if (typeof db.xp !== 'number') db.xp = 0;
+  if (typeof db.playbook !== 'string') db.playbook = '';
+
+  function salvar() { Store.salvar('habitos', db); }
+
+  /* ---------- FERRAMENTAS DE DATA ----------
+     IMPORTANTE: geramos a chave a partir do horário LOCAL (e não com
+     toISOString, que usa UTC). Em BH (UTC-3) o método antigo salvava
+     hábitos marcados à noite no dia seguinte. Aqui isso não acontece. */
+  function dataChave(date) {
+    const a = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const d = String(date.getDate()).padStart(2, '0');
+    return `${a}-${m}-${d}`;
+  }
+  // Domingo é o início da semana (padrão de todo o seu Planner).
+  function inicioSemana(date) {
+    const d = new Date(date);
+    d.setHours(0, 0, 0, 0);
+    d.setDate(d.getDate() - d.getDay()); // volta até o domingo
+    return d;
+  }
+
+  const MESES = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
+  const DIAS  = ['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB'];
+
+  /* ---------- ESTADO DE NAVEGAÇÃO (qual dia / qual semana eu vejo) ---------- */
+  let dataDia      = (() => { const d = new Date(); d.setHours(0, 0, 0, 0); return d; })();
+  let semanaInicio = inicioSemana(new Date());
+
+  /* ===================================================================
+     XP, NÍVEL E OFENSIVA
+     A fórmula de nível usa raiz quadrada: cada nível exige cada vez
+     mais XP (10·nível²). Subir fica progressivamente mais difícil —
+     é o que dá a sensação de progressão de "jogo".
+     =================================================================== */
+  function calcNivel(xp) {
+    if (xp < 0) xp = 0;
+    const lvl = Math.floor(Math.sqrt(xp / 10)) + 1;
+    const baseAtual = 10 * Math.pow(lvl - 1, 2);
+    const baseProx  = 10 * Math.pow(lvl, 2);
+    const progresso = ((xp - baseAtual) / (baseProx - baseAtual)) * 100;
+    return { lvl, baseProx, progresso };
+  }
+
+  function addXP(qtd) {
+    db.xp += qtd;
+    if (db.xp < 0) db.xp = 0;
+    salvar();
+    renderDashboard();
+    if (qtd > 0) popXP(qtd); // só celebra quando ganha
+  }
+
+  function popXP(qtd) {
+    const el = document.createElement('div');
+    el.className = 'rt-xp-pop';
+    el.textContent = `+${qtd} XP`;
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 900);
+  }
+
+  function editarXP() {
+    rtPrompt('Editar XP', 'Novo valor de XP', db.xp, (val) => {
+      const n = parseInt(val, 10);
+      if (!isNaN(n)) { db.xp = Math.max(0, n); salvar(); renderDashboard(); }
+    });
+  }
+
+  // Ofensiva = dias consecutivos (contando de hoje pra trás) com TODAS as rotinas feitas.
+  function calcOfensiva() {
+    const total = db.rotinas.manha.length + db.rotinas.tarde.length + db.rotinas.noite.length;
+    if (total === 0) return 0;
+
+    const diaCompleto = (chave) => {
+      let feitas = 0;
+      ['manha', 'tarde', 'noite'].forEach(p =>
+        db.rotinas[p].forEach(r => { if (r.history && r.history[chave]) feitas++; })
+      );
+      return feitas === total;
+    };
+
+    let streak = 0;
+    const d = new Date(); d.setHours(0, 0, 0, 0);
+    if (diaCompleto(dataChave(d))) streak++;       // hoje conta se já estiver completo
+    d.setDate(d.getDate() - 1);
+    while (diaCompleto(dataChave(d))) { streak++; d.setDate(d.getDate() - 1); }
+    return streak;
+  }
+
+  /* ---------- CONFETE PRÓPRIO (canvas, sem biblioteca externa) ---------- */
+  function rtConfete() {
+    const cores = ['#10b981', '#3b82f6', '#f59e0b', '#8b5cf6', '#ef4444'];
+    const canvas = document.createElement('canvas');
+    canvas.style.cssText = 'position:fixed;inset:0;pointer-events:none;z-index:9999';
+    canvas.width = innerWidth; canvas.height = innerHeight;
+    document.body.appendChild(canvas);
+    const ctx = canvas.getContext('2d');
+
+    const peças = Array.from({ length: 90 }, () => ({
+      x: innerWidth / 2, y: innerHeight * 0.5,
+      vx: (Math.random() - 0.5) * 13,
+      vy: Math.random() * -12 - 4,
+      g: 0.38 + Math.random() * 0.18,         // gravidade
+      tam: 5 + Math.random() * 6,
+      cor: cores[Math.floor(Math.random() * cores.length)],
+      rot: Math.random() * Math.PI, vrot: (Math.random() - 0.5) * 0.3,
+      vida: 1
+    }));
+
+    let frame = 0;
+    (function loop() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      peças.forEach(p => {
+        p.vy += p.g; p.x += p.vx; p.y += p.vy; p.rot += p.vrot; p.vida -= 0.012;
+        ctx.save();
+        ctx.globalAlpha = Math.max(p.vida, 0);
+        ctx.translate(p.x, p.y); ctx.rotate(p.rot);
+        ctx.fillStyle = p.cor;
+        ctx.fillRect(-p.tam / 2, -p.tam / 2, p.tam, p.tam);
+        ctx.restore();
+      });
+      frame++;
+      if (frame < 120) requestAnimationFrame(loop);
+      else canvas.remove();
+    })();
+  }
+
+  /* ===================================================================
+     RENDERIZAÇÃO
+     =================================================================== */
+  function renderTudo() {
+    renderDashboard();
+    renderRotulos();
+    renderRotinas();
+    renderHabitos();
+    renderGrafico();
+    renderPodio();
+    document.getElementById('playbook-texto').value = db.playbook || '';
+  }
+
+  function renderDashboard() {
+    const n = calcNivel(db.xp);
+    document.getElementById('ui-level').textContent    = n.lvl;
+    document.getElementById('ui-xp-atual').textContent = db.xp;
+    document.getElementById('ui-xp-max').textContent   = n.baseProx;
+    document.getElementById('ui-xp-bar').style.width   = `${n.progresso}%`;
+    document.getElementById('ui-streak').textContent   = calcOfensiva();
+  }
+
+  function renderRotulos() {
+    // Rótulo do dia: mostra "Hoje" quando o dia visto é o de hoje.
+    const hoje = dataChave(new Date());
+    const vendo = dataChave(dataDia);
+    const prefixo = hoje === vendo ? 'Hoje · ' : '';
+    document.getElementById('label-dia').textContent =
+      `${prefixo}${dataDia.getDate()} ${MESES[dataDia.getMonth()]}`;
+
+    // Rótulo da semana: "6 abr – 12 abr"
+    const fim = new Date(semanaInicio); fim.setDate(fim.getDate() + 6);
+    document.getElementById('label-semana').textContent =
+      `${semanaInicio.getDate()} ${MESES[semanaInicio.getMonth()]} – ${fim.getDate()} ${MESES[fim.getMonth()]}`;
+
+    const ehSemanaAtual = dataChave(semanaInicio) === dataChave(inicioSemana(new Date()));
+    document.getElementById('label-grafico').textContent = ehSemanaAtual ? 'Semana atual' : 'Outra semana';
+  }
+
+  // --- RITUAIS DIÁRIOS ---
+  function renderRotinas() {
+    const chave = dataChave(dataDia);
+    const cores = { manha: 'var(--rt-manha)', tarde: 'var(--rt-tarde)', noite: 'var(--rt-noite)' };
+
+    ['manha', 'tarde', 'noite'].forEach(periodo => {
+      const lista = document.getElementById(`lista-${periodo}`);
+      const itens = db.rotinas[periodo];
+
+      if (!itens.length) {
+        lista.innerHTML = `<p class="rt-empty">Nenhuma rotina aqui ainda.</p>`;
+        return;
+      }
+
+      lista.innerHTML = itens.map((r, idx) => {
+        const feito = r.history && r.history[chave];
+        const estiloCheck = feito
+          ? `background:${cores[periodo]};border-color:${cores[periodo]};color:#fff`
+          : '';
+        return `
+          <div class="rt-rotina">
+            <div class="rt-rotina__left">
+              <div class="rt-check" style="${estiloCheck}" onclick="toggleRotina('${periodo}',${idx})">
+                <i class="fa-solid fa-check"></i>
+              </div>
+              <span class="rt-rotina__txt ${feito ? 'rt-rotina__txt--done' : ''}" title="${r.txt}">${r.txt}</span>
+            </div>
+            <button class="rt-del" onclick="delRotina('${periodo}',${idx})"><i class="fa-solid fa-xmark"></i></button>
+          </div>`;
+      }).join('');
+    });
+  }
+
+  function addRotina(periodo) {
+    const nomes = { manha: 'manhã', tarde: 'tarde', noite: 'noite' };
+    rtPrompt(`Nova rotina · ${nomes[periodo]}`, 'Ex: Meditar 10 minutos', '', (txt) => {
+      db.rotinas[periodo].push({ id: Date.now(), txt, history: {} });
+      salvar(); renderTudo();
+    });
+  }
+
+  function toggleRotina(periodo, idx) {
+    const chave = dataChave(dataDia);
+    const r = db.rotinas[periodo][idx];
+    r.history = r.history || {};
+    if (!r.history[chave]) {
+      r.history[chave] = true;
+      addXP(5);
+      rtConfete();
+    } else {
+      delete r.history[chave];
+      addXP(-5);
+    }
+    salvar(); renderTudo();
+  }
+
+  function delRotina(periodo, idx) {
+    const r = db.rotinas[periodo][idx];
+    rtConfirm('Apagar rotina', `Remover "${r.txt}" de todo o histórico?`, () => {
+      db.rotinas[periodo].splice(idx, 1);
+      salvar(); renderTudo();
+    });
+  }
+
+  // --- HÁBITOS (grade semanal, 3 estados) ---
+  function renderHabitos() {
+    // Cabeçalho dos 7 dias da semana visualizada (DOM 06, SEG 07...)
+    const datasSemana = [];
+    let cabHtml = '';
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(semanaInicio); d.setDate(d.getDate() + i);
+      datasSemana.push(dataChave(d));
+      cabHtml += `<div>${DIAS[d.getDay()]}<b>${d.getDate()}</b></div>`;
+    }
+    document.getElementById('cab-dias').innerHTML = cabHtml;
+
+    const lista = document.getElementById('lista-habitos');
+    if (!db.habitos.length) {
+      lista.innerHTML = `<p class="rt-empty" style="text-align:center;padding:24px 0">Nenhum hábito ainda. Toque no + para criar o primeiro.</p>`;
+      return;
+    }
+
+    lista.innerHTML = db.habitos.map((h, hIdx) => {
+      let feitosSemana = 0;
+      const células = datasSemana.map(chave => {
+        const estado = h.history ? h.history[chave] : 0;
+        let classe = 'rt-cell', icone = '';
+        if (estado === 1)  { classe += ' rt-cell--feito'; icone = '<i class="fa-solid fa-check"></i>'; feitosSemana++; }
+        else if (estado === -1) { classe += ' rt-cell--falho'; icone = '<i class="fa-solid fa-xmark"></i>'; }
+        return `<div class="${classe}" onclick="toggleHabito(${hIdx},'${chave}')">${icone}</div>`;
+      }).join('');
+
+      const pct = Math.round((feitosSemana / 7) * 100);
+      return `
+        <div class="rt-habito">
+          <div class="rt-habito__nome">
+            <span title="${h.txt}">${h.txt}</span>
+            <button class="rt-del" onclick="delHabito(${hIdx})"><i class="fa-solid fa-trash" style="font-size:10px"></i></button>
+          </div>
+          <div class="rt-habito__dias">${células}</div>
+          <div class="rt-habito__total">
+            <span class="rt-habito__pct">${pct}%</span>
+            <div class="rt-mini-bar"><div style="width:${pct}%"></div></div>
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  function addHabito() {
+    rtPrompt('Novo hábito', 'Ex: Beber 2L de água', '', (txt) => {
+      db.habitos.push({ id: Date.now(), txt, history: {} });
+      salvar(); renderTudo();
+    });
+  }
+
+  // Ciclo de 3 estados: vazio → feito (+10) → falhou (−10) → vazio
+  function toggleHabito(hIdx, chave) {
+    const h = db.habitos[hIdx];
+    h.history = h.history || {};
+    const estado = h.history[chave] || 0;
+    if (estado === 0)      { h.history[chave] = 1;  addXP(10); }
+    else if (estado === 1) { h.history[chave] = -1; addXP(-10); }
+    else                   { delete h.history[chave]; }
+    salvar(); renderTudo();
+  }
+
+  function delHabito(hIdx) {
+    const h = db.habitos[hIdx];
+    rtConfirm('Apagar hábito', `Remover "${h.txt}" e todo o seu histórico?`, () => {
+      db.habitos.splice(hIdx, 1);
+      salvar(); renderTudo();
+    });
+  }
+
+  // --- GRÁFICO (% de rotinas + hábitos feitos por dia da semana) ---
+  // Cada barra é colorida pelo desempenho do dia (forte/médio/fraco),
+  // com o número sempre visível e uma linha de meta tracejada em 80%.
+  function corDesempenho(pct) {
+    if (pct >= 80) return 'var(--rt-feito)';
+    if (pct >= 50) return 'var(--rt-medio)';
+    return 'var(--rt-falho)';
+  }
+
+  function renderGrafico() {
+    const chart = document.getElementById('chart-bars');
+    let html = '';
+    let somaPct = 0;
+
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(semanaInicio); d.setDate(d.getDate() + i);
+      const chave = dataChave(d);
+
+      // Total possível no dia = nº de rotinas + nº de hábitos
+      const total = db.rotinas.manha.length + db.rotinas.tarde.length + db.rotinas.noite.length + db.habitos.length;
+      let feitos = 0;
+      ['manha', 'tarde', 'noite'].forEach(p =>
+        db.rotinas[p].forEach(r => { if (r.history && r.history[chave]) feitos++; })
+      );
+      db.habitos.forEach(h => { if (h.history && h.history[chave] === 1) feitos++; });
+
+      const pct = total > 0 ? Math.round((feitos / total) * 100) : 0;
+      somaPct += pct;
+
+      // Classe da barra por faixa de desempenho (100% ganha o degradê especial)
+      const classe = pct === 100 ? 'rt-chart__bar--full'
+                   : pct >= 80   ? 'rt-chart__bar--forte'
+                   : pct >= 50   ? 'rt-chart__bar--medio'
+                   : 'rt-chart__bar--fraco';
+
+      html += `
+        <div class="rt-chart__col">
+          <span class="rt-chart__pct" style="color:${corDesempenho(pct)}">${pct}%</span>
+          <div class="rt-chart__track">
+            <div class="rt-chart__bar ${classe}" style="height:${pct}%"></div>
+          </div>
+          <span class="rt-chart__day">${DIAS[d.getDay()]}</span>
+        </div>`;
+    }
+
+    // Linha de meta (80%) sobreposta às barras
+    html += `<div class="rt-chart__meta"><span>meta 80%</span></div>`;
+    chart.innerHTML = html;
+
+    // Selo de média da semana no topo do card
+    const media = Math.round(somaPct / 7);
+    document.getElementById('media-semana').textContent = `média ${media}%`;
+  }
+
+  // --- PÓDIO (melhor / pior hábito da semana visualizada) ---
+  function renderPodio() {
+    const melhorNome = document.getElementById('stat-melhor-nome');
+    const piorNome   = document.getElementById('stat-pior-nome');
+
+    if (!db.habitos.length) {
+      melhorNome.textContent = '—'; piorNome.textContent = '—';
+      document.getElementById('stat-melhor-val').textContent = '0/7';
+      document.getElementById('stat-pior-val').textContent = '0/7';
+      return;
+    }
+
+    const datasSemana = [];
+    for (let i = 0; i < 7; i++) { const d = new Date(semanaInicio); d.setDate(d.getDate() + i); datasSemana.push(dataChave(d)); }
+
+    const ranking = db.habitos.map(h => {
+      let feitos = 0;
+      datasSemana.forEach(c => { if (h.history && h.history[c] === 1) feitos++; });
+      return { nome: h.txt, feitos };
+    }).sort((a, b) => b.feitos - a.feitos);
+
+    melhorNome.textContent = ranking[0].nome;
+    document.getElementById('stat-melhor-val').textContent = `${ranking[0].feitos}/7`;
+    const pior = ranking[ranking.length - 1];
+    piorNome.textContent = pior.nome;
+    document.getElementById('stat-pior-val').textContent = `${pior.feitos}/7`;
+  }
+
+  /* ---------- NAVEGAÇÃO TEMPORAL ---------- */
+  function mudarDia(dir)    { dataDia.setDate(dataDia.getDate() + dir); renderTudo(); }
+  function mudarSemana(dir) { semanaInicio.setDate(semanaInicio.getDate() + dir * 7); renderTudo(); }
+  function irParaHoje() {
+    dataDia = (() => { const d = new Date(); d.setHours(0, 0, 0, 0); return d; })();
+    semanaInicio = inicioSemana(new Date());
+    renderTudo();
+  }
+
+  /* ---------- PLAYBOOK ---------- */
+  function salvarPlaybook() {
+    db.playbook = document.getElementById('playbook-texto').value;
+    salvar();
+  }
+
+  /* ===================================================================
+     MINI-MODAIS  (substituem prompt/confirm/alert do navegador)
+     rtPrompt  -> pede um texto e devolve no callback
+     rtConfirm -> pede confirmação de uma ação destrutiva
+     Ambos reusam o .modal e os .btn que já existem no style.css.
+     =================================================================== */
+  function abrirRtModal()  { document.getElementById('rt-modal').classList.add('is-open'); }
+  function fecharRtModal() { document.getElementById('rt-modal').classList.remove('is-open'); }
+
+  function rtPrompt(titulo, placeholder, valor, aoConfirmar) {
+    document.getElementById('rt-modal-titulo').innerHTML = `<i class="fa-solid fa-pen"></i> ${titulo}`;
+    document.getElementById('rt-modal-msg').style.display = 'none';
+
+    const input = document.getElementById('rt-modal-input');
+    input.style.display = 'block';
+    input.placeholder = placeholder || '';
+    input.value = valor !== undefined && valor !== null ? valor : '';
+
+    const ok = document.getElementById('rt-modal-ok');
+    ok.textContent = 'Confirmar';
+    const confirmar = () => { const v = String(input.value).trim(); if (v !== '') aoConfirmar(v); fecharRtModal(); };
+    ok.onclick = confirmar;
+    input.onkeydown = (e) => { if (e.key === 'Enter') confirmar(); };
+
+    abrirRtModal();
+    setTimeout(() => input.focus(), 60);
+  }
+
+  function rtConfirm(titulo, mensagem, aoConfirmar) {
+    document.getElementById('rt-modal-titulo').innerHTML = `<i class="fa-solid fa-triangle-exclamation" style="color:var(--rt-falho)"></i> ${titulo}`;
+    const msg = document.getElementById('rt-modal-msg');
+    msg.style.display = 'block';
+    msg.textContent = mensagem;
+    document.getElementById('rt-modal-input').style.display = 'none';
+
+    const ok = document.getElementById('rt-modal-ok');
+    ok.textContent = 'Apagar';
+    ok.onclick = () => { aoConfirmar(); fecharRtModal(); };
+
+    abrirRtModal();
+  }
+
+  /* ---------- PARTIDA ---------- */
+  renderTudo();
+  </script>
+</body>
+</html>

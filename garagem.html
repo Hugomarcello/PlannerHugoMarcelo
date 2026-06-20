@@ -1,0 +1,1169 @@
+<!DOCTYPE html>
+<html lang="pt-br" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Planner Hugo Marcelo | Moto/Garagem</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+
+  <!-- ===================================================================
+       ESTILOS SÓ DESTA PÁGINA
+       Prefixo "gr-" (garagem) pra não colidir com nada do style.css.
+       As 3 cores do semáforo ficam no :root pra que os MODAIS (que são
+       renderizados no fim do <body>, FORA do .container) também as enxerguem.
+       Esse foi um bug que já te mordeu antes; aqui já nasce resolvido.
+       =================================================================== -->
+  <style>
+    :root {
+      --gr-bom:   #10b981;  /* verde  = tranquilo            */
+      --gr-medio: #f59e0b;  /* amarelo = fique de olho       */
+      --gr-ruim:  #ef4444;  /* vermelho = precisa de atenção */
+    }
+
+    /* ---------- 1. PAINEL DA MOTO (identidade + telemetria-resumo) ---------- */
+    .gr-painel {
+      display: grid; gap: 22px; grid-template-columns: 1fr;
+      align-items: stretch;
+    }
+    @media (min-width: 860px) { .gr-painel { grid-template-columns: 1.1fr 1fr; } }
+
+    .gr-moto-foto {
+      position: relative; border-radius: 16px; overflow: hidden;
+      background: radial-gradient(120% 120% at 50% 0%, var(--bg-soft), var(--panel));
+      border: 1px solid var(--border);
+      display: grid; place-items: center; min-height: 230px; padding: 18px;
+    }
+    .gr-moto-foto img { width: 100%; height: 100%; object-fit: contain; max-height: 260px; }
+    .gr-moto-foto svg { width: 92%; max-width: 420px; }
+    /* faixinha de ações sobre a foto */
+    .gr-foto-acoes {
+      position: absolute; top: 12px; right: 12px; display: flex; gap: 8px;
+    }
+    .gr-foto-btn {
+      width: 34px; height: 34px; border-radius: 9px; display: grid; place-items: center;
+      background: color-mix(in srgb, var(--bg) 70%, transparent);
+      border: 1px solid var(--border); color: var(--text-muted); font-size: 13px;
+      backdrop-filter: blur(4px); transition: all .15s;
+    }
+    .gr-foto-btn:hover { color: var(--accent); border-color: var(--accent); }
+
+    /* selo de saúde geral no canto da foto */
+    .gr-selo {
+      position: absolute; bottom: 12px; left: 12px;
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 7px 12px; border-radius: 99px;
+      background: color-mix(in srgb, var(--bg) 78%, transparent);
+      border: 1px solid var(--border); backdrop-filter: blur(4px);
+      font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px;
+    }
+    .gr-selo .gr-bolinha { width: 10px; height: 10px; border-radius: 99px; }
+
+    /* km gigante estilo painel de jogo */
+    .gr-km-box { display: flex; flex-direction: column; gap: 4px; margin-bottom: 18px; }
+    .gr-km-label { font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; color: var(--text-muted); }
+    .gr-km-valor { display: flex; align-items: baseline; gap: 8px; }
+    .gr-km-valor b { font-size: 42px; font-weight: 900; letter-spacing: -1px; line-height: 1; }
+    .gr-km-valor span { font-size: 13px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; }
+    .gr-km-edit {
+      width: 30px; height: 30px; border-radius: 8px; align-self: center;
+      background: var(--bg-soft); border: 1px solid var(--border); color: var(--text-muted);
+      font-size: 11px; transition: all .15s;
+    }
+    .gr-km-edit:hover { color: var(--accent); border-color: var(--accent); }
+
+    /* fichinhas de especificação */
+    .gr-specs { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .gr-spec {
+      background: var(--bg-soft); border: 1px solid var(--border); border-radius: 11px;
+      padding: 10px 12px; display: flex; flex-direction: column; gap: 2px;
+      position: relative; cursor: pointer; transition: border-color .15s;
+    }
+    .gr-spec:hover { border-color: var(--accent); }
+    .gr-spec small { font-size: 8px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-muted); }
+    .gr-spec b { font-size: 13px; font-weight: 800; }
+
+    /* ---------- 2. CARDS DE PEÇAS (a inteligência) ---------- */
+    .gr-grid-pecas { display: grid; gap: 16px; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
+    .gr-peca {
+      background: var(--panel); border: 1px solid var(--border);
+      border-top: 3px solid var(--cor, var(--gr-bom)); border-radius: 14px;
+      padding: 16px; display: flex; flex-direction: column; box-shadow: var(--shadow);
+      transition: transform .15s;
+    }
+    .gr-peca:hover { transform: translateY(-3px); }
+    .gr-peca__top { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 12px; }
+    .gr-peca__nome { font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: .5px; display: flex; align-items: center; gap: 7px; }
+    .gr-peca__nome i { color: var(--cor, var(--gr-bom)); width: 16px; text-align: center; }
+    .gr-peca__edit { color: var(--text-muted); font-size: 11px; opacity: .5; transition: opacity .15s, color .15s; }
+    .gr-peca:hover .gr-peca__edit { opacity: 1; }
+    .gr-peca__edit:hover { color: var(--accent); }
+    .gr-peca__metrica { display: flex; align-items: baseline; gap: 6px; margin-bottom: 4px; }
+    .gr-peca__metrica b { font-size: 26px; font-weight: 900; line-height: 1; }
+    .gr-peca__metrica span { font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); }
+    .gr-bar { height: 6px; border-radius: 99px; background: var(--bg-soft); overflow: hidden; margin: 10px 0; }
+    .gr-bar__fill { height: 100%; border-radius: 99px; background: var(--cor, var(--gr-bom)); transition: width .8s cubic-bezier(.4,0,.2,1); }
+    .gr-peca__rodape { display: flex; justify-content: space-between; font-size: 8.5px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 12px; }
+    .gr-peca__rodape em { color: var(--cor, var(--gr-bom)); font-style: normal; }
+    .gr-peca__btn {
+      margin-top: auto; padding: 9px; border-radius: 9px; text-align: center;
+      font-size: 9px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px;
+      background: color-mix(in srgb, var(--cor, var(--gr-bom)) 14%, transparent);
+      border: 1px solid color-mix(in srgb, var(--cor, var(--gr-bom)) 35%, transparent);
+      color: var(--cor, var(--gr-bom)); transition: all .15s; width: 100%;
+    }
+    .gr-peca__btn:hover { background: var(--cor, var(--gr-bom)); color: #fff; }
+
+    /* ---------- 3. e 4. RASTREADORES (semanal e mensal) ---------- */
+    .gr-nav { display: flex; align-items: center; justify-content: center; gap: 14px; margin-bottom: 16px; }
+    .gr-nav__btn { width: 36px; height: 36px; border-radius: 9px; background: var(--bg-soft); border: 1px solid var(--border); color: var(--text-strong); transition: all .15s; }
+    .gr-nav__btn:hover { color: var(--accent); border-color: var(--accent); }
+    .gr-nav__label { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; min-width: 200px; text-align: center; }
+
+    .gr-check {
+      display: flex; align-items: center; gap: 12px; padding: 12px 14px;
+      background: var(--bg-soft); border: 1px solid var(--border); border-radius: 12px;
+      margin-bottom: 10px; transition: border-color .15s;
+    }
+    .gr-check.is-done { border-color: var(--gr-bom); background: color-mix(in srgb, var(--gr-bom) 8%, var(--bg-soft)); }
+    .gr-check__box {
+      width: 26px; height: 26px; border-radius: 8px; flex-shrink: 0;
+      border: 2px solid var(--border); display: grid; place-items: center;
+      color: transparent; font-size: 12px; transition: all .15s;
+    }
+    .gr-check.is-done .gr-check__box { background: var(--gr-bom); border-color: var(--gr-bom); color: #fff; }
+    .gr-check__nome { flex: 1; font-size: 13px; font-weight: 700; }
+    .gr-check__acoes { display: flex; gap: 6px; opacity: .5; transition: opacity .15s; }
+    .gr-check:hover .gr-check__acoes { opacity: 1; }
+    .gr-check__acoes button { color: var(--text-muted); font-size: 12px; padding: 4px; transition: color .15s; }
+    .gr-check__acoes button:hover { color: var(--accent); }
+    .gr-check__acoes button.danger:hover { color: var(--gr-ruim); }
+
+    /* mapa de calor do ano (52 semanas) */
+    .gr-heat { display: grid; grid-template-columns: repeat(26, 1fr); gap: 4px; margin-top: 16px; }
+    .gr-heat__cel { aspect-ratio: 1; border-radius: 3px; background: var(--bg-soft); border: 1px solid var(--border); }
+    .gr-heat__cel[data-nivel="1"] { background: color-mix(in srgb, var(--gr-bom) 30%, var(--bg-soft)); }
+    .gr-heat__cel[data-nivel="2"] { background: color-mix(in srgb, var(--gr-bom) 60%, var(--bg-soft)); }
+    .gr-heat__cel[data-nivel="3"] { background: var(--gr-bom); border-color: var(--gr-bom); }
+    .gr-heat__cel.is-atual { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+    /* grade mensal: 12 meses x itens */
+    .gr-mensal-grid { width: 100%; border-collapse: collapse; font-size: 11px; }
+    .gr-mensal-grid th { font-size: 8px; font-weight: 800; text-transform: uppercase; letter-spacing: .5px; color: var(--text-muted); padding: 6px 2px; text-align: center; }
+    .gr-mensal-grid td.nome { font-size: 11px; font-weight: 700; text-align: left; padding: 6px 8px; white-space: nowrap; }
+    .gr-mensal-grid td.cel { text-align: center; padding: 3px; }
+    .gr-mensal-dot { width: 22px; height: 22px; border-radius: 7px; margin: 0 auto; background: var(--bg-soft); border: 1px solid var(--border); display: grid; place-items: center; color: transparent; font-size: 10px; transition: all .12s; }
+    .gr-mensal-dot.is-done { background: var(--gr-bom); border-color: var(--gr-bom); color: #fff; }
+    .gr-mensal-dot.is-atual { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+    /* ---------- 5. HISTÓRICO ---------- */
+    .gr-hist-item {
+      display: grid; grid-template-columns: auto 1fr auto; gap: 12px; align-items: center;
+      padding: 14px; background: var(--bg-soft); border: 1px solid var(--border);
+      border-radius: 12px; margin-bottom: 10px;
+    }
+    .gr-hist-icone { width: 40px; height: 40px; border-radius: 11px; background: var(--accent-soft); color: var(--accent); display: grid; place-items: center; font-size: 16px; }
+    .gr-hist-info b { font-size: 13px; font-weight: 800; display: block; }
+    .gr-hist-info small { font-size: 10px; color: var(--text-muted); font-weight: 700; }
+    .gr-hist-valor { text-align: right; }
+    .gr-hist-valor b { font-size: 14px; font-weight: 900; color: var(--accent); }
+    .gr-hist-valor button { display: block; margin-top: 4px; color: var(--text-muted); font-size: 11px; }
+    .gr-hist-valor button:hover { color: var(--gr-ruim); }
+
+    .gr-vazio { font-size: 12px; color: var(--text-muted); font-style: italic; padding: 12px 4px; }
+
+    /* cabeçalho de cada card com botão à direita */
+    .gr-card-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 16px; }
+    .gr-card-head .card__title { margin-bottom: 0; }
+    .gr-add-btn { font-size: 9px; padding: 8px 12px; }
+
+    /* ---------- MINI-MODAL GENÉRICO (prompt/confirm) ---------- */
+    .gr-modal { position: fixed; inset: 0; z-index: 120; display: none; align-items: center; justify-content: center; padding: 16px; background: rgba(0,0,0,.7); backdrop-filter: blur(6px); }
+    .gr-modal.is-open { display: flex; }
+    .gr-modal__box { background: var(--bg); border: 1px solid var(--border); border-radius: 18px; width: 100%; max-width: 460px; box-shadow: var(--shadow); animation: pop .25s ease; max-height: 90vh; overflow-y: auto; }
+    .gr-modal__head { display: flex; align-items: center; justify-content: space-between; padding: 16px 18px; border-bottom: 1px solid var(--border); background: var(--panel); }
+    .gr-modal__head h3 { font-size: 12px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; display: flex; align-items: center; gap: 8px; }
+    .gr-modal__head h3 i { color: var(--accent); }
+    .gr-modal__close { color: var(--text-muted); font-size: 17px; }
+    .gr-modal__close:hover { color: var(--gr-ruim); }
+    .gr-modal__body { padding: 18px; display: flex; flex-direction: column; gap: 14px; }
+    .gr-modal__body p { font-size: 13px; color: var(--text-muted); line-height: 1.5; }
+
+    /* campos de formulário reutilizáveis nos modais */
+    .gr-campo { display: flex; flex-direction: column; gap: 5px; }
+    .gr-campo label { font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); }
+    .gr-input, .gr-select {
+      width: 100%; padding: 10px 12px; border-radius: 10px;
+      background: var(--bg-soft); border: 1px solid var(--border); color: var(--text-strong);
+      font-family: inherit; font-size: 13px; font-weight: 600;
+    }
+    .gr-input:focus, .gr-select:focus { outline: none; border-color: var(--accent); }
+    .gr-dupla { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .gr-modal__rodape { display: flex; gap: 10px; padding-top: 4px; }
+    .gr-modal__rodape .btn { flex: 1; justify-content: center; }
+
+    /* "+XP" que sobe na tela ao cumprir um cuidado */
+    .gr-xp-pop {
+      position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%);
+      font-size: 26px; font-weight: 900; color: var(--gr-bom); z-index: 9998;
+      pointer-events: none; animation: grSobe .9s ease forwards; text-shadow: 0 2px 14px rgba(16,185,129,.5);
+    }
+    @keyframes grSobe { 0% { opacity: 0; transform: translate(-50%, -30%) scale(.6); } 20% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%, -140%) scale(1.1); } }
+  </style>
+</head>
+
+<body class="app" data-page="garagem">
+
+  <div id="sidebar-container"></div>
+  <div id="overlay" class="overlay" onclick="fecharMenu()"></div>
+
+  <main class="main">
+
+    <header class="header">
+      <div class="header__left">
+        <button class="btn btn--icon btn--menu" onclick="abrirMenu()" aria-label="Abrir menu">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+        <div>
+          <h1 class="header__title">Moto / Garagem</h1>
+          <p class="header__subtitle">Telemetria &amp; Manutenção</p>
+        </div>
+      </div>
+      <div class="header__actions">
+        <button class="btn" onclick="abrirSync()">
+          <i class="fa-solid fa-cloud-arrow-up" style="color: var(--accent)"></i>
+          <span>Backup</span>
+        </button>
+        <button class="btn btn--icon" id="btn-tema" onclick="Tema.alternar()" aria-label="Trocar tema">
+          <i class="fa-solid fa-moon"></i>
+        </button>
+      </div>
+    </header>
+
+    <div class="container fade-up">
+
+      <!-- ============ 1. PAINEL DA MOTO ============ -->
+      <div class="card gr-painel" style="margin-bottom: 22px;">
+
+        <!-- Foto / ilustração -->
+        <div class="gr-moto-foto" id="gr-foto"></div>
+
+        <!-- Identidade + specs -->
+        <div>
+          <div class="gr-km-box">
+            <span class="gr-km-label">Hodômetro atual</span>
+            <div class="gr-km-valor">
+              <b id="gr-km">0</b>
+              <span>km</span>
+              <button class="gr-km-edit" onclick="editarKm()" title="Atualizar quilometragem">
+                <i class="fa-solid fa-pen"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="gr-specs" id="gr-specs"></div>
+        </div>
+      </div>
+
+      <!-- ============ 2. ESTADO DAS PEÇAS ============ -->
+      <div class="card" style="margin-bottom: 22px;">
+        <div class="gr-card-head">
+          <h2 class="card__title"><i class="fa-solid fa-gauge-high"></i> Estado das peças</h2>
+          <button class="btn btn--primary gr-add-btn" onclick="abrirPeca()">
+            <i class="fa-solid fa-plus"></i> Peça
+          </button>
+        </div>
+        <div class="gr-grid-pecas" id="gr-pecas"></div>
+      </div>
+
+      <!-- ============ 3. RASTREADOR SEMANAL ============ -->
+      <div class="card" style="margin-bottom: 22px;">
+        <div class="gr-card-head">
+          <h2 class="card__title"><i class="fa-solid fa-calendar-week"></i> Cuidados da semana</h2>
+          <button class="btn btn--primary gr-add-btn" onclick="abrirItemSemanal()">
+            <i class="fa-solid fa-plus"></i> Cuidado
+          </button>
+        </div>
+
+        <div class="gr-nav">
+          <button class="gr-nav__btn" onclick="mudarSemana(-1)"><i class="fa-solid fa-chevron-left"></i></button>
+          <span class="gr-nav__label" id="gr-label-semana">—</span>
+          <button class="gr-nav__btn" onclick="mudarSemana(1)"><i class="fa-solid fa-chevron-right"></i></button>
+        </div>
+
+        <div id="gr-semanal"></div>
+
+        <div style="display:flex; justify-content:flex-end; margin-top:8px;">
+          <button class="btn" onclick="resetarSemana()" style="font-size:9px;">
+            <i class="fa-solid fa-rotate-left" style="color:var(--gr-medio)"></i> Resetar esta semana
+          </button>
+        </div>
+
+        <p style="font-size:9px; font-weight:800; text-transform:uppercase; letter-spacing:1px; color:var(--text-muted); margin-top:18px;">
+          Seu ano em semanas
+        </p>
+        <div class="gr-heat" id="gr-heat"></div>
+      </div>
+
+      <!-- ============ 4. RASTREADOR MENSAL ============ -->
+      <div class="card" style="margin-bottom: 22px;">
+        <div class="gr-card-head">
+          <h2 class="card__title"><i class="fa-solid fa-calendar-days"></i> Cuidados do mês</h2>
+          <div style="display:flex; gap:8px; align-items:center;">
+            <button class="gr-nav__btn" onclick="mudarAnoMensal(-1)"><i class="fa-solid fa-chevron-left"></i></button>
+            <span style="font-size:12px; font-weight:800;" id="gr-ano-mensal">—</span>
+            <button class="gr-nav__btn" onclick="mudarAnoMensal(1)"><i class="fa-solid fa-chevron-right"></i></button>
+            <button class="btn btn--primary gr-add-btn" onclick="abrirItemMensal()" style="margin-left:6px;">
+              <i class="fa-solid fa-plus"></i> Item
+            </button>
+          </div>
+        </div>
+        <div style="overflow-x:auto;">
+          <table class="gr-mensal-grid" id="gr-mensal"></table>
+        </div>
+      </div>
+
+      <!-- ============ 5. HISTÓRICO DE MANUTENÇÃO ============ -->
+      <div class="card">
+        <div class="gr-card-head">
+          <h2 class="card__title"><i class="fa-solid fa-screwdriver-wrench"></i> Histórico de manutenção</h2>
+          <button class="btn btn--primary gr-add-btn" onclick="abrirServico(null)">
+            <i class="fa-solid fa-plus"></i> Registro
+          </button>
+        </div>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; padding:12px 14px; background:var(--bg-soft); border:1px solid var(--border); border-radius:12px;">
+          <span style="font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:1px; color:var(--text-muted);">Total já investido na moto</span>
+          <b id="gr-total-gasto" style="font-size:18px; font-weight:900; color:var(--accent);">R$ 0</b>
+        </div>
+        <div id="gr-historico"></div>
+      </div>
+
+      <div id="footer-container"></div>
+    </div>
+  </main>
+
+  <!-- ===== Modal de backup — IGUAL em todas as páginas ===== -->
+  <div id="modal-sync" class="modal">
+    <div class="modal__box">
+      <div class="modal__head">
+        <h3><i class="fa-solid fa-cloud-arrow-up" style="color:var(--accent)"></i> Backup &amp; Transferência</h3>
+        <button class="modal__close" onclick="fecharSync()"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal__body">
+        <p>Sem nuvem por enquanto: use isto pra levar seus dados entre celular e computador.</p>
+        <button class="btn" onclick="exportarBackup()" style="width:100%; justify-content:center;">
+          <i class="fa-solid fa-download"></i> Exportar (baixar arquivo)
+        </button>
+        <input type="file" id="input-import" accept=".json" onchange="importarBackup(event)" style="display:none;">
+        <button class="btn btn--primary" onclick="document.getElementById('input-import').click()" style="width:100%; justify-content:center;">
+          <i class="fa-solid fa-upload"></i> Importar (restaurar backup)
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== MINI-MODAL GENÉRICO (prompt / confirm) ===== -->
+  <div id="gr-mini" class="gr-modal">
+    <div class="gr-modal__box">
+      <div class="gr-modal__head">
+        <h3 id="gr-mini-titulo"><i class="fa-solid fa-pen"></i> Editar</h3>
+        <button class="gr-modal__close" onclick="fecharMini()"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="gr-modal__body">
+        <p id="gr-mini-msg" style="display:none;"></p>
+        <input type="text" id="gr-mini-input" class="gr-input">
+        <div class="gr-modal__rodape">
+          <button class="btn" onclick="fecharMini()">Cancelar</button>
+          <button class="btn btn--primary" id="gr-mini-ok">Confirmar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== MODAL PEÇA (adicionar / editar) ===== -->
+  <div id="gr-modal-peca" class="gr-modal">
+    <div class="gr-modal__box">
+      <div class="gr-modal__head">
+        <h3 id="gr-peca-titulo"><i class="fa-solid fa-gear"></i> Nova peça</h3>
+        <button class="gr-modal__close" onclick="fecharPeca()"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="gr-modal__body">
+        <div class="gr-campo">
+          <label>Nome da peça / serviço</label>
+          <input type="text" id="pc-nome" class="gr-input" placeholder="Ex.: Óleo do motor">
+        </div>
+        <div class="gr-campo">
+          <label>Ícone (Font Awesome — opcional)</label>
+          <input type="text" id="pc-icone" class="gr-input" placeholder="Ex.: fa-oil-can">
+        </div>
+        <div class="gr-dupla">
+          <div class="gr-campo">
+            <label>Troca a cada (km)</label>
+            <input type="number" id="pc-km" class="gr-input" placeholder="Ex.: 1000">
+          </div>
+          <div class="gr-campo">
+            <label>Ou a cada (meses)</label>
+            <input type="number" id="pc-meses" class="gr-input" placeholder="Ex.: 6">
+          </div>
+        </div>
+        <div class="gr-dupla">
+          <div class="gr-campo">
+            <label>Km da última troca</label>
+            <input type="number" id="pc-kmult" class="gr-input" placeholder="Ex.: 17000">
+          </div>
+          <div class="gr-campo">
+            <label>Data da última troca</label>
+            <input type="date" id="pc-datault" class="gr-input">
+          </div>
+        </div>
+        <p style="font-size:11px;">Preencha km, meses, ou os dois. Quando preencher ambos, o estado considera o que <b>vencer primeiro</b>.</p>
+        <div class="gr-modal__rodape">
+          <button class="btn" id="gr-peca-del" onclick="excluirPecaAtual()" style="display:none; color:var(--gr-ruim); border-color:var(--gr-ruim);">
+            <i class="fa-solid fa-trash"></i>
+          </button>
+          <button class="btn btn--primary" onclick="salvarPeca()">Salvar peça</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== MODAL SERVIÇO / HISTÓRICO ===== -->
+  <div id="gr-modal-serv" class="gr-modal">
+    <div class="gr-modal__box">
+      <div class="gr-modal__head">
+        <h3><i class="fa-solid fa-screwdriver-wrench"></i> Registrar serviço</h3>
+        <button class="gr-modal__close" onclick="fecharServico()"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="gr-modal__body">
+        <div class="gr-dupla">
+          <div class="gr-campo">
+            <label>Data</label>
+            <input type="date" id="sv-data" class="gr-input">
+          </div>
+          <div class="gr-campo">
+            <label>Km no momento</label>
+            <input type="number" id="sv-km" class="gr-input">
+          </div>
+        </div>
+        <div class="gr-campo">
+          <label>Serviço feito / peça trocada</label>
+          <input type="text" id="sv-servico" class="gr-input" placeholder="Ex.: Troca de óleo e filtro">
+        </div>
+        <div class="gr-dupla">
+          <div class="gr-campo">
+            <label>Valor pago (R$)</label>
+            <input type="number" id="sv-valor" class="gr-input" placeholder="0">
+          </div>
+          <div class="gr-campo">
+            <label>Local / oficina</label>
+            <input type="text" id="sv-local" class="gr-input" placeholder="Ex.: Yamaha BH">
+          </div>
+        </div>
+        <p id="sv-aviso" style="font-size:11px; display:none;">
+          <i class="fa-solid fa-circle-info" style="color:var(--accent)"></i>
+          Ao salvar, o contador desta peça será zerado a partir destes dados.
+        </p>
+        <div class="gr-modal__rodape">
+          <button class="btn" onclick="fecharServico()">Cancelar</button>
+          <button class="btn btn--primary" onclick="salvarServico()">Salvar no histórico</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+  /* ===================================================================
+     GARAGEM · o cérebro só desta página
+     Tudo é guardado numa única chave "garagem" pelo Store (prefixo
+     planner_), exatamente como a página de Hábitos faz. Assim o backup
+     já leva os dados da moto junto, sem nenhum código extra.
+     =================================================================== */
+
+  /* ---------- 1. DADOS PADRÃO (a "semente") ----------
+     Já vem pré-cadastrado com os intervalos REAIS do manual da FZ25.
+     kmAtual = 17.400 e ~1.000 km/mês (você pode editar tudo na tela). */
+  const KM_INICIAL = 17400;
+
+  // Helper da semente: assume que a última troca aconteceu no múltiplo
+  // do intervalo logo abaixo do km atual. Dá um estado inicial crível
+  // que você depois corrige com a sua realidade.
+  function ultimaPorKm(intervalo) {
+    return Math.floor(KM_INICIAL / intervalo) * intervalo;
+  }
+  const HOJE_ISO = (() => {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  })();
+
+  const PADRAO = {
+    moto: {
+      modelo: 'Yamaha FZ25 (Fazer 250) ABS',
+      kmAtual: KM_INICIAL,
+      kmMes: 1000,
+      foto: null,
+      specs: [
+        { rotulo: 'Motor',          valor: '249 cc · monocilíndrico' },
+        { rotulo: 'Óleo',           valor: 'YAMALUBE 10W-40 · API SG+' },
+        { rotulo: 'Tanque',         valor: '14 L' },
+        { rotulo: 'Pressão pneus',  valor: '200 / 225 kPa (29/33 psi)' },
+        { rotulo: 'Folga corrente', valor: '40–45 mm' },
+        { rotulo: 'Placa',          valor: '—' },
+      ],
+    },
+    xp: 0,
+    // Peças: km (km), meses (tempo) — um pode ser null. Estado usa o pior dos dois.
+    pecas: [
+      { id: 'p_oleo',     nome: 'Óleo do motor',      icone: 'fa-oil-can',        km: 1000,  meses: 6,  kmUlt: ultimaPorKm(1000),  dataUlt: HOJE_ISO },
+      { id: 'p_filtroo',  nome: 'Filtro de óleo',     icone: 'fa-filter',         km: 1000,  meses: null, kmUlt: ultimaPorKm(1000), dataUlt: HOJE_ISO },
+      { id: 'p_vela',     nome: 'Vela de ignição',    icone: 'fa-bolt',           km: 10000, meses: null, kmUlt: ultimaPorKm(10000), dataUlt: HOJE_ISO },
+      { id: 'p_filtroar', nome: 'Filtro de ar',       icone: 'fa-wind',           km: 40000, meses: null, kmUlt: 0, dataUlt: HOJE_ISO },
+      { id: 'p_valvulas', nome: 'Folga das válvulas', icone: 'fa-gauge',          km: 10000, meses: null, kmUlt: ultimaPorKm(10000), dataUlt: HOJE_ISO },
+      { id: 'p_filtroc',  nome: 'Filtro de combustível', icone: 'fa-gas-pump',    km: 15000, meses: null, kmUlt: ultimaPorKm(15000), dataUlt: HOJE_ISO },
+      { id: 'p_pastd',    nome: 'Pastilhas dianteiras', icone: 'fa-record-vinyl', km: 15000, meses: null, kmUlt: ultimaPorKm(15000), dataUlt: HOJE_ISO },
+      { id: 'p_pastt',    nome: 'Pastilhas traseiras', icone: 'fa-record-vinyl',  km: 20000, meses: null, kmUlt: 0, dataUlt: HOJE_ISO },
+      { id: 'p_pneus',    nome: 'Pneus',              icone: 'fa-circle-notch',   km: 25000, meses: null, kmUlt: 0, dataUlt: HOJE_ISO },
+      { id: 'p_rolam',    nome: 'Rolamentos e direção', icone: 'fa-compass-drafting', km: 10000, meses: null, kmUlt: ultimaPorKm(10000), dataUlt: HOJE_ISO },
+      { id: 'p_fluido',   nome: 'Fluido de freio',    icone: 'fa-droplet',        km: null,  meses: 24, kmUlt: KM_INICIAL, dataUlt: HOJE_ISO },
+      { id: 'p_mangfreio',nome: 'Mangueira do freio', icone: 'fa-grip-lines',     km: null,  meses: 48, kmUlt: KM_INICIAL, dataUlt: HOJE_ISO },
+    ],
+    // Cuidados semanais (history[chaveSemana] = true)
+    semanal: [
+      { id: 's_corrente', nome: 'Lubrificar e verificar a corrente', history: {} },
+      { id: 's_pneu',     nome: 'Calibrar os pneus',                 history: {} },
+      { id: 's_freios',   nome: 'Verificar os freios',               history: {} },
+      { id: 's_tanque',   nome: 'Completar o tanque',                history: {} },
+    ],
+    // Cuidados mensais (history["AAAA-M"] = true)
+    mensal: [
+      { id: 'm_lavar',  nome: 'Lavar a moto', history: {} },
+      { id: 'm_filtro', nome: 'Limpar mangueira do filtro de ar', history: {} },
+      { id: 'm_geral',  nome: 'Conferir parafusos e fixações', history: {} },
+    ],
+    historico: [],
+  };
+
+  /* ---------- 2. CARREGAR + GARANTIR INTEGRIDADE ---------- */
+  let db = Store.ler('garagem', PADRAO);
+  // Garante que chaves novas existam mesmo em dados antigos (à prova de evolução)
+  if (!db.moto)      db.moto = PADRAO.moto;
+  if (!db.moto.specs) db.moto.specs = PADRAO.moto.specs;
+  if (typeof db.xp !== 'number') db.xp = 0;
+  ['pecas','semanal','mensal','historico'].forEach(k => { if (!Array.isArray(db[k])) db[k] = PADRAO[k]; });
+
+  function salvar() { Store.salvar('garagem', db); }
+
+  /* ---------- 3. FERRAMENTAS DE DATA ----------
+     Mesma lição da página de Hábitos: a chave do dia/semana vem do horário
+     LOCAL (getFullYear/Month/Date), nunca de toISOString() — senão, em BH
+     (UTC-3), algo marcado de noite cairia no dia errado. */
+  function dataChave(date) {
+    const a = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const d = String(date.getDate()).padStart(2, '0');
+    return `${a}-${m}-${d}`;
+  }
+  function inicioSemana(date) {
+    const d = new Date(date);
+    d.setHours(0, 0, 0, 0);
+    d.setDate(d.getDate() - d.getDay()); // volta até o domingo
+    return d;
+  }
+  const MESES = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+
+  /* ---------- 4. ESTADO DE NAVEGAÇÃO ---------- */
+  let semanaInicio = inicioSemana(new Date());
+  let anoMensal    = new Date().getFullYear();
+
+  /* ===================================================================
+     5. XP, NÍVEL E OFENSIVA (igualzinho à página de Hábitos)
+     A fórmula usa raiz quadrada: cada nível pede mais XP que o anterior,
+     dando aquela sensação gostosa de progressão de jogo.
+     =================================================================== */
+  function calcNivel(xp) {
+    if (xp < 0) xp = 0;
+    const lvl = Math.floor(Math.sqrt(xp / 10)) + 1;
+    const baseAtual = 10 * Math.pow(lvl - 1, 2);
+    const baseProx  = 10 * Math.pow(lvl, 2);
+    const progresso = ((xp - baseAtual) / (baseProx - baseAtual)) * 100;
+    return { lvl, baseProx, progresso };
+  }
+  function addXP(qtd) {
+    const nivelAntes = calcNivel(db.xp).lvl;
+    db.xp += qtd;
+    if (db.xp < 0) db.xp = 0;
+    salvar();
+    if (qtd > 0) {
+      popXP(qtd);
+      if (calcNivel(db.xp).lvl > nivelAntes) grConfete(); // subiu de nível? festa!
+    }
+  }
+  function popXP(qtd) {
+    const el = document.createElement('div');
+    el.className = 'gr-xp-pop';
+    el.textContent = `+${qtd} XP`;
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 900);
+  }
+
+  // Ofensiva = semanas seguidas (de hoje pra trás) com TODOS os cuidados feitos.
+  function calcOfensivaSemanal() {
+    if (db.semanal.length === 0) return 0;
+    const semanaCompleta = (chave) => db.semanal.every(item => item.history && item.history[chave]);
+    let streak = 0;
+    const d = inicioSemana(new Date());
+    if (semanaCompleta(dataChave(d))) streak++;
+    d.setDate(d.getDate() - 7);
+    while (semanaCompleta(dataChave(d))) { streak++; d.setDate(d.getDate() - 7); }
+    return streak;
+  }
+
+  /* ---------- CONFETE (canvas puro, sem biblioteca) ---------- */
+  function grConfete() {
+    const cores = ['#10b981', '#3b82f6', '#f59e0b', '#8b5cf6', '#ef4444'];
+    const canvas = document.createElement('canvas');
+    canvas.style.cssText = 'position:fixed;inset:0;pointer-events:none;z-index:9999';
+    canvas.width = innerWidth; canvas.height = innerHeight;
+    document.body.appendChild(canvas);
+    const ctx = canvas.getContext('2d');
+    const pecas = Array.from({ length: 90 }, () => ({
+      x: innerWidth / 2, y: innerHeight * 0.5,
+      vx: (Math.random() - 0.5) * 13, vy: Math.random() * -12 - 4,
+      g: 0.38 + Math.random() * 0.18, tam: 5 + Math.random() * 6,
+      cor: cores[Math.floor(Math.random() * cores.length)],
+      rot: Math.random() * Math.PI, vrot: (Math.random() - 0.5) * 0.3, vida: 1,
+    }));
+    let frame = 0;
+    (function loop() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      pecas.forEach(p => {
+        p.vy += p.g; p.x += p.vx; p.y += p.vy; p.rot += p.vrot; p.vida -= 0.012;
+        ctx.save(); ctx.globalAlpha = Math.max(p.vida, 0);
+        ctx.translate(p.x, p.y); ctx.rotate(p.rot);
+        ctx.fillStyle = p.cor; ctx.fillRect(-p.tam/2, -p.tam/2, p.tam, p.tam); ctx.restore();
+      });
+      frame++;
+      if (frame < 120) requestAnimationFrame(loop); else canvas.remove();
+    })();
+  }
+
+  /* ===================================================================
+     6. A INTELIGÊNCIA: estado de cada peça
+     Calcula o desgaste cruzando KM e TEMPO e fica com o PIOR dos dois.
+     Ex.: óleo vence "1.000 km OU 6 meses" — o que chegar primeiro manda.
+     =================================================================== */
+  function estadoPeca(p) {
+    let pctKm = null, pctTempo = null;
+
+    if (p.km) {
+      const rodado = db.moto.kmAtual - (p.kmUlt || 0);
+      pctKm = (rodado / p.km) * 100;
+    }
+    if (p.meses) {
+      const ini = p.dataUlt ? new Date(p.dataUlt + 'T00:00:00') : new Date();
+      const meses = (new Date() - ini) / (1000 * 60 * 60 * 24 * 30.44);
+      pctTempo = (meses / p.meses) * 100;
+    }
+
+    // pega o pior (maior %) entre os dois critérios
+    let pct = Math.max(pctKm ?? 0, pctTempo ?? 0);
+    let limiteFoi = (pctKm ?? -1) >= (pctTempo ?? -1) ? 'km' : 'tempo';
+    if (pct < 0) pct = 0;
+    const pctVisual = Math.min(pct, 100);
+
+    let cor = 'var(--gr-bom)', rotulo = 'Tranquilo';
+    if (pct >= 90)      { cor = 'var(--gr-ruim)';  rotulo = 'Trocar já'; }
+    else if (pct >= 70) { cor = 'var(--gr-medio)'; rotulo = 'De olho'; }
+
+    // Métrica principal e previsão
+    let metrica, unidade, prev = '—';
+    if (limiteFoi === 'km' && p.km) {
+      const restante = Math.max(0, p.km - (db.moto.kmAtual - (p.kmUlt || 0)));
+      metrica = restante.toLocaleString('pt-BR'); unidade = 'km restantes';
+      if (db.moto.kmMes > 0) {
+        const dias = restante / (db.moto.kmMes / 30);
+        const dp = new Date(); dp.setDate(dp.getDate() + dias);
+        prev = dias <= 0 ? 'agora' : dp.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' });
+      }
+    } else if (p.meses) {
+      const ini = p.dataUlt ? new Date(p.dataUlt + 'T00:00:00') : new Date();
+      const venc = new Date(ini); venc.setMonth(venc.getMonth() + p.meses);
+      const diasRest = Math.max(0, Math.round((venc - new Date()) / (1000*60*60*24)));
+      metrica = diasRest.toLocaleString('pt-BR'); unidade = 'dias restantes';
+      prev = venc.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: '2-digit' });
+    } else {
+      metrica = '—'; unidade = 'sem intervalo';
+    }
+
+    return { pct: pctVisual, cor, rotulo, metrica, unidade, prev };
+  }
+
+  // Saúde geral = a pior peça da garagem
+  function saudeGeral() {
+    let pior = 0;
+    db.pecas.forEach(p => { pior = Math.max(pior, estadoPeca(p).pct); });
+    if (pior >= 90) return { cor: 'var(--gr-ruim)',  texto: 'Manutenção exigida' };
+    if (pior >= 70) return { cor: 'var(--gr-medio)', texto: 'Requer atenção' };
+    return { cor: 'var(--gr-bom)', texto: 'Operacional' };
+  }
+
+  /* ===================================================================
+     7. RENDERIZAÇÃO
+     =================================================================== */
+  function renderTudo() {
+    renderMoto();
+    renderPecas();
+    renderSemanal();
+    renderMensal();
+    renderHistorico();
+  }
+
+  /* ---- 7.1 Painel da moto (foto + km + specs + selo) ---- */
+  // Ilustração genérica de uma naked cinza com detalhes verdes (placeholder
+  // até você subir a foto real). Não é o desenho oficial da Yamaha.
+  function svgMoto() {
+    return `
+      <svg viewBox="0 0 420 220" xmlns="http://www.w3.org/2000/svg" fill="none">
+        <!-- rodas -->
+        <circle cx="80" cy="165" r="42" stroke="#4b5563" stroke-width="9"/>
+        <circle cx="340" cy="165" r="42" stroke="#4b5563" stroke-width="9"/>
+        <circle cx="80" cy="165" r="20" stroke="var(--accent)" stroke-width="4"/>
+        <circle cx="340" cy="165" r="20" stroke="var(--accent)" stroke-width="4"/>
+        <circle cx="80" cy="165" r="5" fill="#6b7280"/>
+        <circle cx="340" cy="165" r="5" fill="#6b7280"/>
+        <!-- corpo / tanque / banco -->
+        <path d="M110 150 L150 120 L205 118 L235 95 L290 95 L300 120 L330 150"
+              stroke="#9aa3b2" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>
+        <path d="M150 120 Q185 92 235 95 L255 118 Q200 122 175 138 Z" fill="#6b7280"/>
+        <path d="M235 95 L290 95 L300 116 L250 118 Z" fill="var(--accent)" opacity="0.85"/>
+        <!-- carenagem dianteira / farol -->
+        <path d="M300 95 L322 105 L330 150 L308 138 Z" fill="#4b5563"/>
+        <circle cx="316" cy="108" r="7" fill="var(--accent)"/>
+        <!-- guidão -->
+        <path d="M300 95 L318 70 M312 70 L330 74" stroke="#9aa3b2" stroke-width="5" stroke-linecap="round"/>
+        <!-- escapamento -->
+        <path d="M150 150 L240 158 L300 168" stroke="#6b7280" stroke-width="7" stroke-linecap="round"/>
+        <!-- motor -->
+        <rect x="175" y="130" width="55" height="34" rx="6" fill="#3a4250"/>
+      </svg>`;
+  }
+
+  function renderMoto() {
+    // foto ou ilustração
+    const foto = document.getElementById('gr-foto');
+    const sg = saudeGeral();
+    const conteudo = db.moto.foto
+      ? `<img src="${db.moto.foto}" alt="Minha moto">`
+      : svgMoto();
+    foto.innerHTML = `
+      ${conteudo}
+      <div class="gr-foto-acoes">
+        <button class="gr-foto-btn" onclick="document.getElementById('gr-input-foto').click()" title="Enviar foto">
+          <i class="fa-solid fa-camera"></i>
+        </button>
+        ${db.moto.foto ? `<button class="gr-foto-btn" onclick="removerFoto()" title="Remover foto"><i class="fa-solid fa-xmark"></i></button>` : ''}
+      </div>
+      <input type="file" id="gr-input-foto" accept="image/*" style="display:none" onchange="enviarFoto(event)">
+      <div class="gr-selo">
+        <span class="gr-bolinha" style="background:${sg.cor}; box-shadow:0 0 8px ${sg.cor};"></span>
+        ${sg.texto}
+      </div>`;
+
+    // km
+    document.getElementById('gr-km').textContent = (db.moto.kmAtual || 0).toLocaleString('pt-BR');
+
+    // specs (editáveis no clique)
+    const specsEl = document.getElementById('gr-specs');
+    const modeloChip = `<div class="gr-spec" style="grid-column:1/-1;" onclick="editarModelo()">
+        <small>Modelo</small><b>${db.moto.modelo || '—'}</b></div>`;
+    specsEl.innerHTML = modeloChip + db.moto.specs.map((s, i) => `
+      <div class="gr-spec" onclick="editarSpec(${i})">
+        <small>${s.rotulo}</small><b>${s.valor}</b>
+      </div>`).join('') + `
+      <div class="gr-spec" onclick="editarKmMes()">
+        <small>Média mensal</small><b>${(db.moto.kmMes||0).toLocaleString('pt-BR')} km/mês</b>
+      </div>`;
+  }
+
+  /* ---- 7.2 Peças ---- */
+  function renderPecas() {
+    const el = document.getElementById('gr-pecas');
+    if (db.pecas.length === 0) { el.innerHTML = `<p class="gr-vazio">Nenhuma peça cadastrada. Clique em “+ Peça”.</p>`; return; }
+    el.innerHTML = db.pecas.map(p => {
+      const e = estadoPeca(p);
+      return `
+        <div class="gr-peca" style="--cor:${e.cor}">
+          <div class="gr-peca__top">
+            <span class="gr-peca__nome"><i class="fa-solid ${p.icone || 'fa-gear'}"></i> ${p.nome}</span>
+            <button class="gr-peca__edit" onclick="abrirPeca('${p.id}')"><i class="fa-solid fa-pen"></i></button>
+          </div>
+          <div class="gr-peca__metrica"><b>${e.metrica}</b><span>${e.unidade}</span></div>
+          <div class="gr-bar"><div class="gr-bar__fill" style="width:${e.pct}%"></div></div>
+          <div class="gr-peca__rodape">
+            <span>${e.rotulo}</span>
+            <span>Prev: <em>${e.prev}</em></span>
+          </div>
+          <button class="gr-peca__btn" onclick="registrarServicoPeca('${p.id}')">
+            <i class="fa-solid fa-check"></i> Fiz / Troquei
+          </button>
+        </div>`;
+    }).join('');
+  }
+
+  /* ---- 7.3 Rastreador semanal ---- */
+  function renderSemanal() {
+    // rótulo da semana
+    const fim = new Date(semanaInicio); fim.setDate(fim.getDate() + 6);
+    const fmt = d => `${String(d.getDate()).padStart(2,'0')}/${MESES[d.getMonth()]}`;
+    document.getElementById('gr-label-semana').textContent = `${fmt(semanaInicio)} — ${fmt(fim)}`;
+
+    const chave = dataChave(semanaInicio);
+    const lista = document.getElementById('gr-semanal');
+
+    if (db.semanal.length === 0) {
+      lista.innerHTML = `<p class="gr-vazio">Nenhum cuidado semanal. Clique em “+ Cuidado”.</p>`;
+    } else {
+      lista.innerHTML = db.semanal.map(item => {
+        const feito = item.history && item.history[chave];
+        return `
+          <div class="gr-check ${feito ? 'is-done' : ''}">
+            <div class="gr-check__box" onclick="toggleSemanal('${item.id}')"><i class="fa-solid fa-check"></i></div>
+            <span class="gr-check__nome" onclick="toggleSemanal('${item.id}')">${item.nome}</span>
+            <div class="gr-check__acoes">
+              <button onclick="editarItemSemanal('${item.id}')" title="Renomear"><i class="fa-solid fa-pen"></i></button>
+              <button class="danger" onclick="excluirItemSemanal('${item.id}')" title="Excluir"><i class="fa-solid fa-trash"></i></button>
+            </div>
+          </div>`;
+      }).join('');
+    }
+
+    renderHeat();
+  }
+
+  // Mapa de calor: 52 células = quão completa ficou cada semana do ano.
+  function renderHeat() {
+    const heat = document.getElementById('gr-heat');
+    const ano = new Date().getFullYear();
+    const total = db.semanal.length;
+    const chaveAtual = dataChave(semanaInicio);
+
+    // começa no primeiro domingo do ano
+    let d = inicioSemana(new Date(ano, 0, 1));
+    let html = '';
+    for (let i = 0; i < 52; i++) {
+      const ch = dataChave(d);
+      let feitas = 0;
+      db.semanal.forEach(it => { if (it.history && it.history[ch]) feitas++; });
+      let nivel = 0;
+      if (total > 0) {
+        const r = feitas / total;
+        nivel = r === 0 ? 0 : r < 0.5 ? 1 : r < 1 ? 2 : 3;
+      }
+      const atual = ch === chaveAtual ? 'is-atual' : '';
+      html += `<div class="gr-heat__cel ${atual}" data-nivel="${nivel}" title="Semana ${i+1}: ${feitas}/${total}"></div>`;
+      d.setDate(d.getDate() + 7);
+    }
+    heat.innerHTML = html;
+  }
+
+  /* ---- 7.4 Rastreador mensal (12 meses x itens) ---- */
+  function renderMensal() {
+    document.getElementById('gr-ano-mensal').textContent = anoMensal;
+    const tabela = document.getElementById('gr-mensal');
+    const mesAtual = new Date().getMonth();
+    const anoAtual = new Date().getFullYear();
+
+    if (db.mensal.length === 0) {
+      tabela.innerHTML = `<tr><td><p class="gr-vazio">Nenhum item mensal. Clique em “+ Item”.</p></td></tr>`;
+      return;
+    }
+
+    let cab = '<tr><th style="text-align:left; padding-left:8px;">Cuidado</th>';
+    MESES.forEach(m => cab += `<th>${m}</th>`);
+    cab += '</tr>';
+
+    const linhas = db.mensal.map(item => {
+      let tds = `<td class="nome">
+        ${item.nome}
+        <button onclick="editarItemMensal('${item.id}')" style="color:var(--text-muted); margin-left:4px;"><i class="fa-solid fa-pen" style="font-size:9px;"></i></button>
+        <button onclick="excluirItemMensal('${item.id}')" style="color:var(--text-muted); margin-left:2px;"><i class="fa-solid fa-trash" style="font-size:9px;"></i></button>
+      </td>`;
+      for (let m = 0; m < 12; m++) {
+        const ch = `${anoMensal}-${m}`;
+        const feito = item.history && item.history[ch];
+        const atual = (anoMensal === anoAtual && m === mesAtual) ? 'is-atual' : '';
+        tds += `<td class="cel">
+          <div class="gr-mensal-dot ${feito ? 'is-done' : ''} ${atual}" onclick="toggleMensal('${item.id}', ${m})"><i class="fa-solid fa-check"></i></div>
+        </td>`;
+      }
+      return `<tr>${tds}</tr>`;
+    }).join('');
+
+    tabela.innerHTML = cab + linhas;
+  }
+
+  /* ---- 7.5 Histórico ---- */
+  function renderHistorico() {
+    const el = document.getElementById('gr-historico');
+    const lista = [...db.historico].sort((a, b) => (b.data || '').localeCompare(a.data || ''));
+    const total = db.historico.reduce((s, h) => s + (Number(h.valor) || 0), 0);
+    document.getElementById('gr-total-gasto').textContent =
+      'R$ ' + total.toLocaleString('pt-BR', { minimumFractionDigits: 0 });
+
+    if (lista.length === 0) { el.innerHTML = `<p class="gr-vazio">Nenhum serviço registrado ainda. Cada troca que você anotar vira história aqui.</p>`; return; }
+
+    el.innerHTML = lista.map(h => {
+      const data = h.data ? new Date(h.data + 'T00:00:00').toLocaleDateString('pt-BR') : '—';
+      const km = h.km ? `${Number(h.km).toLocaleString('pt-BR')} km` : '';
+      const local = h.local ? ` · ${h.local}` : '';
+      return `
+        <div class="gr-hist-item">
+          <div class="gr-hist-icone"><i class="fa-solid fa-wrench"></i></div>
+          <div class="gr-hist-info">
+            <b>${h.servico || 'Serviço'}</b>
+            <small>${data}${km ? ' · ' + km : ''}${local}</small>
+          </div>
+          <div class="gr-hist-valor">
+            <b>R$ ${(Number(h.valor)||0).toLocaleString('pt-BR')}</b>
+            <button onclick="excluirHistorico('${h.id}')"><i class="fa-solid fa-trash"></i></button>
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  /* ===================================================================
+     8. AÇÕES — PAINEL DA MOTO
+     =================================================================== */
+  function editarKm() {
+    grPrompt('Atualizar hodômetro', 'Km atual', db.moto.kmAtual, (v) => {
+      const n = parseInt(v.replace(/\D/g, ''), 10);
+      if (!isNaN(n)) { db.moto.kmAtual = n; salvar(); renderTudo(); }
+    });
+  }
+  function editarKmMes() {
+    grPrompt('Média mensal de rodagem', 'Km por mês', db.moto.kmMes, (v) => {
+      const n = parseInt(v.replace(/\D/g, ''), 10);
+      if (!isNaN(n)) { db.moto.kmMes = n; salvar(); renderTudo(); }
+    });
+  }
+  function editarModelo() {
+    grPrompt('Modelo da moto', 'Modelo', db.moto.modelo, (v) => { db.moto.modelo = v; salvar(); renderMoto(); });
+  }
+  function editarSpec(i) {
+    grPrompt(`Editar “${db.moto.specs[i].rotulo}”`, 'Valor', db.moto.specs[i].valor, (v) => {
+      db.moto.specs[i].valor = v; salvar(); renderMoto();
+    });
+  }
+  function enviarFoto(ev) {
+    const arq = ev.target.files[0]; if (!arq) return;
+    const r = new FileReader();
+    r.onload = e => { db.moto.foto = e.target.result; salvar(); renderMoto(); };
+    r.readAsDataURL(arq);
+  }
+  function removerFoto() {
+    grConfirm('Remover foto?', 'A ilustração genérica volta no lugar.', () => { db.moto.foto = null; salvar(); renderMoto(); });
+  }
+
+  /* ===================================================================
+     9. AÇÕES — PEÇAS
+     =================================================================== */
+  let pecaEditandoId = null;
+  function abrirPeca(id = null) {
+    pecaEditandoId = id;
+    const p = id ? db.pecas.find(x => x.id === id) : null;
+    document.getElementById('gr-peca-titulo').innerHTML = `<i class="fa-solid fa-gear"></i> ${p ? 'Editar peça' : 'Nova peça'}`;
+    document.getElementById('pc-nome').value    = p ? p.nome : '';
+    document.getElementById('pc-icone').value   = p ? (p.icone || '') : '';
+    document.getElementById('pc-km').value       = p && p.km ? p.km : '';
+    document.getElementById('pc-meses').value    = p && p.meses ? p.meses : '';
+    document.getElementById('pc-kmult').value    = p && p.kmUlt != null ? p.kmUlt : db.moto.kmAtual;
+    document.getElementById('pc-datault').value  = p && p.dataUlt ? p.dataUlt : HOJE_ISO;
+    document.getElementById('gr-peca-del').style.display = p ? 'inline-flex' : 'none';
+    document.getElementById('gr-modal-peca').classList.add('is-open');
+  }
+  function fecharPeca() { document.getElementById('gr-modal-peca').classList.remove('is-open'); }
+  function salvarPeca() {
+    const nome = document.getElementById('pc-nome').value.trim();
+    if (!nome) return;
+    const dados = {
+      nome,
+      icone:  document.getElementById('pc-icone').value.trim() || 'fa-gear',
+      km:     parseInt(document.getElementById('pc-km').value, 10) || null,
+      meses:  parseInt(document.getElementById('pc-meses').value, 10) || null,
+      kmUlt:  parseInt(document.getElementById('pc-kmult').value, 10) || 0,
+      dataUlt: document.getElementById('pc-datault').value || HOJE_ISO,
+    };
+    if (pecaEditandoId) {
+      Object.assign(db.pecas.find(x => x.id === pecaEditandoId), dados);
+    } else {
+      db.pecas.push({ id: 'p_' + Date.now(), ...dados });
+    }
+    salvar(); fecharPeca(); renderPecas(); renderMoto();
+  }
+  function excluirPecaAtual() {
+    if (!pecaEditandoId) return;
+    grConfirm('Excluir peça?', 'Ela some do estado da moto (o histórico continua intacto).', () => {
+      db.pecas = db.pecas.filter(x => x.id !== pecaEditandoId);
+      salvar(); fecharPeca(); renderPecas(); renderMoto();
+    });
+  }
+
+  /* ===================================================================
+     10. AÇÕES — RASTREADOR SEMANAL
+     =================================================================== */
+  function mudarSemana(dir) { semanaInicio.setDate(semanaInicio.getDate() + dir * 7); renderSemanal(); }
+  function toggleSemanal(id) {
+    const item = db.semanal.find(x => x.id === id);
+    const ch = dataChave(semanaInicio);
+    if (!item.history) item.history = {};
+    const estava = !!item.history[ch];
+    if (estava) delete item.history[ch]; else item.history[ch] = true;
+    salvar();
+    addXP(estava ? -2 : 2);   // +2 ao cumprir, -2 se desmarcar
+    renderSemanal();
+  }
+  function resetarSemana() {
+    grConfirm('Resetar esta semana?', 'Desmarca todos os cuidados da semana exibida.', () => {
+      const ch = dataChave(semanaInicio);
+      db.semanal.forEach(it => { if (it.history) delete it.history[ch]; });
+      salvar(); renderSemanal();
+    });
+  }
+  function abrirItemSemanal() {
+    grPrompt('Novo cuidado semanal', 'Ex.: Verificar nível do óleo', '', (v) => {
+      db.semanal.push({ id: 's_' + Date.now(), nome: v, history: {} });
+      salvar(); renderSemanal();
+    });
+  }
+  function editarItemSemanal(id) {
+    const item = db.semanal.find(x => x.id === id);
+    grPrompt('Renomear cuidado', 'Nome', item.nome, (v) => { item.nome = v; salvar(); renderSemanal(); });
+  }
+  function excluirItemSemanal(id) {
+    const item = db.semanal.find(x => x.id === id);
+    grConfirm('Excluir cuidado?', `“${item.nome}” e todo o histórico dele serão removidos.`, () => {
+      db.semanal = db.semanal.filter(x => x.id !== id);
+      salvar(); renderSemanal();
+    });
+  }
+
+  /* ===================================================================
+     11. AÇÕES — RASTREADOR MENSAL
+     =================================================================== */
+  function mudarAnoMensal(dir) { anoMensal += dir; renderMensal(); }
+  function toggleMensal(id, mes) {
+    const item = db.mensal.find(x => x.id === id);
+    const ch = `${anoMensal}-${mes}`;
+    if (!item.history) item.history = {};
+    const estava = !!item.history[ch];
+    if (estava) delete item.history[ch]; else item.history[ch] = true;
+    salvar();
+    addXP(estava ? -3 : 3);   // cuidado mensal vale um pouco mais de XP
+    renderMensal();
+  }
+  function abrirItemMensal() {
+    grPrompt('Novo cuidado mensal', 'Ex.: Trocar óleo', '', (v) => {
+      db.mensal.push({ id: 'm_' + Date.now(), nome: v, history: {} });
+      salvar(); renderMensal();
+    });
+  }
+  function editarItemMensal(id) {
+    const item = db.mensal.find(x => x.id === id);
+    grPrompt('Renomear item', 'Nome', item.nome, (v) => { item.nome = v; salvar(); renderMensal(); });
+  }
+  function excluirItemMensal(id) {
+    const item = db.mensal.find(x => x.id === id);
+    grConfirm('Excluir item?', `“${item.nome}” e o histórico dele serão removidos.`, () => {
+      db.mensal = db.mensal.filter(x => x.id !== id);
+      salvar(); renderMensal();
+    });
+  }
+
+  /* ===================================================================
+     12. AÇÕES — HISTÓRICO / SERVIÇO
+     =================================================================== */
+  let servicoPecaId = null; // se veio do botão "Fiz/Troquei" de uma peça
+  function abrirServico(pecaId) {
+    servicoPecaId = pecaId;
+    document.getElementById('sv-data').value = HOJE_ISO;
+    document.getElementById('sv-km').value = db.moto.kmAtual;
+    document.getElementById('sv-servico').value = '';
+    document.getElementById('sv-valor').value = '';
+    document.getElementById('sv-local').value = '';
+    document.getElementById('sv-aviso').style.display = pecaId ? 'block' : 'none';
+    document.getElementById('gr-modal-serv').classList.add('is-open');
+  }
+  function registrarServicoPeca(pecaId) {
+    const p = db.pecas.find(x => x.id === pecaId);
+    abrirServico(pecaId);
+    document.getElementById('sv-servico').value = p ? p.nome : '';
+  }
+  function fecharServico() { document.getElementById('gr-modal-serv').classList.remove('is-open'); }
+  function salvarServico() {
+    const servico = document.getElementById('sv-servico').value.trim();
+    if (!servico) return;
+    const km = parseInt(document.getElementById('sv-km').value, 10) || db.moto.kmAtual;
+    const data = document.getElementById('sv-data').value || HOJE_ISO;
+
+    db.historico.push({
+      id: 'h_' + Date.now(),
+      data, km, servico,
+      valor: parseFloat(document.getElementById('sv-valor').value) || 0,
+      local: document.getElementById('sv-local').value.trim(),
+    });
+
+    // Se veio de uma peça, zera o contador dela com estes dados
+    if (servicoPecaId) {
+      const p = db.pecas.find(x => x.id === servicoPecaId);
+      if (p) { p.kmUlt = km; p.dataUlt = data; }
+    }
+    // Mantém o hodômetro coerente: se registrei um km maior, atualizo a moto
+    if (km > db.moto.kmAtual) db.moto.kmAtual = km;
+
+    salvar(); fecharServico(); renderTudo();
+  }
+  function excluirHistorico(id) {
+    grConfirm('Apagar registro?', 'Some do histórico e do total investido.', () => {
+      db.historico = db.historico.filter(x => x.id !== id);
+      salvar(); renderHistorico();
+    });
+  }
+
+  /* ===================================================================
+     13. MINI-MODAIS (substituem prompt/confirm/alert nativos)
+     =================================================================== */
+  function abrirMini()  { document.getElementById('gr-mini').classList.add('is-open'); }
+  function fecharMini() { document.getElementById('gr-mini').classList.remove('is-open'); }
+
+  function grPrompt(titulo, placeholder, valor, aoConfirmar) {
+    document.getElementById('gr-mini-titulo').innerHTML = `<i class="fa-solid fa-pen"></i> ${titulo}`;
+    document.getElementById('gr-mini-msg').style.display = 'none';
+    const input = document.getElementById('gr-mini-input');
+    input.style.display = 'block';
+    input.placeholder = placeholder || '';
+    input.value = (valor !== undefined && valor !== null) ? valor : '';
+    const ok = document.getElementById('gr-mini-ok');
+    ok.textContent = 'Confirmar';
+    const confirmar = () => { const v = String(input.value).trim(); if (v !== '') aoConfirmar(v); fecharMini(); };
+    ok.onclick = confirmar;
+    input.onkeydown = (e) => { if (e.key === 'Enter') confirmar(); };
+    abrirMini();
+    setTimeout(() => input.focus(), 60);
+  }
+  function grConfirm(titulo, mensagem, aoConfirmar) {
+    document.getElementById('gr-mini-titulo').innerHTML = `<i class="fa-solid fa-triangle-exclamation" style="color:var(--gr-medio)"></i> ${titulo}`;
+    const msg = document.getElementById('gr-mini-msg');
+    msg.style.display = 'block'; msg.textContent = mensagem;
+    document.getElementById('gr-mini-input').style.display = 'none';
+    const ok = document.getElementById('gr-mini-ok');
+    ok.textContent = 'Confirmar';
+    ok.onclick = () => { aoConfirmar(); fecharMini(); };
+    abrirMini();
+  }
+
+  /* ---------- PARTIDA ---------- */
+  renderTudo();
+  </script>
+</body>
+</html>
