@@ -126,33 +126,32 @@
     .rt-podio-val--up { color: var(--rt-feito); }
     .rt-podio-val--down { color: var(--rt-falho); }
 
-    /* Gráfico "barras turbinadas": cor por desempenho, números fixos e linha de meta */
-    .rt-chart { position: relative; display: flex; gap: 8px; margin-top: 8px; }
+    /* Gráfico de barras finas (tipo "pílula"): pista sutil + barra colorida por desempenho */
+    .rt-chart { position: relative; display: flex; gap: 6px; margin-top: 14px; }
     .rt-chart__col { flex: 1; display: flex; flex-direction: column; align-items: center; }
-    .rt-chart__pct { font-size: 11px; font-weight: 800; height: 18px; line-height: 18px; }
+    .rt-chart__pct { font-size: 11px; font-weight: 700; height: 16px; line-height: 16px; color: var(--text-muted); }
     .rt-chart__track {
-      width: 100%; height: 100px;
-      background: var(--bg); border: 1px solid var(--border);
-      border-radius: 8px 8px 4px 4px;
+      width: 9px; height: 110px;
+      background: var(--bg-soft); border-radius: 99px;
       display: flex; align-items: flex-end; overflow: hidden;
     }
-    .rt-chart__bar { width: 100%; transition: height .6s cubic-bezier(.2,.8,.2,1); }
+    .rt-chart__bar { width: 100%; border-radius: 99px; transition: height .7s cubic-bezier(.2,.8,.2,1); }
     .rt-chart__bar--forte { background: var(--rt-feito); }
     .rt-chart__bar--medio { background: var(--rt-medio); }
     .rt-chart__bar--fraco { background: var(--rt-fraco); }
     .rt-chart__bar--full  { background: linear-gradient(180deg, #34d399, var(--rt-feito)); }
     .rt-chart__day {
-      font-size: 9px; font-weight: 800; text-transform: uppercase;
-      letter-spacing: 1px; color: var(--text-muted); margin-top: 6px;
+      font-size: 9px; font-weight: 700;
+      letter-spacing: .5px; color: var(--text-muted); margin-top: 8px;
     }
-    /* Linha de meta (80%): 18px do rótulo + 20% da pista de 100px = 38px do topo */
+    /* Linha de meta (80%): 16px do rótulo + 20% da pista de 110px = 38px do topo */
     .rt-chart__meta {
-      position: absolute; left: 0; right: 0; top: 38px;
-      border-top: 1px dashed var(--text-muted); opacity: .45; pointer-events: none;
+      position: absolute; left: 4px; right: 4px; top: 38px;
+      border-top: 1px dashed var(--border); pointer-events: none;
     }
     .rt-chart__meta span {
       position: absolute; right: 0; top: -8px;
-      font-size: 8px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;
+      font-size: 8px; font-weight: 700; letter-spacing: .5px;
       color: var(--text-muted); background: var(--panel); padding: 0 5px;
     }
     .rt-chart-media {
@@ -210,21 +209,22 @@
       padding: 5px 10px; border-radius: 7px; transition: all .15s;
     }
     .rt-rotina {
-      display: flex; justify-content: space-between; align-items: center;
-      padding: 8px; border-radius: 10px; border: 1px solid transparent;
+      display: flex; justify-content: space-between; align-items: flex-start;
+      gap: 8px; padding: 9px 8px; border-radius: 10px; border: 1px solid transparent;
       transition: all .15s;
     }
     .rt-rotina:hover { background: var(--bg); border-color: var(--border); }
-    .rt-rotina__left { display: flex; align-items: center; gap: 10px; min-width: 0; }
+    .rt-rotina__left { display: flex; align-items: flex-start; gap: 10px; min-width: 0; flex: 1; }
     .rt-check {
-      width: 22px; height: 22px; border-radius: 6px; flex-shrink: 0;
+      width: 22px; height: 22px; border-radius: 6px; flex-shrink: 0; margin-top: 1px;
       border: 2px solid var(--border); background: var(--bg);
       display: grid; place-items: center; cursor: pointer;
       color: transparent; font-size: 11px; transition: all .15s;
     }
     .rt-rotina__txt {
-      font-size: 12px; font-weight: 700; text-transform: uppercase;
-      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px;
+      flex: 1; min-width: 0;
+      font-size: 13px; font-weight: 600; line-height: 1.45;
+      overflow-wrap: anywhere;
     }
     .rt-rotina__txt--done { color: var(--text-muted); text-decoration: line-through; opacity: .6; }
     .rt-del {
@@ -265,8 +265,8 @@
       width: 30%; display: flex; align-items: center; justify-content: space-between; gap: 6px;
     }
     .rt-habito__nome span {
-      font-size: 11px; font-weight: 900; text-transform: uppercase;
-      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      font-size: 12px; font-weight: 600; line-height: 1.35;
+      overflow-wrap: anywhere;
     }
     .rt-habito__dias { flex: 1; display: grid; grid-template-columns: repeat(7,1fr); gap: 6px; }
     .rt-cell {
@@ -648,7 +648,7 @@
     const diaCompleto = (chave) => {
       let feitas = 0;
       ['manha', 'tarde', 'noite'].forEach(p =>
-        db.rotinas[p].forEach(r => { if (r.history && r.history[chave]) feitas++; })
+        db.rotinas[p].forEach(r => { if (r.history && r.history[chave] === 1) feitas++; })
       );
       return feitas === total;
     };
@@ -753,17 +753,22 @@
       }
 
       lista.innerHTML = itens.map((r, idx) => {
-        const feito = r.history && r.history[chave];
-        const estiloCheck = feito
+        // Estado numérico: 1 = feito, -1 = falhou, 0/ausente = vazio
+        const estado = (r.history && r.history[chave]) || 0;
+        const estiloCheck = estado === 1
           ? `background:${cores[periodo]};border-color:${cores[periodo]};color:#fff`
-          : '';
+          : estado === -1
+            ? `background:#ef4444;border-color:#ef4444;color:#fff`
+            : '';
+        const icone = estado === -1 ? 'fa-xmark' : 'fa-check';
+        const iconeVisivel = estado !== 0 ? `<i class="fa-solid ${icone}"></i>` : '';
         return `
           <div class="rt-rotina">
             <div class="rt-rotina__left">
               <div class="rt-check" style="${estiloCheck}" onclick="toggleRotina('${periodo}',${idx})">
-                <i class="fa-solid fa-check"></i>
+                ${iconeVisivel}
               </div>
-              <span class="rt-rotina__txt ${feito ? 'rt-rotina__txt--done' : ''}" title="${r.txt}">${r.txt}</span>
+              <span class="rt-rotina__txt ${estado === 1 ? 'rt-rotina__txt--done' : ''}" title="${r.txt}">${r.txt}</span>
             </div>
             <button class="rt-del" onclick="delRotina('${periodo}',${idx})"><i class="fa-solid fa-xmark"></i></button>
           </div>`;
@@ -783,14 +788,13 @@
     const chave = dataChave(dataDia);
     const r = db.rotinas[periodo][idx];
     r.history = r.history || {};
-    if (!r.history[chave]) {
-      r.history[chave] = true;
-      addXP(5);
-      rtConfete();
-    } else {
-      delete r.history[chave];
-      addXP(-5);
-    }
+    const estado = r.history[chave] || 0;
+
+    // Ciclo: 0 (vazio) → 1 (feito, +5 XP, confete) → -1 (falhou, -5 XP) → 0 (vazio)
+    if (estado === 0)       { r.history[chave] = 1;  addXP(5);  rtConfete(); }
+    else if (estado === 1)  { r.history[chave] = -1; addXP(-5); }
+    else                    { delete r.history[chave]; }
+
     salvar(); renderTudo();
   }
 
@@ -873,14 +877,8 @@
   }
 
   // --- GRÁFICO (% de rotinas + hábitos feitos por dia da semana) ---
-  // Cada barra é colorida pelo desempenho do dia (forte/médio/fraco),
-  // com o número sempre visível e uma linha de meta tracejada em 80%.
-  function corDesempenho(pct) {
-    if (pct >= 80) return 'var(--rt-feito)';
-    if (pct >= 50) return 'var(--rt-medio)';
-    return 'var(--rt-falho)';
-  }
-
+  // Barra fina por dia, colorida pelo desempenho (forte/médio/fraco),
+  // com o número acima e uma linha de meta tracejada em 80%.
   function renderGrafico() {
     const chart = document.getElementById('chart-bars');
     let html = '';
@@ -894,7 +892,7 @@
       const total = db.rotinas.manha.length + db.rotinas.tarde.length + db.rotinas.noite.length + db.habitos.length;
       let feitos = 0;
       ['manha', 'tarde', 'noite'].forEach(p =>
-        db.rotinas[p].forEach(r => { if (r.history && r.history[chave]) feitos++; })
+        db.rotinas[p].forEach(r => { if (r.history && r.history[chave] === 1) feitos++; })
       );
       db.habitos.forEach(h => { if (h.history && h.history[chave] === 1) feitos++; });
 
@@ -909,7 +907,7 @@
 
       html += `
         <div class="rt-chart__col">
-          <span class="rt-chart__pct" style="color:${corDesempenho(pct)}">${pct}%</span>
+          <span class="rt-chart__pct">${pct}%</span>
           <div class="rt-chart__track">
             <div class="rt-chart__bar ${classe}" style="height:${pct}%"></div>
           </div>

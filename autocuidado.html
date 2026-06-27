@@ -9,100 +9,107 @@
   <link rel="stylesheet" href="style.css">
 
   <!-- ===================================================================
-       ESTILOS SÓ DESTA PÁGINA
-       Tudo aqui usa as variáveis de cor do style.css (var(--...)) pra
-       acompanhar o tema claro/escuro sozinho. Prefixo "ac-" (autocuidado)
-       pra não colidir com classes de outras páginas.
+       ESTILOS SÓ DESTA PÁGINA  (prefixo "ac-" pra não colidir)
+       Filosofia visual: painel de controle. Poucas cores, e a cor só
+       aparece quando CARREGA SIGNIFICADO (status): vermelho = atrasado,
+       âmbar = atenção, verde = em dia, cinza = neutro.
        =================================================================== -->
   <style>
-    /* ---- Banner estoico + números do topo ---- */
-    .ac-banner { display:flex; flex-wrap:wrap; gap:18px; align-items:center; justify-content:space-between; margin-bottom:20px; }
-    .ac-banner__tit { font-size:13px; font-weight:900; text-transform:uppercase; letter-spacing:1.5px; display:flex; align-items:center; gap:8px; }
-    .ac-banner__tit i { color:var(--accent); }
-    .ac-banner__sub { font-size:12px; font-weight:600; color:var(--text-muted); line-height:1.6; margin-top:8px; max-width:560px; }
-    .ac-stats { display:flex; gap:10px; }
-    .ac-stat { background:var(--bg-soft); border:1px solid var(--border); border-radius:14px; padding:12px 16px; text-align:center; min-width:74px; }
-    .ac-stat__num { display:block; font-size:24px; font-weight:900; color:var(--text-strong); line-height:1; }
-    .ac-stat__lbl { display:block; font-size:9px; font-weight:800; text-transform:uppercase; letter-spacing:1.5px; color:var(--text-muted); margin-top:6px; }
+    /* ---------- DASHBOARD ---------- */
+    .ac-dash { margin-bottom:20px; }
+    .ac-dash__top { display:flex; gap:22px; align-items:center; flex-wrap:wrap; }
 
-    /* ---- Barra de ações ---- */
-    .ac-toolbar { display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-bottom:22px; }
-    .ac-toolbar__sep { flex:1; }
-
-    /* ---- Grade de cards de área ---- */
-    .ac-grid { display:grid; gap:20px; grid-template-columns:1fr; }
-    @media (min-width:780px) { .ac-grid { grid-template-columns:repeat(auto-fill, minmax(320px, 1fr)); } }
-
-    /* ---- Card de área ----
-       A cor da área entra como a variável --ac-cor (setada no HTML do card).
-       Assim a mesma regra de CSS serve pra qualquer cor que você escolher. */
-    .ac-card {
-      background:var(--panel); border:1px solid var(--border);
-      border-top:3px solid var(--ac-cor, var(--accent));
-      border-radius:16px; padding:20px; box-shadow:var(--shadow);
-      display:flex; flex-direction:column;
+    /* Anel de score: um círculo "preenchido" por gradiente cônico.
+       --p = porcentagem (0–100) e --cor = a cor conforme o score. */
+    .ring {
+      position:relative; width:108px; height:108px; border-radius:50%; flex-shrink:0;
+      background: conic-gradient(var(--cor, var(--accent)) calc(var(--p,0) * 3.6deg), var(--border) 0);
     }
-    .ac-card__head { display:flex; align-items:center; justify-content:space-between; gap:10px; padding-bottom:14px; margin-bottom:16px; border-bottom:1px solid var(--border); }
-    .ac-card__id { display:flex; align-items:center; gap:11px; min-width:0; }
-    .ac-card__icone {
-      width:38px; height:38px; border-radius:11px; display:grid; place-items:center; font-size:16px; flex-shrink:0;
-      color:var(--ac-cor, var(--accent));
-      background:color-mix(in srgb, var(--ac-cor, var(--accent)) 14%, transparent);
-    }
-    .ac-card__nome { font-size:13px; font-weight:800; text-transform:uppercase; letter-spacing:.5px; color:var(--text-strong); line-height:1.2; overflow:hidden; text-overflow:ellipsis; }
+    .ring__hole { position:absolute; inset:10px; border-radius:50%; background:var(--panel); display:grid; place-items:center; text-align:center; }
+    .ring__num { font-size:26px; font-weight:900; line-height:1; }
+    .ring__lbl { font-size:8px; font-weight:800; text-transform:uppercase; letter-spacing:1.5px; color:var(--text-muted); margin-top:4px; }
 
-    /* ---- Seções dentro do card ---- */
-    .ac-secao { margin-bottom:16px; }
-    .ac-secao--arsenal { margin-top:auto; padding-top:14px; border-top:1px dashed var(--border); margin-bottom:0; }
-    .ac-secao__topo { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; gap:8px; }
-    .ac-secao__titulo { font-size:9px; font-weight:800; text-transform:uppercase; letter-spacing:1.5px; color:var(--text-muted); display:flex; align-items:center; gap:6px; }
-    .ac-add {
-      font-size:9px; font-weight:800; text-transform:uppercase; letter-spacing:1px; flex-shrink:0;
-      color:var(--ac-cor, var(--accent));
-      background:color-mix(in srgb, var(--ac-cor, var(--accent)) 12%, transparent);
-      padding:5px 9px; border-radius:7px; transition:filter .15s;
-    }
-    .ac-add:hover { filter:brightness(1.15); }
-    .ac-add--ghost { color:var(--text-muted); background:var(--bg-soft); border:1px solid var(--border); }
-    .ac-add--ghost:hover { color:var(--text-strong); }
+    .ac-tiles { display:grid; grid-template-columns:repeat(3, 1fr); gap:12px; flex:1; min-width:240px; }
+    .ac-tile { background:var(--bg-soft); border:1px solid var(--border); border-radius:12px; padding:13px 14px; }
+    .ac-tile__num { font-size:21px; font-weight:900; line-height:1; }
+    .ac-tile__lbl { font-size:9px; font-weight:800; text-transform:uppercase; letter-spacing:1px; color:var(--text-muted); margin-top:5px; }
+    .ac-tile__hint { font-size:12px; font-weight:800; color:var(--text-strong); margin-top:5px; line-height:1.25; overflow:hidden; text-overflow:ellipsis; }
 
-    .ac-lista { display:flex; flex-direction:column; gap:8px; }
+    /* Score por categoria (mini-barras) */
+    .ac-catscores { margin-top:18px; padding-top:16px; border-top:1px solid var(--border); display:grid; grid-template-columns:1fr 1fr; gap:12px 26px; }
+    .ac-catscore { display:grid; grid-template-columns:1fr auto; align-items:center; gap:5px 10px; }
+    .ac-catscore__nome { font-size:11px; font-weight:700; color:var(--text-muted); display:flex; align-items:center; gap:7px; min-width:0; }
+    .ac-catscore__nome i { width:14px; text-align:center; }
+    .ac-catscore__pct { font-size:11px; font-weight:900; }
+    .ac-csbar { grid-column:1 / -1; height:6px; border-radius:99px; background:var(--bg-soft); overflow:hidden; }
+    .ac-csbar i { display:block; height:100%; border-radius:99px; transition:width .3s; }
 
-    /* ---- Item de cuidado (ação + frequência) ---- */
-    .ac-item { display:flex; align-items:flex-start; justify-content:space-between; gap:8px; padding:11px 12px; background:var(--bg-soft); border:1px solid var(--border); border-radius:11px; }
-    .ac-item__txt { min-width:0; }
-    .ac-item__acao { font-size:12px; font-weight:700; color:var(--text-strong); line-height:1.35; margin-bottom:7px; }
-    .ac-item__obs { font-size:11px; font-weight:600; color:var(--text-muted); line-height:1.45; margin-top:7px; }
-    .ac-item__acoes { display:flex; gap:6px; flex-shrink:0; }
+    /* ---------- BARRA: alternar visão + ações ---------- */
+    .ac-bar { display:flex; flex-wrap:wrap; gap:12px; align-items:center; justify-content:space-between; margin-bottom:16px; }
+    .ac-views { display:inline-flex; background:var(--bg-soft); border:1px solid var(--border); border-radius:10px; padding:3px; gap:3px; }
+    .ac-view { padding:8px 14px; border-radius:8px; font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.5px; color:var(--text-muted); display:inline-flex; align-items:center; gap:7px; transition:all .15s; }
+    .ac-view.is-active { background:var(--accent); color:#fff; box-shadow:var(--glow); }
+    .ac-bar__acoes { display:flex; flex-wrap:wrap; gap:8px; }
 
-    /* ---- Item de produto (arsenal) ---- */
-    .ac-prod { display:flex; align-items:center; justify-content:space-between; gap:8px; padding:8px 10px; border-radius:10px; border:1px solid transparent; transition:background .15s, border-color .15s; }
-    .ac-prod:hover { background:var(--bg-soft); border-color:var(--border); }
-    .ac-prod__nome { font-size:12px; font-weight:700; color:var(--text-strong); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-    .ac-prod__dir { display:flex; align-items:center; gap:6px; flex-shrink:0; }
+    /* Filtros de categoria (só na visão Por categoria) */
+    .ac-filtros { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:16px; }
+    .ac-chip { padding:7px 12px; border-radius:99px; background:var(--bg-soft); border:1px solid var(--border); font-size:11px; font-weight:700; color:var(--text-muted); display:inline-flex; align-items:center; gap:7px; transition:all .15s; }
+    .ac-chip.is-active { color:var(--text-strong); border-color:var(--accent); }
 
-    /* Pílula de status do produto: "Em casa" (verde) x "Comprar" (âmbar) */
-    .ac-status { display:inline-flex; align-items:center; gap:5px; font-size:9px; font-weight:800; text-transform:uppercase; letter-spacing:.8px; padding:5px 9px; border-radius:7px; transition:all .15s; }
-    .ac-status--casa { color:var(--accent); background:var(--accent-soft); border:1px solid transparent; }
-    .ac-status--casa:hover { border-color:var(--accent); }
-    .ac-status--comprar { color:#f59e0b; background:rgba(245,158,11,.12); border:1px solid rgba(245,158,11,.3); }
-    .ac-status--comprar:hover { background:#f59e0b; color:#fff; }
+    /* ---------- LINHA DE CUIDADO ---------- */
+    .ac-grupo-tit { font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:1.5px; color:var(--text-muted); margin-bottom:12px; }
+    .ac-row { display:flex; align-items:center; gap:12px; padding:11px 12px; background:var(--bg-soft); border:1px solid var(--border); border-radius:11px; margin-bottom:8px; flex-wrap:wrap; }
+    .ac-row__main { flex:1; min-width:160px; }
+    .ac-row__nome { font-size:13px; font-weight:700; color:var(--text-strong); line-height:1.3; }
+    .ac-row__meta { font-size:10px; font-weight:700; color:var(--text-muted); margin-top:5px; display:flex; flex-wrap:wrap; gap:4px 10px; align-items:center; }
+    .ac-row__meta i { margin-right:3px; }
+    .ac-row__dir { display:flex; align-items:center; gap:6px; flex-shrink:0; flex-wrap:wrap; justify-content:flex-end; }
 
-    /* Etiqueta de frequência */
-    .badge { display:inline-block; font-size:9px; font-weight:800; text-transform:uppercase; letter-spacing:.8px; padding:4px 9px; border-radius:7px; background:var(--panel); border:1px solid var(--border); color:var(--text-muted); }
+    /* Bolinha de prioridade */
+    .prio { width:9px; height:9px; border-radius:99px; flex-shrink:0; display:inline-block; }
+    .prio--alta { background:#ef4444; }
+    .prio--media { background:#f59e0b; }
+    .prio--baixa { background:var(--text-muted); opacity:.45; }
 
-    /* Botõezinhos de ação (editar / arquivar / excluir) */
-    .mini { width:28px; height:28px; border-radius:8px; background:var(--panel); border:1px solid var(--border); color:var(--text-muted); display:grid; place-items:center; font-size:11px; transition:all .15s; flex-shrink:0; }
+    /* Etiqueta de status */
+    .st { font-size:9px; font-weight:800; text-transform:uppercase; letter-spacing:.6px; padding:4px 9px; border-radius:7px; white-space:nowrap; }
+    .st--atrasado { background:rgba(239,68,68,.14); color:#ef4444; border:1px solid rgba(239,68,68,.3); }
+    .st--hoje     { background:rgba(245,158,11,.15); color:#f59e0b; border:1px solid rgba(245,158,11,.3); }
+    .st--proximo  { background:var(--bg-soft); color:var(--text-muted); border:1px solid var(--border); }
+    .st--emdia    { background:var(--accent-soft); color:var(--accent); border:1px solid transparent; }
+    .st--pendente { background:var(--bg-soft); color:var(--text-muted); border:1px dashed var(--border); }
+    .st--livre    { background:var(--bg-soft); color:var(--text-muted); border:1px solid var(--border); }
+
+    /* Botão "Feito" */
+    .ac-feito { display:inline-flex; align-items:center; gap:6px; padding:7px 11px; border-radius:8px; background:var(--accent); color:#fff; font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:.5px; transition:filter .15s; }
+    .ac-feito:hover { filter:brightness(1.1); }
+    .ac-feito--done { background:var(--bg-soft); color:var(--text-muted); border:1px solid var(--border); }
+
+    /* Botõezinhos de ação */
+    .mini { width:30px; height:30px; border-radius:8px; background:var(--panel); border:1px solid var(--border); color:var(--text-muted); display:grid; place-items:center; font-size:11px; transition:all .15s; flex-shrink:0; }
     .mini:hover { color:var(--text-strong); border-color:var(--accent); }
     .mini--perigo:hover { color:#ef4444; border-color:#ef4444; }
 
+    .badge { display:inline-block; font-size:9px; font-weight:800; text-transform:uppercase; letter-spacing:.8px; padding:4px 9px; border-radius:7px; background:var(--panel); border:1px solid var(--border); color:var(--text-muted); }
+
+    /* ---------- CARD DE CATEGORIA (visão Por categoria) ---------- */
+    .ac-catcard { background:var(--panel); border:1px solid var(--border); border-radius:16px; padding:18px; box-shadow:var(--shadow); margin-bottom:16px; }
+    .ac-catcard__head { display:flex; align-items:center; gap:12px; margin-bottom:14px; }
+    .ac-catcard__icone { width:40px; height:40px; border-radius:11px; background:var(--bg-soft); border:1px solid var(--border); display:grid; place-items:center; color:var(--text-muted); font-size:16px; flex-shrink:0; }
+    .ac-catcard__nome { font-size:14px; font-weight:800; line-height:1.2; }
+    .ac-catcard__count { font-size:10px; color:var(--text-muted); font-weight:700; margin-top:3px; }
+    .ac-add { font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:.5px; color:var(--accent); background:var(--accent-soft); padding:7px 11px; border-radius:8px; flex-shrink:0; transition:filter .15s; }
+    .ac-add:hover { filter:brightness(1.12); }
+    .ac-subtit { font-size:9px; font-weight:800; text-transform:uppercase; letter-spacing:1.5px; color:var(--text-muted); margin:16px 0 10px; padding-bottom:6px; border-bottom:1px solid var(--border); }
+
     /* Estados vazios */
     .ac-vazio-mini { font-size:11px; font-weight:600; font-style:italic; color:var(--text-muted); padding:6px 2px; }
-    .ac-vazio { grid-column:1 / -1; text-align:center; padding:60px 20px; color:var(--text-muted); }
-    .ac-vazio i { font-size:40px; opacity:.4; margin-bottom:14px; }
-    .ac-vazio p { font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:1px; margin-bottom:18px; }
+    .ac-tudoemdia { text-align:center; padding:54px 20px; }
+    .ac-tudoemdia i { font-size:46px; color:var(--accent); margin-bottom:16px; }
+    .ac-tudoemdia h3 { font-size:16px; font-weight:800; }
+    .ac-tudoemdia p { font-size:12px; color:var(--text-muted); margin-top:8px; max-width:380px; margin-inline:auto; line-height:1.5; }
 
-    /* ---- Campos de formulário dos modais ---- */
+    /* ---------- CAMPOS DOS MODAIS ---------- */
     .campo { margin-bottom:16px; }
     .campo__label { display:flex; justify-content:space-between; align-items:center; font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:1.5px; color:var(--text-muted); margin-bottom:8px; }
     .campo__input, .campo__select, .campo__area {
@@ -110,58 +117,62 @@
       color:var(--text-strong); font-family:inherit; font-size:13px; font-weight:600; outline:none; transition:border-color .15s;
     }
     .campo__input:focus, .campo__select:focus, .campo__area:focus { border-color:var(--accent); }
-    .campo__area { resize:vertical; min-height:80px; }
-    /* Os seletores nativos (cor) acompanham o tema do site */
-    :root[data-theme="dark"]  .campo__input { color-scheme:dark; }
-    :root[data-theme="light"] .campo__input { color-scheme:light; }
+    .campo__area { resize:vertical; min-height:74px; }
+    .campo--dupla { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+    /* Seletores nativos (data) acompanham o tema */
+    :root[data-theme="dark"]  .campo__input, :root[data-theme="dark"]  .campo__select { color-scheme:dark; }
+    :root[data-theme="light"] .campo__input, :root[data-theme="light"] .campo__select { color-scheme:light; }
 
-    /* Rodapé dos modais: botões alinhados à direita numa linha */
     .ac-modal-rodape { flex-direction:row !important; justify-content:flex-end; gap:10px; border-top:1px solid var(--border); }
 
-    /* Seletor de ícone + cor da área */
-    .ac-area-form { display:grid; grid-template-columns:1fr auto; gap:12px; align-items:center; }
-    .ac-area-preview { width:48px; height:48px; border-radius:12px; display:grid; place-items:center; font-size:19px; flex-shrink:0; }
-    .ac-cor-input { width:48px; height:46px; padding:4px; cursor:pointer; }
+    /* Bloco de info (só leitura) no topo da edição */
+    .ac-info { background:var(--bg-soft); border:1px solid var(--border); border-radius:10px; padding:11px 13px; margin-bottom:16px; display:flex; gap:20px; flex-wrap:wrap; align-items:center; }
+    .ac-info__item span { display:block; font-size:9px; text-transform:uppercase; letter-spacing:1px; color:var(--text-muted); font-weight:800; margin-bottom:4px; }
+    .ac-info__item { font-size:12px; font-weight:700; }
 
-    /* Linhas dentro de "Áreas" e "Arquivados" */
-    .ac-area-linha { display:flex; align-items:center; justify-content:space-between; gap:10px; padding:11px 12px; background:var(--bg-soft); border:1px solid var(--border); border-radius:11px; margin-bottom:8px; }
-    .ac-area-linha__id { display:flex; align-items:center; gap:11px; min-width:0; }
-    .ac-area-linha__nome { font-size:12px; font-weight:800; color:var(--text-strong); }
-    .ac-area-linha__meta { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.5px; color:var(--text-muted); margin-top:3px; }
-    .ac-mini-icone { width:34px; height:34px; border-radius:9px; display:grid; place-items:center; font-size:14px; flex-shrink:0; }
+    /* Linhas de "Gerenciar categorias" / "Arquivados" / "Histórico" */
+    .ac-linha { display:flex; align-items:center; justify-content:space-between; gap:10px; padding:11px 12px; background:var(--bg-soft); border:1px solid var(--border); border-radius:11px; margin-bottom:8px; }
+    .ac-linha__id { display:flex; align-items:center; gap:11px; min-width:0; }
+    .ac-linha__nome { font-size:12px; font-weight:800; color:var(--text-strong); }
+    .ac-linha__meta { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.5px; color:var(--text-muted); margin-top:3px; }
+    .ac-mini-icone { width:34px; height:34px; border-radius:9px; display:grid; place-items:center; font-size:14px; flex-shrink:0; background:var(--panel); border:1px solid var(--border); color:var(--text-muted); }
     .ac-risco { text-decoration:line-through; opacity:.55; }
     .ac-cofre-tit { font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:1.5px; color:var(--text-muted); margin-bottom:10px; padding-bottom:6px; border-bottom:1px solid var(--border); }
 
-    /* Modais altos rolam por dentro (importante no celular) */
-    .modal__box--scroll { max-height:90dvh; overflow-y:auto; }
+    /* Gerenciador de subcategorias (dentro de editar categoria) */
+    .ac-subadd { display:flex; gap:8px; }
+    .ac-subadd .campo__input { flex:1; }
+    .ac-subchips { display:flex; flex-wrap:wrap; gap:7px; margin-top:10px; }
+    .ac-subchip { display:inline-flex; align-items:center; gap:8px; padding:6px 11px; border-radius:99px; background:var(--bg-soft); border:1px solid var(--border); font-size:11px; font-weight:700; }
+    .ac-subchip button { color:var(--text-muted); font-size:11px; }
+    .ac-subchip button:hover { color:#ef4444; }
 
-    /* Mensagem do modal de confirmação */
+    .modal__box--scroll { max-height:90dvh; overflow-y:auto; }
     .ac-confirma-msg { font-size:14px; font-weight:600; color:var(--text-strong); line-height:1.5; }
 
-    /* Aviso flutuante (toast) que substitui o alert() do navegador */
-    .ac-toast {
-      position:fixed; bottom:20px; right:20px; z-index:200;
-      display:flex; align-items:center; gap:9px;
-      background:var(--panel); border:1px solid var(--border); color:var(--text-strong);
-      padding:12px 16px; border-radius:12px; font-size:12px; font-weight:700; box-shadow:var(--shadow);
-      max-width:calc(100vw - 40px);
-      transform:translateY(140%); opacity:0; transition:transform .3s ease, opacity .3s ease;
-    }
+    /* Aviso flutuante (substitui o alert) */
+    .ac-toast { position:fixed; bottom:20px; right:20px; z-index:200; display:flex; align-items:center; gap:9px; background:var(--panel); border:1px solid var(--border); color:var(--text-strong); padding:12px 16px; border-radius:12px; font-size:12px; font-weight:700; box-shadow:var(--shadow); max-width:calc(100vw - 40px); transform:translateY(140%); opacity:0; transition:transform .3s ease, opacity .3s ease; }
     .ac-toast.is-open { transform:translateY(0); opacity:1; }
     .ac-toast i { color:var(--accent); }
 
-    /* ---- Ajustes de celular ---- */
+    /* ---------- CELULAR ---------- */
     @media (max-width:640px) {
+      .ac-tiles { grid-template-columns:1fr 1fr; }
+      .ac-tiles .ac-tile:last-child { grid-column:1 / -1; }
+      .ac-catscores { grid-template-columns:1fr; gap:10px; }
+      .ac-views { width:100%; }
+      .ac-view { flex:1; justify-content:center; }
+      .ac-bar__acoes { width:100%; }
+      .ac-bar__acoes .btn { flex:1; justify-content:center; }
+      .ac-filtros { flex-wrap:nowrap; overflow-x:auto; scrollbar-width:none; padding-bottom:4px; }
+      .ac-filtros::-webkit-scrollbar { display:none; }
+      .ac-chip { flex-shrink:0; }
       .mini { width:32px; height:32px; font-size:12px; }
-      .ac-stats { width:100%; }
-      .ac-stat { flex:1; }
-      .ac-toolbar .btn { flex:1; justify-content:center; }
-      .ac-toolbar__sep { display:none; }
+      .campo--dupla { grid-template-columns:1fr; }
     }
   </style>
 </head>
 
-<!-- data-page="autocuidado" diz ao app.js qual item do menu acender -->
 <body class="app" data-page="autocuidado">
 
   <div id="sidebar-container"></div>
@@ -176,7 +187,7 @@
         </button>
         <div>
           <h1 class="header__title">Autocuidado</h1>
-          <p class="header__subtitle">O Playbook da Sua Melhor Versão</p>
+          <p class="header__subtitle">Manutenção Preventiva da Sua Melhor Versão</p>
         </div>
       </div>
       <div class="header__actions">
@@ -192,43 +203,34 @@
 
     <div class="container fade-up">
 
-      <!-- ======= BANNER ESTOICO + RESUMO ======= -->
-      <div class="ac-banner card">
-        <div>
-          <h2 class="ac-banner__tit"><i class="fa-solid fa-shield-halved"></i> Padrão inegociável</h2>
-          <p class="ac-banner__sub">
-            A motivação oscila, mas o sistema permanece. Nos dias bons, com intenção;
-            nos dias ruins, no automático — mas sempre. Aqui ficam as regras que mantêm
-            você sempre apresentável.
-          </p>
+      <!-- Dashboard (montado pelo JS) -->
+      <div id="ac-dash"></div>
+
+      <!-- Barra de visão + ações -->
+      <div class="ac-bar">
+        <div class="ac-views">
+          <button id="vw-hoje" class="ac-view" onclick="setVista('hoje')"><i class="fa-solid fa-bolt"></i> Hoje</button>
+          <button id="vw-cat" class="ac-view" onclick="setVista('cat')"><i class="fa-solid fa-layer-group"></i> Por categoria</button>
         </div>
-        <div class="ac-stats">
-          <div class="ac-stat"><span class="ac-stat__num" id="ac-num-cuidados">0</span><span class="ac-stat__lbl">Cuidados</span></div>
-          <div class="ac-stat"><span class="ac-stat__num" id="ac-num-comprar">0</span><span class="ac-stat__lbl">Comprar</span></div>
-          <div class="ac-stat"><span class="ac-stat__num" id="ac-num-areas">0</span><span class="ac-stat__lbl">Áreas</span></div>
+        <div class="ac-bar__acoes">
+          <button class="btn btn--primary" onclick="abrirNovoCuidado()"><i class="fa-solid fa-plus"></i> Novo cuidado</button>
+          <button class="btn" onclick="abrirCats()"><i class="fa-solid fa-list"></i> Categorias</button>
+          <button class="btn" onclick="abrirCofre()"><i class="fa-solid fa-box-archive"></i> Arquivados</button>
         </div>
       </div>
 
-      <!-- ======= BARRA DE AÇÕES ======= -->
-      <div class="ac-toolbar">
-        <button class="btn btn--primary" onclick="abrirNovoCuidado()"><i class="fa-solid fa-plus"></i> Novo cuidado</button>
-        <button class="btn" onclick="abrirNovoProduto()"><i class="fa-solid fa-spray-can-sparkles"></i> Novo produto</button>
-        <span class="ac-toolbar__sep"></span>
-        <button class="btn" onclick="abrirAreas()"><i class="fa-solid fa-layer-group"></i> Áreas</button>
-        <button class="btn" onclick="abrirCofre()"><i class="fa-solid fa-box-archive"></i> Arquivados</button>
-      </div>
+      <!-- Filtros de categoria (só na visão Por categoria) -->
+      <div class="ac-filtros" id="ac-filtros"></div>
 
-      <!-- ======= GRADE DE ÁREAS (montada pelo JS) ======= -->
-      <div class="ac-grid" id="ac-grid"></div>
+      <!-- Conteúdo (Hoje OU Por categoria) -->
+      <div id="ac-conteudo"></div>
 
     </div>
 
     <div id="footer-container"></div>
   </main>
 
-  <!-- ===================================================================
-       MODAL DE BACKUP — IGUAL em todas as páginas (vem do app.js)
-       =================================================================== -->
+  <!-- ====== MODAL DE BACKUP (igual em todas as páginas) ====== -->
   <div id="modal-sync" class="modal">
     <div class="modal__box">
       <div class="modal__head">
@@ -248,40 +250,63 @@
     </div>
   </div>
 
-  <!-- ===================================================================
-       MODAL: NOVO / EDITAR CUIDADO
-       =================================================================== -->
+  <!-- ====== MODAL: NOVO / EDITAR CUIDADO ====== -->
   <div id="modal-cuidado" class="modal" onclick="fundoModal(event,'modal-cuidado')">
     <div class="modal__box modal__box--scroll">
       <div class="modal__head">
-        <h3 id="ac-cuidado-titulo"><i class="fa-solid fa-list-check" style="color:var(--accent)"></i> Novo cuidado</h3>
+        <h3 id="ac-c-titulo"><i class="fa-solid fa-plus" style="color:var(--accent)"></i> Novo cuidado</h3>
         <button class="modal__close" onclick="fechar('modal-cuidado')"><i class="fa-solid fa-xmark"></i></button>
       </div>
       <div class="modal__body">
-        <input type="hidden" id="ac-cuidado-id">
+        <input type="hidden" id="ac-c-id">
+
+        <div class="ac-info" id="ac-c-info" style="display:none"></div>
+
         <div class="campo">
-          <label class="campo__label">Área</label>
-          <select id="ac-cuidado-area" class="campo__select"></select>
+          <label class="campo__label">Nome do cuidado</label>
+          <input id="ac-c-nome" class="campo__input" placeholder="Ex: Hidratar o rosto" maxlength="120">
         </div>
-        <div class="campo">
-          <label class="campo__label">O que fazer</label>
-          <input id="ac-cuidado-acao" class="campo__input" placeholder="Ex: Hidratar o rosto" maxlength="120">
+
+        <div class="campo--dupla">
+          <div class="campo">
+            <label class="campo__label">Categoria</label>
+            <select id="ac-c-cat" class="campo__select" onchange="onCatChange()"></select>
+          </div>
+          <div class="campo" id="ac-c-sub-campo">
+            <label class="campo__label">Subcategoria</label>
+            <select id="ac-c-sub" class="campo__select"></select>
+          </div>
         </div>
-        <div class="campo">
-          <label class="campo__label">Frequência</label>
-          <input id="ac-cuidado-freq" class="campo__input" list="ac-freqs" placeholder="Ex: Diário, Semanal, 1x ao mês" maxlength="60">
-          <datalist id="ac-freqs">
-            <option value="Diário"></option>
-            <option value="Diário (manhã e noite)"></option>
-            <option value="Semanal"></option>
-            <option value="Quinzenal"></option>
-            <option value="1x ao mês"></option>
-            <option value="A cada 3 meses"></option>
-          </datalist>
+
+        <div class="campo--dupla">
+          <div class="campo">
+            <label class="campo__label">Frequência</label>
+            <select id="ac-c-freq" class="campo__select"></select>
+          </div>
+          <div class="campo">
+            <label class="campo__label">Prioridade</label>
+            <select id="ac-c-prio" class="campo__select">
+              <option value="alta">Alta</option>
+              <option value="media" selected>Média</option>
+              <option value="baixa">Baixa</option>
+            </select>
+          </div>
         </div>
+
+        <div class="campo--dupla">
+          <div class="campo">
+            <label class="campo__label">Tempo estimado (min)</label>
+            <input id="ac-c-tempo" class="campo__input" type="number" min="0" placeholder="Ex: 5">
+          </div>
+          <div class="campo">
+            <label class="campo__label">Última execução</label>
+            <input id="ac-c-ultima" class="campo__input" type="date">
+          </div>
+        </div>
+
         <div class="campo">
-          <label class="campo__label">Observação <span style="font-weight:600;text-transform:none;letter-spacing:0">(opcional)</span></label>
-          <textarea id="ac-cuidado-obs" class="campo__area" placeholder="Marca do produto, dica, lembrete..."></textarea>
+          <label class="campo__label">Observações <span style="font-weight:600;text-transform:none;letter-spacing:0">(opcional)</span></label>
+          <textarea id="ac-c-obs" class="campo__area" placeholder="Marca do produto, técnica, lembrete..."></textarea>
         </div>
       </div>
       <div class="modal__body ac-modal-rodape">
@@ -291,94 +316,69 @@
     </div>
   </div>
 
-  <!-- ===================================================================
-       MODAL: NOVO / EDITAR PRODUTO
-       =================================================================== -->
-  <div id="modal-produto" class="modal" onclick="fundoModal(event,'modal-produto')">
+  <!-- ====== MODAL: GERENCIAR CATEGORIAS ====== -->
+  <div id="modal-cats" class="modal" onclick="fundoModal(event,'modal-cats')">
     <div class="modal__box modal__box--scroll">
       <div class="modal__head">
-        <h3 id="ac-produto-titulo"><i class="fa-solid fa-spray-can-sparkles" style="color:var(--accent)"></i> Novo produto</h3>
-        <button class="modal__close" onclick="fechar('modal-produto')"><i class="fa-solid fa-xmark"></i></button>
+        <h3><i class="fa-solid fa-list" style="color:var(--accent)"></i> Categorias</h3>
+        <button class="modal__close" onclick="fechar('modal-cats')"><i class="fa-solid fa-xmark"></i></button>
       </div>
       <div class="modal__body">
-        <input type="hidden" id="ac-produto-id">
-        <div class="campo">
-          <label class="campo__label">Área</label>
-          <select id="ac-produto-area" class="campo__select"></select>
-        </div>
-        <div class="campo">
-          <label class="campo__label">Nome do produto</label>
-          <input id="ac-produto-nome" class="campo__input" placeholder="Ex: Sabonete facial" maxlength="80">
-        </div>
-        <div class="campo">
-          <label class="campo__label">Situação</label>
-          <select id="ac-produto-status" class="campo__select">
-            <option value="casa">Tenho em casa</option>
-            <option value="comprar">Preciso comprar</option>
-          </select>
-        </div>
-      </div>
-      <div class="modal__body ac-modal-rodape">
-        <button class="btn" onclick="fechar('modal-produto')">Cancelar</button>
-        <button class="btn btn--primary" onclick="salvarProduto()"><i class="fa-solid fa-check"></i> Salvar</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ===================================================================
-       MODAL: NOVA / EDITAR ÁREA
-       =================================================================== -->
-  <div id="modal-area" class="modal" onclick="fundoModal(event,'modal-area')">
-    <div class="modal__box modal__box--scroll">
-      <div class="modal__head">
-        <h3 id="ac-area-titulo"><i class="fa-solid fa-layer-group" style="color:var(--accent)"></i> Nova área</h3>
-        <button class="modal__close" onclick="fechar('modal-area')"><i class="fa-solid fa-xmark"></i></button>
-      </div>
-      <div class="modal__body">
-        <input type="hidden" id="ac-area-id">
-        <div class="campo">
-          <label class="campo__label">Nome da área</label>
-          <input id="ac-area-nome" class="campo__input" placeholder="Ex: Cabelo & Barba" maxlength="40">
-        </div>
-        <div class="campo">
-          <label class="campo__label">Ícone & cor</label>
-          <div class="ac-area-form">
-            <select id="ac-area-icone" class="campo__select" onchange="atualizarPreviewIcone()"></select>
-            <div style="display:flex; gap:8px; align-items:center;">
-              <input type="color" id="ac-area-cor" class="campo__input ac-cor-input" value="#10b981" oninput="atualizarPreviewIcone()">
-              <span class="ac-area-preview" id="ac-area-preview"></span>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="modal__body ac-modal-rodape">
-        <button class="btn" onclick="fechar('modal-area')">Cancelar</button>
-        <button class="btn btn--primary" onclick="salvarArea()"><i class="fa-solid fa-check"></i> Salvar</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ===================================================================
-       MODAL: GERENCIAR ÁREAS (lista + adicionar)
-       =================================================================== -->
-  <div id="modal-areas" class="modal" onclick="fundoModal(event,'modal-areas')">
-    <div class="modal__box modal__box--scroll">
-      <div class="modal__head">
-        <h3><i class="fa-solid fa-layer-group" style="color:var(--accent)"></i> Áreas do corpo</h3>
-        <button class="modal__close" onclick="fechar('modal-areas')"><i class="fa-solid fa-xmark"></i></button>
-      </div>
-      <div class="modal__body">
-        <button class="btn btn--primary" style="width:100%; justify-content:center;" onclick="abrirNovaArea()">
-          <i class="fa-solid fa-plus"></i> Nova área
+        <button class="btn btn--primary" style="width:100%; justify-content:center;" onclick="abrirNovaCat()">
+          <i class="fa-solid fa-plus"></i> Nova categoria
         </button>
-        <div id="ac-lista-areas"></div>
+        <div id="ac-lista-cats"></div>
       </div>
     </div>
   </div>
 
-  <!-- ===================================================================
-       MODAL: ARQUIVADOS (o "cofre")
-       =================================================================== -->
+  <!-- ====== MODAL: NOVA / EDITAR CATEGORIA ====== -->
+  <div id="modal-catedit" class="modal" onclick="fundoModal(event,'modal-catedit')">
+    <div class="modal__box modal__box--scroll">
+      <div class="modal__head">
+        <h3 id="ac-cat-titulo"><i class="fa-solid fa-layer-group" style="color:var(--accent)"></i> Nova categoria</h3>
+        <button class="modal__close" onclick="fechar('modal-catedit')"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal__body">
+        <input type="hidden" id="ac-cat-id">
+        <div class="campo">
+          <label class="campo__label">Nome</label>
+          <input id="ac-cat-nome" class="campo__input" placeholder="Ex: Pele" maxlength="40">
+        </div>
+        <div class="campo">
+          <label class="campo__label">Ícone</label>
+          <select id="ac-cat-icone" class="campo__select"></select>
+        </div>
+        <div class="campo">
+          <label class="campo__label">Subcategorias <span style="font-weight:600;text-transform:none;letter-spacing:0">(opcional)</span></label>
+          <div class="ac-subadd">
+            <input id="ac-cat-subinput" class="campo__input" placeholder="Ex: Rosto" maxlength="30" onkeydown="if(event.key==='Enter'){event.preventDefault();addSubEdit();}">
+            <button class="btn" onclick="addSubEdit()"><i class="fa-solid fa-plus"></i></button>
+          </div>
+          <div class="ac-subchips" id="ac-cat-subs"></div>
+        </div>
+      </div>
+      <div class="modal__body ac-modal-rodape">
+        <button class="btn" onclick="fechar('modal-catedit')">Cancelar</button>
+        <button class="btn btn--primary" onclick="salvarCat()"><i class="fa-solid fa-check"></i> Salvar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== MODAL: HISTÓRICO DE EXECUÇÃO ====== -->
+  <div id="modal-historico" class="modal" onclick="fundoModal(event,'modal-historico')">
+    <div class="modal__box modal__box--scroll">
+      <div class="modal__head">
+        <h3><i class="fa-solid fa-clock-rotate-left" style="color:var(--accent)"></i> <span id="ac-hist-titulo">Histórico</span></h3>
+        <button class="modal__close" onclick="fechar('modal-historico')"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal__body">
+        <div id="ac-hist-lista"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== MODAL: ARQUIVADOS ====== -->
   <div id="modal-cofre" class="modal" onclick="fundoModal(event,'modal-cofre')">
     <div class="modal__box modal__box--scroll">
       <div class="modal__head">
@@ -391,9 +391,7 @@
     </div>
   </div>
 
-  <!-- ===================================================================
-       MODAL: CONFIRMAÇÃO (substitui o confirm() do navegador)
-       =================================================================== -->
+  <!-- ====== MODAL: CONFIRMAÇÃO (substitui o confirm) ====== -->
   <div id="modal-confirma" class="modal" onclick="fundoModal(event,'modal-confirma')">
     <div class="modal__box">
       <div class="modal__head">
@@ -412,95 +410,729 @@
     </div>
   </div>
 
-  <!-- Aviso flutuante -->
   <div id="ac-toast" class="ac-toast"></div>
 
   <script src="app.js"></script>
   <script>
     /* =================================================================
-       AUTOCUIDADO — comportamento SÓ desta página
-       O app.js já cuidou da sidebar, do tema e do backup. Aqui a gente
-       só cuida dos dados de autocuidado: áreas, cuidados e produtos.
+       AUTOCUIDADO — painel de manutenção preventiva
+       O app.js já cuidou da sidebar, do tema e do backup. Aqui mora só
+       a inteligência do autocuidado: catálogo, motor de datas e score.
        ================================================================= */
 
-    /* A "gaveta" onde guardamos tudo. Vira planner_autocuidado no
-       localStorage por causa do prefixo automático do Store. */
-    const CHAVE = "autocuidado";
+    const CHAVE = "autocuidado";   /* vira planner_autocuidado no Store */
 
-    /* Estrutura inicial (só usada na PRIMEIRA vez que você abre a página).
-       Depois disso, o que vale é o que estiver salvo no Store. */
-    function estruturaInicial() {
-      return {
-        areas: [
-          { id: "cabelo", nome: "Cabelo & Barba",  icone: "fa-scissors",       cor: "#f97316" },
-          { id: "pele",   nome: "Pele (Skincare)", icone: "fa-pump-soap",      cor: "#3b82f6" },
-          { id: "dentes", nome: "Higiene Bucal",   icone: "fa-tooth",          cor: "#94a3b8" },
-          { id: "cheiro", nome: "Aroma & Banho",   icone: "fa-wind",           cor: "#a855f7" },
-          { id: "unhas",  nome: "Unhas & Mãos",    icone: "fa-hand-sparkles",  cor: "#10b981" },
-        ],
-        cuidados: [
-          { id: "c1", areaId: "cabelo", acao: "Cortar o cabelo e fazer a barba no barbeiro", frequencia: "1x ao mês", obs: "", arquivado: false },
-          { id: "c2", areaId: "pele",   acao: "Lavar o rosto com sabonete específico",       frequencia: "Diário (manhã e noite)", obs: "", arquivado: false },
-          { id: "c3", areaId: "pele",   acao: "Hidratar o rosto após lavar",                 frequencia: "Diário", obs: "Protetor solar logo de manhã", arquivado: false },
-          { id: "c4", areaId: "dentes", acao: "Passar fio dental e escovar",                 frequencia: "Diário (noite)", obs: "", arquivado: false },
-          { id: "c5", areaId: "cheiro", acao: "Aplicar desodorante antitranspirante",        frequencia: "Diário", obs: "", arquivado: false },
-          { id: "c6", areaId: "unhas",  acao: "Cortar e lixar as unhas",                     frequencia: "Semanal (sábado)", obs: "", arquivado: false },
-        ],
-        produtos: [
-          { id: "p1", areaId: "cabelo", nome: "Pomada modeladora", status: "casa",    arquivado: false },
-          { id: "p2", areaId: "pele",   nome: "Sabonete facial",   status: "comprar", arquivado: false },
-          { id: "p3", areaId: "cheiro", nome: "Perfume assinatura", status: "casa",   arquivado: false },
-        ],
-      };
+    /* -----------------------------------------------------------------
+       MOTOR DE DATAS — tudo em data LOCAL (nunca toISOString!)
+       Esse é o ponto onde mais aparece o bug de fuso UTC-3 (um dia a
+       mais ou a menos). Por isso montamos as datas "na mão", lendo
+       ano/mês/dia locais, e guardamos como texto "AAAA-MM-DD".
+       ----------------------------------------------------------------- */
+    function pad(n) { return String(n).padStart(2, "0"); }
+
+    /* Data de hoje como "AAAA-MM-DD", usando o relógio local do aparelho. */
+    function hojeStr() {
+      const d = new Date();
+      return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
     }
 
-    /* Lê o que está salvo; se não houver nada ainda, usa a estrutura inicial. */
-    let dados = Store.ler(CHAVE, null) || estruturaInicial();
-    /* Cinto de segurança: garante que as três listas existem mesmo em
-       backups antigos que por acaso não tenham alguma delas. */
-    dados.areas    = dados.areas    || [];
-    dados.cuidados = dados.cuidados || [];
-    dados.produtos = dados.produtos || [];
+    /* Transforma "AAAA-MM-DD" num Date à meia-noite LOCAL (sem fuso). */
+    function dataLocal(str) {
+      const [a, m, d] = str.split("-").map(Number);
+      return new Date(a, m - 1, d);
+    }
 
-    /* Grava o estado atual. Uma função só pra não esquecer o prefixo. */
-    function salvar() { Store.salvar(CHAVE, dados); }
+    /* Soma "dias" a uma data e devolve outra string "AAAA-MM-DD". */
+    function somarDias(str, dias) {
+      const dt = dataLocal(str);
+      dt.setDate(dt.getDate() + dias);
+      return `${dt.getFullYear()}-${pad(dt.getMonth() + 1)}-${pad(dt.getDate())}`;
+    }
 
-    /* Gera um id único pra novos itens (texto curto difícil de repetir). */
-    function novoId() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+    /* Diferença em dias inteiros: (b - a). Positivo = b está no futuro. */
+    function difDias(a, b) {
+      return Math.round((dataLocal(b) - dataLocal(a)) / 86400000);
+    }
 
-    /* Ícones que você pode escolher para uma área (lista enxuta e relevante). */
+    function fmtData(str)      { const [a, m, d] = str.split("-"); return `${d}/${m}`; }
+    function fmtDataLonga(str) { const [a, m, d] = str.split("-"); return `${d}/${m}/${a}`; }
+
+    /* -----------------------------------------------------------------
+       FREQUÊNCIAS PADRONIZADAS — cada uma vira um intervalo em dias.
+       "dias: null" = "conforme necessidade" (sem agendamento).
+       Obs.: "2x ao dia" é simplificado como diário pro cálculo da
+       próxima data — a contagem de vezes no dia fica por sua conta.
+       ----------------------------------------------------------------- */
+    const FREQS = [
+      { id: "2x_dia",     nome: "2x ao dia",            dias: 1 },
+      { id: "diario",     nome: "Diariamente",          dias: 1 },
+      { id: "2_dias",     nome: "A cada 2 dias",        dias: 2 },
+      { id: "semanal",    nome: "Semanal",              dias: 7 },
+      { id: "quinzenal",  nome: "Quinzenal",            dias: 15 },
+      { id: "mensal",     nome: "Mensal",               dias: 30 },
+      { id: "bimestral",  nome: "Bimestral",            dias: 60 },
+      { id: "trimestral", nome: "Trimestral",           dias: 90 },
+      { id: "semestral",  nome: "Semestral",            dias: 180 },
+      { id: "anual",      nome: "Anual",                dias: 365 },
+      { id: "conforme",   nome: "Conforme necessidade", dias: null },
+    ];
+    function freqInfo(id) { return FREQS.find(f => f.id === id) || FREQS[1]; }
+
+    /* Ícones disponíveis pra escolher numa categoria. */
     const ICONES = [
-      "fa-scissors", "fa-pump-soap", "fa-tooth", "fa-wind", "fa-hand-sparkles",
-      "fa-spray-can-sparkles", "fa-soap", "fa-droplet", "fa-shower", "fa-face-smile",
-      "fa-shirt", "fa-eye", "fa-heart", "fa-star",
+      "fa-pump-soap", "fa-tooth", "fa-scissors", "fa-spray-can-sparkles", "fa-soap",
+      "fa-hand-sparkles", "fa-bed", "fa-glass-water", "fa-stethoscope", "fa-dumbbell",
+      "fa-shirt", "fa-broom", "fa-droplet", "fa-heart-pulse", "fa-spa", "fa-shower",
+      "fa-wind", "fa-star", "fa-eye", "fa-bath",
     ];
 
-    /* Protege textos do usuário antes de jogar no HTML (evita quebrar a tela
-       se alguém digitar < > & " num nome). */
+    /* -----------------------------------------------------------------
+       ESTRUTURA INICIAL — só na primeira vez que você abre a página.
+       Já vem com as 12 categorias e dezenas de cuidados do seu documento.
+       Os cuidados de higiene/aparência começam "feitos hoje" (pra você
+       abrir num estado calmo), e os de saúde preventiva começam "a
+       iniciar" (pra aparecerem como pendências a agendar).
+       ----------------------------------------------------------------- */
+    function estruturaInicial() {
+      const HOJE = hojeStr();
+
+      const categorias = [
+        { id: "cabelo", nome: "Cabelo, Barba e Pelos", icone: "fa-scissors",      subs: [{ id: "cab-cabelo", nome: "Cabelo" }, { id: "cab-barba", nome: "Barba" }, { id: "cab-pelos", nome: "Pelos" }] },
+        { id: "dentes", nome: "Dentes",                icone: "fa-tooth",         subs: [] },
+        { id: "pele",   nome: "Pele",                  icone: "fa-pump-soap",     subs: [{ id: "pele-rosto", nome: "Rosto" }, { id: "pele-corpo", nome: "Corpo" }] },
+        { id: "cheiro", nome: "Cheiro",                icone: "fa-wind",          subs: [] },
+        { id: "unhas",  nome: "Unhas",                 icone: "fa-hand-sparkles", subs: [{ id: "unhas-maos", nome: "Mãos" }, { id: "unhas-pes", nome: "Pés" }] },
+      ];
+
+      /* [categoria, subcategoria, nome, frequência, prioridade] */
+      const SEED = [
+        /* ---- Cabelo, Barba e Pelos ---- */
+        ["cabelo", "cab-cabelo", "Lavar o cabelo", "2_dias", "media"],
+        ["cabelo", "cab-cabelo", "Condicionador", "2_dias", "baixa"],
+        ["cabelo", "cab-cabelo", "Hidratação capilar", "semanal", "baixa"],
+        ["cabelo", "cab-cabelo", "Shampoo específico", "semanal", "baixa"],
+        ["cabelo", "cab-cabelo", "Cortar o cabelo no barbeiro", "mensal", "media"],
+        ["cabelo", "cab-cabelo", "Limpar pente/escova", "quinzenal", "baixa"],
+        ["cabelo", "cab-barba", "Fazer/aparar a barba", "2_dias", "media"],
+        ["cabelo", "cab-barba", "Óleo/balm para barba", "diario", "baixa"],
+        ["cabelo", "cab-barba", "Desenhar a barba no barbeiro", "mensal", "baixa"],
+        ["cabelo", "cab-pelos", "Aparar pelos do nariz", "quinzenal", "media"],
+        ["cabelo", "cab-pelos", "Aparar pelos da orelha", "mensal", "baixa"],
+        ["cabelo", "cab-pelos", "Aparar a sobrancelha", "mensal", "baixa"],
+        ["cabelo", "cab-pelos", "Depilar/aparar pelos corporais", "mensal", "baixa"],
+
+        /* ---- Dentes ---- */
+        ["dentes", "", "Escovar os dentes", "2x_dia", "alta"],
+        ["dentes", "", "Fio dental", "diario", "alta"],
+        ["dentes", "", "Raspar a língua", "diario", "media"],
+        ["dentes", "", "Enxaguante bucal", "diario", "baixa"],
+        ["dentes", "", "Trocar a escova", "trimestral", "media"],
+        ["dentes", "", "Limpeza no dentista", "semestral", "alta"],
+        ["dentes", "", "Clareamento", "conforme", "baixa"],
+
+        /* ---- Pele ---- */
+        ["pele", "pele-rosto", "Lavar o rosto", "diario", "alta"],
+        ["pele", "pele-rosto", "Hidratante facial", "diario", "media"],
+        ["pele", "pele-rosto", "Protetor solar", "diario", "alta"],
+        ["pele", "pele-rosto", "Esfoliação facial", "semanal", "baixa"],
+        ["pele", "pele-rosto", "Máscara facial", "semanal", "baixa"],
+        ["pele", "pele-corpo", "Hidratação corporal", "diario", "media"],
+        ["pele", "pele-corpo", "Esfoliação corporal", "semanal", "baixa"],
+
+        /* ---- Cheiro ---- */
+        ["cheiro", "", "Banho", "diario", "alta"],
+        ["cheiro", "", "Desodorante antitranspirante", "diario", "alta"],
+        ["cheiro", "", "Perfume", "diario", "baixa"],
+        ["cheiro", "", "Trocar as toalhas", "semanal", "media"],
+        ["cheiro", "", "Trocar a roupa de cama", "semanal", "media"],
+        ["cheiro", "", "Lavar as roupas de treino", "2_dias", "media"],
+        ["cheiro", "", "Higienizar o tênis", "mensal", "baixa"],
+
+        /* ---- Unhas ---- */
+        ["unhas", "unhas-maos", "Cortar as unhas das mãos", "semanal", "media"],
+        ["unhas", "unhas-maos", "Lixar as unhas das mãos", "semanal", "baixa"],
+        ["unhas", "unhas-maos", "Limpar as unhas das mãos", "semanal", "baixa"],
+        ["unhas", "unhas-pes", "Cortar as unhas dos pés", "quinzenal", "media"],
+        ["unhas", "unhas-pes", "Lixar as unhas dos pés", "quinzenal", "baixa"],
+        ["unhas", "unhas-pes", "Hidratar os pés", "semanal", "baixa"],
+        ["unhas", "unhas-pes", "Remover calos", "mensal", "baixa"],
+      ];
+
+      /* Cuidados de rotina curta começam "feitos hoje" (abertura calma);
+         os de intervalo longo começam "a iniciar" pra aparecerem como pendência. */
+      const FEITOS = ["2x_dia", "diario", "2_dias", "semanal"];
+      const cuidados = SEED.map((s, i) => {
+        const feito = FEITOS.includes(s[3]);
+        return {
+          id: "c" + (i + 1),
+          catId: s[0], subId: s[1] || "", nome: s[2],
+          frequencia: s[3], prioridade: s[4] || "media",
+          ultima: feito ? HOJE : "", tempo: "", obs: "",
+          historico: feito ? [HOJE] : [], arquivado: false,
+        };
+      });
+
+      return { categorias, cuidados };
+    }
+
+    /* Lê o que está salvo; se for a primeira vez, usa a estrutura inicial. */
+    let dados = Store.ler(CHAVE, null) || estruturaInicial();
+    dados.categorias = dados.categorias || [];
+    dados.cuidados   = dados.cuidados   || [];
+
+    function salvar() { Store.salvar(CHAVE, dados); }
+    function novoId() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+    function get(id)  { return dados.cuidados.find(c => c.id === id); }
+    function catById(id) { return dados.categorias.find(c => c.id === id); }
+
     function esc(t) {
       return String(t ?? "")
         .replace(/&/g, "&amp;").replace(/</g, "&lt;")
         .replace(/>/g, "&gt;").replace(/"/g, "&quot;");
     }
+    function pesoPrio(c) { return c.prioridade === "alta" ? 3 : c.prioridade === "baixa" ? 1 : 2; }
+    function corDoScore(p) { return p >= 80 ? "#10b981" : p >= 50 ? "#f59e0b" : "#ef4444"; }
 
-    /* Converte uma cor #hex numa versão transparente (pra fundos suaves). */
-    function hexToRgba(hex, a) {
-      hex = String(hex).replace("#", "");
-      if (hex.length === 3) hex = hex.split("").map(x => x + x).join("");
-      const r = parseInt(hex.slice(0, 2), 16);
-      const g = parseInt(hex.slice(2, 4), 16);
-      const b = parseInt(hex.slice(4, 6), 16);
-      return `rgba(${r},${g},${b},${a})`;
+    /* -----------------------------------------------------------------
+       O CÉREBRO: próxima execução + status (calculados, nunca guardados)
+       ----------------------------------------------------------------- */
+    function proximaExecucao(c) {
+      const f = freqInfo(c.frequencia);
+      if (f.dias === null) return null;   /* conforme necessidade */
+      if (!c.ultima) return null;          /* nunca feito */
+      return somarDias(c.ultima, f.dias);
     }
-    function corSoft(hex) { return hexToRgba(hex, .14); }
 
-    /* Abre / fecha qualquer modal pelo id (usa a classe .is-open do style.css). */
+    /* Quantos dias antes do vencimento já contam como "Próximo". */
+    function janelaProximo(f) {
+      if (f.dias <= 2) return 0;
+      return Math.min(Math.max(Math.round(f.dias * 0.15), 1), 20);
+    }
+
+    function statusCuidado(c) {
+      const f = freqInfo(c.frequencia);
+      if (f.dias === null) return { id: "livre", label: "Livre" };
+      if (!c.ultima)       return { id: "pendente", label: "A iniciar" };
+      const prox = proximaExecucao(c);
+      const dif = difDias(hojeStr(), prox);     /* prox - hoje */
+      if (dif < 0)  return { id: "atrasado", label: `Atrasado ${Math.abs(dif)}d` };
+      if (dif === 0) return { id: "hoje", label: "Vence hoje" };
+      if (dif <= janelaProximo(f)) return { id: "proximo", label: `Em ${dif}d` };
+      return { id: "emdia", label: "Em dia" };
+    }
+
+    /* Score = % dos cuidados agendáveis que NÃO estão atrasados nem parados.
+       (conforme necessidade e arquivados ficam de fora da conta.) */
+    function calcularScore(lista) {
+      const sched = lista.filter(c => !c.arquivado && freqInfo(c.frequencia).dias !== null);
+      if (!sched.length) return 100;
+      const bons = sched.filter(c => {
+        const s = statusCuidado(c).id;
+        return s === "emdia" || s === "proximo" || s === "hoje";
+      }).length;
+      return Math.round(bons / sched.length * 100);
+    }
+
+    /* Escolhe o "próximo cuidado importante" pro dashboard. */
+    function proximoImportante() {
+      const lista = dados.cuidados.filter(c => !c.arquivado && freqInfo(c.frequencia).dias !== null);
+      if (!lista.length) return null;
+      const mapeado = lista.map(c => {
+        const prox = proximaExecucao(c);
+        let dif;
+        if (!c.ultima) dif = 0;                       /* a iniciar = vence agora */
+        else dif = difDias(hojeStr(), prox);
+        return { c, dif };
+      });
+      /* mais atrasado/urgente primeiro; empate, maior prioridade */
+      mapeado.sort((a, b) => a.dif - b.dif || pesoPrio(b.c) - pesoPrio(a.c));
+      return mapeado[0];
+    }
+
+    /* =================================================================
+       ESTADO DA TELA (qual visão e qual filtro)
+       ================================================================= */
+    let vista = "hoje";       /* "hoje" | "cat" */
+    let filtroCat = "todos";
+
+    function setVista(v)  { vista = v; render(); }
+    function setFiltro(id){ filtroCat = id; render(); }
+
+    function render() {
+      renderDashboard();
+      document.getElementById("vw-hoje").classList.toggle("is-active", vista === "hoje");
+      document.getElementById("vw-cat").classList.toggle("is-active", vista === "cat");
+      const filtros = document.getElementById("ac-filtros");
+      filtros.style.display = vista === "cat" ? "flex" : "none";
+      if (vista === "cat") renderFiltros();
+      document.getElementById("ac-conteudo").innerHTML = vista === "hoje" ? renderHoje() : renderCat();
+    }
+
+    /* ---------- DASHBOARD ---------- */
+    function renderDashboard() {
+      const ativos = dados.cuidados.filter(c => !c.arquivado);
+      const score = calcularScore(ativos);
+      const cor = corDoScore(score);
+      const pend = ativos.filter(c => {
+        const s = statusCuidado(c).id;
+        return s === "atrasado" || s === "hoje" || s === "pendente";
+      }).length;
+
+      const prox = proximoImportante();
+      let proxTxt = "Tudo tranquilo", proxSub = "Nada urgente agora";
+      if (prox) { proxTxt = prox.c.nome; proxSub = statusCuidado(prox.c).label; }
+
+      const catRows = dados.categorias.map(cat => {
+        const lista = ativos.filter(c => c.catId === cat.id);
+        const temSched = lista.some(c => freqInfo(c.frequencia).dias !== null);
+        if (!temSched) return "";
+        const sc = calcularScore(lista);
+        return `
+          <div class="ac-catscore">
+            <span class="ac-catscore__nome"><i class="fa-solid ${cat.icone}"></i> ${esc(cat.nome)}</span>
+            <span class="ac-catscore__pct" style="color:${corDoScore(sc)}">${sc}%</span>
+            <span class="ac-csbar"><i style="width:${sc}%; background:${corDoScore(sc)}"></i></span>
+          </div>`;
+      }).join("");
+
+      document.getElementById("ac-dash").innerHTML = `
+        <div class="card ac-dash">
+          <div class="ac-dash__top">
+            <div class="ring" style="--p:${score}; --cor:${cor}">
+              <div class="ring__hole">
+                <div>
+                  <div class="ring__num" style="color:${cor}">${score}%</div>
+                  <div class="ring__lbl">Autocuidado</div>
+                </div>
+              </div>
+            </div>
+            <div class="ac-tiles">
+              <div class="ac-tile"><div class="ac-tile__num">${ativos.length}</div><div class="ac-tile__lbl">Cuidados</div></div>
+              <div class="ac-tile"><div class="ac-tile__num" style="color:${pend ? '#f59e0b' : 'var(--accent)'}">${pend}</div><div class="ac-tile__lbl">Pendentes hoje</div></div>
+              <div class="ac-tile">
+                <div class="ac-tile__lbl">Próximo importante</div>
+                <div class="ac-tile__hint">${esc(proxTxt)}</div>
+                <div class="ac-tile__lbl" style="margin-top:3px">${esc(proxSub)}</div>
+              </div>
+            </div>
+          </div>
+          ${catRows ? `<div class="ac-catscores">${catRows}</div>` : ""}
+        </div>`;
+    }
+
+    /* ---------- VISÃO "HOJE" ---------- */
+    function renderHoje() {
+      const ativos = dados.cuidados.filter(c => !c.arquivado);
+      const precisa = ativos.filter(c => {
+        const s = statusCuidado(c).id;
+        return s === "atrasado" || s === "hoje" || s === "pendente";
+      });
+      const chegando = ativos.filter(c => statusCuidado(c).id === "proximo");
+
+      const ordem = { atrasado: 0, hoje: 1, pendente: 2 };
+      precisa.sort((a, b) => {
+        const sa = statusCuidado(a), sb = statusCuidado(b);
+        if (ordem[sa.id] !== ordem[sb.id]) return ordem[sa.id] - ordem[sb.id];
+        const da = sa.id === "atrasado" ? difDias(hojeStr(), proximaExecucao(a)) : 0;
+        const db = sb.id === "atrasado" ? difDias(hojeStr(), proximaExecucao(b)) : 0;
+        if (da !== db) return da - db;
+        return pesoPrio(b) - pesoPrio(a);
+      });
+
+      let html = "";
+      if (!precisa.length) {
+        html += `
+          <div class="ac-tudoemdia">
+            <i class="fa-solid fa-circle-check"></i>
+            <h3>Tudo em dia por hoje!</h3>
+            <p>Nenhum cuidado pendente no momento. Planeje como um sábio, execute como um guerreiro.</p>
+          </div>`;
+      } else {
+        html += `<p class="ac-grupo-tit">Precisa de atenção (${precisa.length})</p>`;
+        html += precisa.map(c => linhaCuidado(c, true)).join("");
+      }
+
+      if (chegando.length) {
+        chegando.sort((a, b) => difDias(hojeStr(), proximaExecucao(a)) - difDias(hojeStr(), proximaExecucao(b)));
+        html += `<p class="ac-grupo-tit" style="margin-top:24px">Chegando</p>`;
+        html += chegando.map(c => linhaCuidado(c, true)).join("");
+      }
+      return html;
+    }
+
+    /* ---------- VISÃO "POR CATEGORIA" ---------- */
+    function renderFiltros() {
+      const chips = [`<button class="ac-chip ${filtroCat === 'todos' ? 'is-active' : ''}" onclick="setFiltro('todos')">Todas</button>`]
+        .concat(dados.categorias.map(c =>
+          `<button class="ac-chip ${filtroCat === c.id ? 'is-active' : ''}" onclick="setFiltro('${c.id}')"><i class="fa-solid ${c.icone}"></i> ${esc(c.nome)}</button>`));
+      document.getElementById("ac-filtros").innerHTML = chips.join("");
+    }
+
+    function renderCat() {
+      const cats = filtroCat === "todos" ? dados.categorias : dados.categorias.filter(c => c.id === filtroCat);
+      if (!cats.length) return `<p class="ac-vazio-mini">Nenhuma categoria.</p>`;
+
+      return cats.map(cat => {
+        const lista = dados.cuidados.filter(c => c.catId === cat.id && !c.arquivado);
+        const temSched = lista.some(c => freqInfo(c.frequencia).dias !== null);
+        const sc = temSched ? calcularScore(lista) : null;
+
+        let corpo = "";
+        if (!lista.length) {
+          corpo = `<p class="ac-vazio-mini">Nenhum cuidado nesta categoria.</p>`;
+        } else if (cat.subs.length) {
+          cat.subs.forEach(s => {
+            const itens = lista.filter(c => c.subId === s.id);
+            if (itens.length) corpo += `<p class="ac-subtit">${esc(s.nome)}</p>` + itens.map(c => linhaCuidado(c, false)).join("");
+          });
+          const orfaos = lista.filter(c => !c.subId || !cat.subs.some(s => s.id === c.subId));
+          if (orfaos.length) corpo += `<p class="ac-subtit">Outros</p>` + orfaos.map(c => linhaCuidado(c, false)).join("");
+        } else {
+          corpo = lista.map(c => linhaCuidado(c, false)).join("");
+        }
+
+        return `
+          <section class="ac-catcard">
+            <header class="ac-catcard__head">
+              <span class="ac-catcard__icone"><i class="fa-solid ${cat.icone}"></i></span>
+              <div style="flex:1; min-width:0">
+                <div class="ac-catcard__nome">${esc(cat.nome)}</div>
+                <div class="ac-catcard__count">${lista.length} cuidado(s)${sc !== null ? ` · <b style="color:${corDoScore(sc)}">${sc}%</b> em dia` : ""}</div>
+              </div>
+              <button class="ac-add" onclick="abrirNovoCuidado('${cat.id}')"><i class="fa-solid fa-plus"></i> Add</button>
+            </header>
+            ${corpo}
+          </section>`;
+      }).join("");
+    }
+
+    /* ---------- LINHA DE UM CUIDADO ---------- */
+    function linhaCuidado(c, mostrarCat) {
+      const st = statusCuidado(c);
+      const cat = catById(c.catId);
+      const sub = (cat && c.subId) ? (cat.subs.find(s => s.id === c.subId) || {}).nome : "";
+      const f = freqInfo(c.frequencia);
+      const prox = proximaExecucao(c);
+      const feitoHoje = c.ultima === hojeStr();
+
+      const meta = [];
+      if (mostrarCat && cat) meta.push(`<i class="fa-solid ${cat.icone}"></i>${esc(cat.nome)}${sub ? " · " + esc(sub) : ""}`);
+      meta.push(esc(f.nome));
+      if (c.tempo) meta.push(`${esc(String(c.tempo))} min`);
+      if (prox && st.id !== "pendente") meta.push(`Próx: ${fmtData(prox)}`);
+
+      const feitoBtn = feitoHoje
+        ? `<button class="ac-feito ac-feito--done" onclick="desfazerUltimo('${c.id}')" title="Desfazer"><i class="fa-solid fa-check"></i> Feito</button>`
+        : `<button class="ac-feito" onclick="marcarFeito('${c.id}')"><i class="fa-solid fa-check"></i> Feito</button>`;
+
+      return `
+        <div class="ac-row">
+          <span class="prio prio--${c.prioridade}" title="Prioridade: ${c.prioridade}"></span>
+          <div class="ac-row__main">
+            <div class="ac-row__nome">${esc(c.nome)}</div>
+            <div class="ac-row__meta">${meta.map(m => `<span>${m}</span>`).join("")}</div>
+          </div>
+          <div class="ac-row__dir">
+            <span class="st st--${st.id}">${esc(st.label)}</span>
+            ${feitoBtn}
+            <button class="mini" onclick="abrirHistorico('${c.id}')" title="Histórico"><i class="fa-solid fa-clock-rotate-left"></i></button>
+            <button class="mini" onclick="editarCuidado('${c.id}')" title="Editar"><i class="fa-solid fa-pen"></i></button>
+            <button class="mini" onclick="arquivarCuidado('${c.id}')" title="Arquivar"><i class="fa-solid fa-box-archive"></i></button>
+          </div>
+        </div>`;
+    }
+
+    /* =================================================================
+       AÇÕES DO DIA A DIA — marcar feito / desfazer
+       ================================================================= */
+    function marcarFeito(id) {
+      const c = get(id); if (!c) return;
+      const h = hojeStr();
+      if (c.historico[c.historico.length - 1] !== h) c.historico.push(h);
+      c.ultima = h;
+      salvar(); render(); avisar(`"${c.nome}" — feito hoje.`, "fa-check");
+    }
+
+    function desfazerUltimo(id) {
+      const c = get(id); if (!c || !c.historico.length) return;
+      c.historico.pop();
+      c.ultima = c.historico[c.historico.length - 1] || "";
+      salvar(); render();
+      if (document.getElementById("modal-historico").classList.contains("is-open")) renderHistorico();
+      avisar("Execução desfeita.", "fa-rotate-left");
+    }
+
+    /* =================================================================
+       CRUD — CUIDADOS
+       ================================================================= */
+    function opcoesCats(sel) {
+      return dados.categorias.map(c => `<option value="${c.id}" ${c.id === sel ? "selected" : ""}>${esc(c.nome)}</option>`).join("");
+    }
+    function opcoesSubs(catId, sel) {
+      const cat = catById(catId);
+      if (!cat) return "";
+      return `<option value="">— nenhuma —</option>` +
+        cat.subs.map(s => `<option value="${s.id}" ${s.id === sel ? "selected" : ""}>${esc(s.nome)}</option>`).join("");
+    }
+    function opcoesFreq(sel) {
+      return FREQS.map(f => `<option value="${f.id}" ${f.id === sel ? "selected" : ""}>${esc(f.nome)}</option>`).join("");
+    }
+
+    /* Quando troca a categoria, recarrega (ou esconde) a subcategoria. */
+    function onCatChange() {
+      const catId = document.getElementById("ac-c-cat").value;
+      const cat = catById(catId);
+      const campo = document.getElementById("ac-c-sub-campo");
+      const sel = document.getElementById("ac-c-sub");
+      if (cat && cat.subs.length) { sel.innerHTML = opcoesSubs(catId, ""); campo.style.display = "block"; }
+      else { sel.innerHTML = ""; campo.style.display = "none"; }
+    }
+
+    function abrirNovoCuidado(catId, subId) {
+      if (!dados.categorias.length) { avisar("Crie uma categoria primeiro.", "fa-circle-exclamation"); return; }
+      document.getElementById("ac-c-id").value = "";
+      document.getElementById("ac-c-titulo").innerHTML = `<i class="fa-solid fa-plus" style="color:var(--accent)"></i> Novo cuidado`;
+      document.getElementById("ac-c-info").style.display = "none";
+      document.getElementById("ac-c-nome").value = "";
+      document.getElementById("ac-c-cat").innerHTML = opcoesCats(catId);
+      onCatChange();
+      if (subId) document.getElementById("ac-c-sub").value = subId;
+      document.getElementById("ac-c-freq").innerHTML = opcoesFreq("diario");
+      document.getElementById("ac-c-prio").value = "media";
+      document.getElementById("ac-c-tempo").value = "";
+      document.getElementById("ac-c-ultima").value = "";
+      document.getElementById("ac-c-obs").value = "";
+      abrir("modal-cuidado");
+      setTimeout(() => document.getElementById("ac-c-nome").focus(), 50);
+    }
+
+    function editarCuidado(id) {
+      const c = get(id); if (!c) return;
+      document.getElementById("ac-c-id").value = c.id;
+      document.getElementById("ac-c-titulo").innerHTML = `<i class="fa-solid fa-pen" style="color:var(--accent)"></i> Editar cuidado`;
+
+      /* Bloco de info só-leitura: próxima execução + status calculados */
+      const prox = proximaExecucao(c);
+      const st = statusCuidado(c);
+      const f = freqInfo(c.frequencia);
+      const proxTxt = prox ? fmtDataLonga(prox) : (f.dias === null ? "—" : "Assim que possível");
+      const info = document.getElementById("ac-c-info");
+      info.innerHTML = `
+        <div class="ac-info__item"><span>Próxima execução</span>${proxTxt}</div>
+        <div class="ac-info__item"><span>Status</span><span class="st st--${st.id}">${st.label}</span></div>`;
+      info.style.display = "flex";
+
+      document.getElementById("ac-c-nome").value = c.nome;
+      document.getElementById("ac-c-cat").innerHTML = opcoesCats(c.catId);
+      onCatChange();
+      document.getElementById("ac-c-sub").value = c.subId || "";
+      document.getElementById("ac-c-freq").innerHTML = opcoesFreq(c.frequencia);
+      document.getElementById("ac-c-prio").value = c.prioridade;
+      document.getElementById("ac-c-tempo").value = c.tempo || "";
+      document.getElementById("ac-c-ultima").value = c.ultima || "";
+      document.getElementById("ac-c-obs").value = c.obs || "";
+      abrir("modal-cuidado");
+    }
+
+    function salvarCuidado() {
+      const id     = document.getElementById("ac-c-id").value;
+      const nome   = document.getElementById("ac-c-nome").value.trim();
+      const catId  = document.getElementById("ac-c-cat").value;
+      const subId  = document.getElementById("ac-c-sub").value || "";
+      const freq   = document.getElementById("ac-c-freq").value;
+      const prio   = document.getElementById("ac-c-prio").value;
+      const tempo  = document.getElementById("ac-c-tempo").value.trim();
+      const ultima = document.getElementById("ac-c-ultima").value;   /* "AAAA-MM-DD" ou "" */
+      const obs    = document.getElementById("ac-c-obs").value.trim();
+
+      if (!nome || !catId) { avisar("Preencha o nome e a categoria.", "fa-circle-exclamation"); return; }
+
+      if (id) {
+        const c = get(id);
+        Object.assign(c, { nome, catId, subId, frequencia: freq, prioridade: prio, tempo, ultima, obs });
+        /* Se você definiu uma data de última execução, registra no histórico. */
+        if (ultima && c.historico[c.historico.length - 1] !== ultima) c.historico.push(ultima);
+      } else {
+        dados.cuidados.push({
+          id: novoId(), nome, catId, subId, frequencia: freq, prioridade: prio,
+          tempo, ultima, obs, historico: ultima ? [ultima] : [], arquivado: false,
+        });
+      }
+      salvar(); render(); fechar("modal-cuidado"); avisar("Cuidado salvo.");
+    }
+
+    function arquivarCuidado(id) {
+      const c = get(id); if (!c) return;
+      c.arquivado = true; salvar(); render(); avisar("Cuidado arquivado.", "fa-box-archive");
+    }
+    function restaurarCuidado(id) {
+      const c = get(id); if (!c) return;
+      c.arquivado = false; salvar(); render(); renderCofre(); avisar("Cuidado restaurado.");
+    }
+    function excluirCuidado(id) {
+      pedirConfirmacao("Excluir este cuidado de vez? Não dá pra desfazer.", () => {
+        dados.cuidados = dados.cuidados.filter(x => x.id !== id);
+        salvar(); render(); renderCofre(); avisar("Cuidado excluído.", "fa-trash");
+      });
+    }
+
+    /* =================================================================
+       HISTÓRICO
+       ================================================================= */
+    let _histId = null;
+    function abrirHistorico(id) { _histId = id; renderHistorico(); abrir("modal-historico"); }
+    function renderHistorico() {
+      const c = get(_histId); if (!c) return;
+      document.getElementById("ac-hist-titulo").textContent = c.nome;
+      const box = document.getElementById("ac-hist-lista");
+      if (!c.historico.length) {
+        box.innerHTML = `<p class="ac-vazio-mini" style="text-align:center; padding:18px 0">Nenhuma execução registrada ainda.</p>`;
+        return;
+      }
+      box.innerHTML = [...c.historico].reverse().map((d, i) => `
+        <div class="ac-linha">
+          <span class="ac-linha__nome"><i class="fa-solid fa-check" style="color:var(--accent); margin-right:8px"></i>${fmtDataLonga(d)}</span>
+          ${i === 0 ? `<button class="mini" onclick="desfazerUltimo('${c.id}')" title="Desfazer"><i class="fa-solid fa-rotate-left"></i></button>` : ""}
+        </div>`).join("");
+    }
+
+    /* =================================================================
+       CRUD — CATEGORIAS (com gerenciador de subcategorias)
+       ================================================================= */
+    function abrirCats() { renderCats(); abrir("modal-cats"); }
+    function renderCats() {
+      const box = document.getElementById("ac-lista-cats");
+      if (!dados.categorias.length) { box.innerHTML = `<p class="ac-vazio-mini" style="text-align:center; padding:20px 0">Nenhuma categoria.</p>`; return; }
+      box.innerHTML = dados.categorias.map(cat => {
+        const qtd = dados.cuidados.filter(c => c.catId === cat.id && !c.arquivado).length;
+        return `
+          <div class="ac-linha">
+            <div class="ac-linha__id">
+              <span class="ac-mini-icone"><i class="fa-solid ${cat.icone}"></i></span>
+              <div>
+                <p class="ac-linha__nome">${esc(cat.nome)}</p>
+                <p class="ac-linha__meta">${qtd} cuidado(s)${cat.subs.length ? ` · ${cat.subs.length} sub` : ""}</p>
+              </div>
+            </div>
+            <div class="ac-row__dir">
+              <button class="mini" onclick="editarCat('${cat.id}')" aria-label="Editar"><i class="fa-solid fa-pen"></i></button>
+              <button class="mini mini--perigo" onclick="excluirCat('${cat.id}')" aria-label="Excluir"><i class="fa-solid fa-trash"></i></button>
+            </div>
+          </div>`;
+      }).join("");
+    }
+
+    /* Lista temporária de subcategorias enquanto você edita uma categoria. */
+    let _subsEdit = [];
+    function renderSubchips() {
+      const box = document.getElementById("ac-cat-subs");
+      box.innerHTML = _subsEdit.map(s => `
+        <span class="ac-subchip">${esc(s.nome)}
+          <button onclick="removeSubEdit('${s.id}')" title="Remover"><i class="fa-solid fa-xmark"></i></button>
+        </span>`).join("");
+    }
+    function addSubEdit() {
+      const inp = document.getElementById("ac-cat-subinput");
+      const nome = inp.value.trim();
+      if (!nome) return;
+      _subsEdit.push({ id: novoId(), nome });
+      inp.value = ""; renderSubchips(); inp.focus();
+    }
+    function removeSubEdit(id) { _subsEdit = _subsEdit.filter(s => s.id !== id); renderSubchips(); }
+
+    function preencherIconesCat(sel) {
+      document.getElementById("ac-cat-icone").innerHTML =
+        ICONES.map(ic => `<option value="${ic}" ${ic === sel ? "selected" : ""}>${ic.replace("fa-", "")}</option>`).join("");
+    }
+
+    function abrirNovaCat() {
+      document.getElementById("ac-cat-id").value = "";
+      document.getElementById("ac-cat-titulo").innerHTML = `<i class="fa-solid fa-layer-group" style="color:var(--accent)"></i> Nova categoria`;
+      document.getElementById("ac-cat-nome").value = "";
+      preencherIconesCat("fa-pump-soap");
+      _subsEdit = []; renderSubchips();
+      abrir("modal-catedit");
+      setTimeout(() => document.getElementById("ac-cat-nome").focus(), 50);
+    }
+
+    function editarCat(id) {
+      const cat = catById(id); if (!cat) return;
+      document.getElementById("ac-cat-id").value = cat.id;
+      document.getElementById("ac-cat-titulo").innerHTML = `<i class="fa-solid fa-pen" style="color:var(--accent)"></i> Editar categoria`;
+      document.getElementById("ac-cat-nome").value = cat.nome;
+      preencherIconesCat(cat.icone);
+      _subsEdit = cat.subs.map(s => ({ ...s }));   /* cópia pra não bagunçar o original antes de salvar */
+      renderSubchips();
+      abrir("modal-catedit");
+    }
+
+    function salvarCat() {
+      const id    = document.getElementById("ac-cat-id").value;
+      const nome  = document.getElementById("ac-cat-nome").value.trim();
+      const icone = document.getElementById("ac-cat-icone").value;
+      if (!nome) { avisar("Dê um nome à categoria.", "fa-circle-exclamation"); return; }
+      const subs = _subsEdit.slice();
+
+      if (id) {
+        const cat = catById(id);
+        cat.nome = nome; cat.icone = icone; cat.subs = subs;
+        /* Se uma subcategoria foi removida, os cuidados dela viram "sem sub". */
+        dados.cuidados.forEach(c => {
+          if (c.catId === id && c.subId && !subs.some(s => s.id === c.subId)) c.subId = "";
+        });
+      } else {
+        dados.categorias.push({ id: novoId(), nome, icone, subs });
+      }
+      salvar(); render(); renderCats(); fechar("modal-catedit"); avisar("Categoria salva.");
+    }
+
+    function excluirCat(id) {
+      if (dados.cuidados.some(c => c.catId === id)) {
+        avisar("Esta categoria ainda tem cuidados. Esvazie-a antes.", "fa-circle-exclamation");
+        return;
+      }
+      pedirConfirmacao("Excluir esta categoria?", () => {
+        dados.categorias = dados.categorias.filter(c => c.id !== id);
+        if (filtroCat === id) filtroCat = "todos";
+        salvar(); render(); renderCats(); avisar("Categoria excluída.", "fa-trash");
+      });
+    }
+
+    /* =================================================================
+       COFRE (arquivados)
+       ================================================================= */
+    function abrirCofre() { renderCofre(); abrir("modal-cofre"); }
+    function renderCofre() {
+      const box = document.getElementById("ac-lista-cofre");
+      const arq = dados.cuidados.filter(c => c.arquivado);
+      if (!arq.length) { box.innerHTML = `<p class="ac-vazio-mini" style="text-align:center; padding:24px 0">Nada arquivado por aqui.</p>`; return; }
+      box.innerHTML = arq.map(c => {
+        const cat = catById(c.catId);
+        const icone = cat ? `<span class="ac-mini-icone"><i class="fa-solid ${cat.icone}"></i></span>` : "";
+        return `
+          <div class="ac-linha">
+            <div class="ac-linha__id">
+              ${icone}
+              <div>
+                <p class="ac-linha__nome ac-risco">${esc(c.nome)}</p>
+                <p class="ac-linha__meta">${cat ? esc(cat.nome) : "Sem categoria"}</p>
+              </div>
+            </div>
+            <div class="ac-row__dir">
+              <button class="mini" onclick="restaurarCuidado('${c.id}')" title="Restaurar"><i class="fa-solid fa-rotate-left"></i></button>
+              <button class="mini mini--perigo" onclick="excluirCuidado('${c.id}')" title="Excluir"><i class="fa-solid fa-trash"></i></button>
+            </div>
+          </div>`;
+      }).join("");
+    }
+
+    /* =================================================================
+       UTILIDADES DE MODAL — abrir/fechar, confirmação e aviso
+       ================================================================= */
     function abrir(id)  { document.getElementById(id).classList.add("is-open"); }
     function fechar(id) { document.getElementById(id).classList.remove("is-open"); }
-    /* Fecha o modal se você clicar no fundo escuro (fora da caixa). */
     function fundoModal(e, id) { if (e.target.id === id) fechar(id); }
 
-    /* Aviso flutuante no canto (no lugar do alert feio do navegador). */
     let _toastTimer = null;
     function avisar(msg, icone = "fa-circle-check") {
       const t = document.getElementById("ac-toast");
@@ -510,424 +1142,14 @@
       _toastTimer = setTimeout(() => t.classList.remove("is-open"), 2600);
     }
 
-    /* Confirmação personalizada (no lugar do confirm). Guarda a ação a
-       executar numa variável e só roda se você clicar em "Confirmar". */
     let _confirmaCb = null;
     function pedirConfirmacao(msg, cb) {
       document.getElementById("ac-confirma-msg").textContent = msg;
-      _confirmaCb = cb;
-      abrir("modal-confirma");
+      _confirmaCb = cb; abrir("modal-confirma");
     }
-    function confirmarAcao() {
-      const acao = _confirmaCb;
-      _confirmaCb = null;
-      fechar("modal-confirma");
-      if (acao) acao();
-    }
+    function confirmarAcao() { const f = _confirmaCb; _confirmaCb = null; fechar("modal-confirma"); if (f) f(); }
     function cancelarConfirma() { _confirmaCb = null; fechar("modal-confirma"); }
 
-    /* Monta as <option> do seletor de área, marcando a selecionada. */
-    function opcoesAreas(sel) {
-      return dados.areas
-        .map(a => `<option value="${a.id}" ${a.id === sel ? "selected" : ""}>${esc(a.nome)}</option>`)
-        .join("");
-    }
-
-    /* =================================================================
-       DESENHO DA TELA
-       ================================================================= */
-
-    function render() {
-      renderResumo();
-      renderAreas();
-    }
-
-    function renderResumo() {
-      const ativos  = dados.cuidados.filter(c => !c.arquivado).length;
-      const comprar = dados.produtos.filter(p => !p.arquivado && p.status === "comprar").length;
-      document.getElementById("ac-num-cuidados").textContent = ativos;
-      document.getElementById("ac-num-comprar").textContent  = comprar;
-      document.getElementById("ac-num-areas").textContent    = dados.areas.length;
-    }
-
-    function renderAreas() {
-      const grid = document.getElementById("ac-grid");
-
-      /* Sem nenhuma área? Mostra um convite pra criar a primeira. */
-      if (!dados.areas.length) {
-        grid.innerHTML = `
-          <div class="ac-vazio">
-            <i class="fa-solid fa-hand-holding-heart"></i>
-            <p>Você ainda não tem áreas</p>
-            <button class="btn btn--primary" onclick="abrirNovaArea()"><i class="fa-solid fa-plus"></i> Criar primeira área</button>
-          </div>`;
-        return;
-      }
-
-      grid.innerHTML = dados.areas.map(area => {
-        const cuidados = dados.cuidados.filter(c => c.areaId === area.id && !c.arquivado);
-        const produtos = dados.produtos.filter(p => p.areaId === area.id && !p.arquivado);
-
-        const cuidadosHTML = cuidados.length
-          ? cuidados.map(itemCuidado).join("")
-          : `<p class="ac-vazio-mini">Nenhum cuidado ainda.</p>`;
-
-        const produtosHTML = produtos.length
-          ? produtos.map(itemProduto).join("")
-          : `<p class="ac-vazio-mini">Inventário vazio.</p>`;
-
-        return `
-          <article class="ac-card" style="--ac-cor:${area.cor}">
-            <header class="ac-card__head">
-              <div class="ac-card__id">
-                <span class="ac-card__icone"><i class="fa-solid ${area.icone}"></i></span>
-                <h3 class="ac-card__nome">${esc(area.nome)}</h3>
-              </div>
-              <button class="mini" onclick="editarArea('${area.id}')" aria-label="Editar área"><i class="fa-solid fa-pen"></i></button>
-            </header>
-
-            <section class="ac-secao">
-              <div class="ac-secao__topo">
-                <h4 class="ac-secao__titulo"><i class="fa-solid fa-list-check"></i> Cuidados & frequência</h4>
-                <button class="ac-add" onclick="abrirNovoCuidado('${area.id}')"><i class="fa-solid fa-plus"></i> Add</button>
-              </div>
-              <div class="ac-lista">${cuidadosHTML}</div>
-            </section>
-
-            <section class="ac-secao ac-secao--arsenal">
-              <div class="ac-secao__topo">
-                <h4 class="ac-secao__titulo"><i class="fa-solid fa-spray-can-sparkles"></i> Arsenal de produtos</h4>
-                <button class="ac-add ac-add--ghost" onclick="abrirNovoProduto('${area.id}')"><i class="fa-solid fa-plus"></i> Item</button>
-              </div>
-              <div class="ac-lista">${produtosHTML}</div>
-            </section>
-          </article>`;
-      }).join("");
-    }
-
-    function itemCuidado(c) {
-      const obs = c.obs ? `<p class="ac-item__obs">${esc(c.obs)}</p>` : "";
-      return `
-        <div class="ac-item">
-          <div class="ac-item__txt">
-            <p class="ac-item__acao">${esc(c.acao)}</p>
-            <span class="badge">${esc(c.frequencia || "—")}</span>
-            ${obs}
-          </div>
-          <div class="ac-item__acoes">
-            <button class="mini" onclick="editarCuidado('${c.id}')" aria-label="Editar"><i class="fa-solid fa-pen"></i></button>
-            <button class="mini" onclick="arquivarCuidado('${c.id}')" aria-label="Arquivar"><i class="fa-solid fa-box-archive"></i></button>
-          </div>
-        </div>`;
-    }
-
-    function itemProduto(p) {
-      const ehComprar = p.status === "comprar";
-      const status = ehComprar
-        ? `<button class="ac-status ac-status--comprar" onclick="toggleProduto('${p.id}')" title="Marcar como em casa"><i class="fa-solid fa-cart-shopping"></i> Comprar</button>`
-        : `<button class="ac-status ac-status--casa" onclick="toggleProduto('${p.id}')" title="Marcar como comprar"><i class="fa-solid fa-check"></i> Em casa</button>`;
-      return `
-        <div class="ac-prod">
-          <span class="ac-prod__nome">${esc(p.nome)}</span>
-          <div class="ac-prod__dir">
-            ${status}
-            <button class="mini" onclick="editarProduto('${p.id}')" aria-label="Editar"><i class="fa-solid fa-pen"></i></button>
-            <button class="mini" onclick="arquivarProduto('${p.id}')" aria-label="Arquivar"><i class="fa-solid fa-box-archive"></i></button>
-          </div>
-        </div>`;
-    }
-
-    /* =================================================================
-       CRUD — CUIDADOS
-       ================================================================= */
-
-    function abrirNovoCuidado(areaId) {
-      if (!dados.areas.length) { avisar("Crie uma área primeiro.", "fa-circle-exclamation"); return; }
-      document.getElementById("ac-cuidado-id").value = "";
-      document.getElementById("ac-cuidado-titulo").innerHTML = `<i class="fa-solid fa-list-check" style="color:var(--accent)"></i> Novo cuidado`;
-      document.getElementById("ac-cuidado-area").innerHTML = opcoesAreas(areaId);
-      document.getElementById("ac-cuidado-acao").value = "";
-      document.getElementById("ac-cuidado-freq").value = "";
-      document.getElementById("ac-cuidado-obs").value = "";
-      abrir("modal-cuidado");
-      setTimeout(() => document.getElementById("ac-cuidado-acao").focus(), 50);
-    }
-
-    function editarCuidado(id) {
-      const c = dados.cuidados.find(x => x.id === id);
-      if (!c) return;
-      document.getElementById("ac-cuidado-id").value = c.id;
-      document.getElementById("ac-cuidado-titulo").innerHTML = `<i class="fa-solid fa-pen" style="color:var(--accent)"></i> Editar cuidado`;
-      document.getElementById("ac-cuidado-area").innerHTML = opcoesAreas(c.areaId);
-      document.getElementById("ac-cuidado-acao").value = c.acao;
-      document.getElementById("ac-cuidado-freq").value = c.frequencia;
-      document.getElementById("ac-cuidado-obs").value = c.obs || "";
-      abrir("modal-cuidado");
-    }
-
-    function salvarCuidado() {
-      const id     = document.getElementById("ac-cuidado-id").value;
-      const areaId = document.getElementById("ac-cuidado-area").value;
-      const acao   = document.getElementById("ac-cuidado-acao").value.trim();
-      const freq   = document.getElementById("ac-cuidado-freq").value.trim();
-      const obs    = document.getElementById("ac-cuidado-obs").value.trim();
-
-      if (!areaId || !acao) { avisar("Preencha a área e o que fazer.", "fa-circle-exclamation"); return; }
-
-      if (id) {
-        const c = dados.cuidados.find(x => x.id === id);
-        Object.assign(c, { areaId, acao, frequencia: freq, obs });
-      } else {
-        dados.cuidados.push({ id: novoId(), areaId, acao, frequencia: freq, obs, arquivado: false });
-      }
-      salvar(); render(); fechar("modal-cuidado"); avisar("Cuidado salvo.");
-    }
-
-    function arquivarCuidado(id) {
-      const c = dados.cuidados.find(x => x.id === id);
-      if (!c) return;
-      c.arquivado = true; salvar(); render(); avisar("Cuidado arquivado.", "fa-box-archive");
-    }
-
-    function restaurarCuidado(id) {
-      const c = dados.cuidados.find(x => x.id === id);
-      if (!c) return;
-      c.arquivado = false; salvar(); render(); renderCofre(); avisar("Cuidado restaurado.");
-    }
-
-    function excluirCuidado(id) {
-      pedirConfirmacao("Excluir este cuidado de vez? Não dá pra desfazer.", () => {
-        dados.cuidados = dados.cuidados.filter(x => x.id !== id);
-        salvar(); render(); renderCofre(); avisar("Cuidado excluído.", "fa-trash");
-      });
-    }
-
-    /* =================================================================
-       CRUD — PRODUTOS
-       ================================================================= */
-
-    function abrirNovoProduto(areaId) {
-      if (!dados.areas.length) { avisar("Crie uma área primeiro.", "fa-circle-exclamation"); return; }
-      document.getElementById("ac-produto-id").value = "";
-      document.getElementById("ac-produto-titulo").innerHTML = `<i class="fa-solid fa-spray-can-sparkles" style="color:var(--accent)"></i> Novo produto`;
-      document.getElementById("ac-produto-area").innerHTML = opcoesAreas(areaId);
-      document.getElementById("ac-produto-nome").value = "";
-      document.getElementById("ac-produto-status").value = "casa";
-      abrir("modal-produto");
-      setTimeout(() => document.getElementById("ac-produto-nome").focus(), 50);
-    }
-
-    function editarProduto(id) {
-      const p = dados.produtos.find(x => x.id === id);
-      if (!p) return;
-      document.getElementById("ac-produto-id").value = p.id;
-      document.getElementById("ac-produto-titulo").innerHTML = `<i class="fa-solid fa-pen" style="color:var(--accent)"></i> Editar produto`;
-      document.getElementById("ac-produto-area").innerHTML = opcoesAreas(p.areaId);
-      document.getElementById("ac-produto-nome").value = p.nome;
-      document.getElementById("ac-produto-status").value = p.status;
-      abrir("modal-produto");
-    }
-
-    function salvarProduto() {
-      const id     = document.getElementById("ac-produto-id").value;
-      const areaId = document.getElementById("ac-produto-area").value;
-      const nome   = document.getElementById("ac-produto-nome").value.trim();
-      const status = document.getElementById("ac-produto-status").value;
-
-      if (!areaId || !nome) { avisar("Preencha a área e o nome.", "fa-circle-exclamation"); return; }
-
-      if (id) {
-        const p = dados.produtos.find(x => x.id === id);
-        Object.assign(p, { areaId, nome, status });
-      } else {
-        dados.produtos.push({ id: novoId(), areaId, nome, status, arquivado: false });
-      }
-      salvar(); render(); fechar("modal-produto"); avisar("Produto salvo.");
-    }
-
-    /* Alterna entre "tenho em casa" e "preciso comprar" num clique. */
-    function toggleProduto(id) {
-      const p = dados.produtos.find(x => x.id === id);
-      if (!p) return;
-      p.status = p.status === "comprar" ? "casa" : "comprar";
-      salvar(); render();
-      if (p.status === "comprar") avisar(`"${p.nome}" na lista de compras.`, "fa-cart-shopping");
-      else avisar(`"${p.nome}" marcado como em casa.`, "fa-check");
-    }
-
-    function arquivarProduto(id) {
-      const p = dados.produtos.find(x => x.id === id);
-      if (!p) return;
-      p.arquivado = true; salvar(); render(); avisar("Produto arquivado.", "fa-box-archive");
-    }
-
-    function restaurarProduto(id) {
-      const p = dados.produtos.find(x => x.id === id);
-      if (!p) return;
-      p.arquivado = false; salvar(); render(); renderCofre(); avisar("Produto restaurado.");
-    }
-
-    function excluirProduto(id) {
-      pedirConfirmacao("Excluir este produto de vez?", () => {
-        dados.produtos = dados.produtos.filter(x => x.id !== id);
-        salvar(); render(); renderCofre(); avisar("Produto excluído.", "fa-trash");
-      });
-    }
-
-    /* =================================================================
-       CRUD — ÁREAS
-       ================================================================= */
-
-    /* Preenche o seletor de ícones e atualiza o preview ao lado da cor. */
-    function preencherIcones(sel) {
-      const s = document.getElementById("ac-area-icone");
-      s.innerHTML = ICONES.map(ic => `<option value="${ic}" ${ic === sel ? "selected" : ""}>${ic.replace("fa-", "")}</option>`).join("");
-      atualizarPreviewIcone();
-    }
-
-    function atualizarPreviewIcone() {
-      const ic  = document.getElementById("ac-area-icone").value;
-      const cor = document.getElementById("ac-area-cor").value;
-      const prev = document.getElementById("ac-area-preview");
-      prev.innerHTML = `<i class="fa-solid ${ic}"></i>`;
-      prev.style.color = cor;
-      prev.style.background = corSoft(cor);
-    }
-
-    function abrirNovaArea() {
-      document.getElementById("ac-area-id").value = "";
-      document.getElementById("ac-area-titulo").innerHTML = `<i class="fa-solid fa-layer-group" style="color:var(--accent)"></i> Nova área`;
-      document.getElementById("ac-area-nome").value = "";
-      document.getElementById("ac-area-cor").value = "#10b981";
-      preencherIcones("fa-pump-soap");
-      abrir("modal-area");
-      setTimeout(() => document.getElementById("ac-area-nome").focus(), 50);
-    }
-
-    function editarArea(id) {
-      const a = dados.areas.find(x => x.id === id);
-      if (!a) return;
-      document.getElementById("ac-area-id").value = a.id;
-      document.getElementById("ac-area-titulo").innerHTML = `<i class="fa-solid fa-pen" style="color:var(--accent)"></i> Editar área`;
-      document.getElementById("ac-area-nome").value = a.nome;
-      document.getElementById("ac-area-cor").value = a.cor;
-      preencherIcones(a.icone);
-      abrir("modal-area");
-    }
-
-    function salvarArea() {
-      const id    = document.getElementById("ac-area-id").value;
-      const nome  = document.getElementById("ac-area-nome").value.trim();
-      const icone = document.getElementById("ac-area-icone").value;
-      const cor   = document.getElementById("ac-area-cor").value;
-
-      if (!nome) { avisar("Dê um nome à área.", "fa-circle-exclamation"); return; }
-
-      if (id) {
-        const a = dados.areas.find(x => x.id === id);
-        Object.assign(a, { nome, icone, cor });
-      } else {
-        dados.areas.push({ id: novoId(), nome, icone, cor });
-      }
-      salvar(); render(); renderListaAreas(); fechar("modal-area"); avisar("Área salva.");
-    }
-
-    function excluirArea(id) {
-      /* Trava de segurança: não deixa apagar uma área que ainda tem itens
-         dentro (cuidados ou produtos), pra você não perder nada sem querer. */
-      const temCuidados = dados.cuidados.some(c => c.areaId === id);
-      const temProdutos = dados.produtos.some(p => p.areaId === id);
-      if (temCuidados || temProdutos) {
-        avisar("Esta área ainda tem itens. Esvazie-a antes de excluir.", "fa-circle-exclamation");
-        return;
-      }
-      pedirConfirmacao("Excluir esta área?", () => {
-        dados.areas = dados.areas.filter(a => a.id !== id);
-        salvar(); render(); renderListaAreas(); avisar("Área excluída.", "fa-trash");
-      });
-    }
-
-    /* =================================================================
-       MODAIS DE LISTA — Gerenciar áreas e Cofre de arquivados
-       ================================================================= */
-
-    function abrirAreas() { renderListaAreas(); abrir("modal-areas"); }
-
-    function renderListaAreas() {
-      const box = document.getElementById("ac-lista-areas");
-      if (!dados.areas.length) { box.innerHTML = `<p class="ac-vazio-mini" style="text-align:center;padding:20px 0">Nenhuma área ainda.</p>`; return; }
-
-      box.innerHTML = dados.areas.map(a => {
-        const qtd = dados.cuidados.filter(c => c.areaId === a.id && !c.arquivado).length;
-        return `
-          <div class="ac-area-linha">
-            <div class="ac-area-linha__id">
-              <span class="ac-mini-icone" style="color:${a.cor};background:${corSoft(a.cor)}"><i class="fa-solid ${a.icone}"></i></span>
-              <div>
-                <p class="ac-area-linha__nome">${esc(a.nome)}</p>
-                <p class="ac-area-linha__meta">${qtd} cuidado(s)</p>
-              </div>
-            </div>
-            <div class="ac-item__acoes">
-              <button class="mini" onclick="editarArea('${a.id}')" aria-label="Editar"><i class="fa-solid fa-pen"></i></button>
-              <button class="mini mini--perigo" onclick="excluirArea('${a.id}')" aria-label="Excluir"><i class="fa-solid fa-trash"></i></button>
-            </div>
-          </div>`;
-      }).join("");
-    }
-
-    function abrirCofre() { renderCofre(); abrir("modal-cofre"); }
-
-    function renderCofre() {
-      const box = document.getElementById("ac-lista-cofre");
-      const cuid = dados.cuidados.filter(c => c.arquivado);
-      const prod = dados.produtos.filter(p => p.arquivado);
-
-      if (!cuid.length && !prod.length) {
-        box.innerHTML = `<p class="ac-vazio-mini" style="text-align:center;padding:24px 0">Nada arquivado por aqui.</p>`;
-        return;
-      }
-
-      let html = "";
-      if (cuid.length) {
-        html += `<h4 class="ac-cofre-tit">Cuidados arquivados</h4>`;
-        html += cuid.map(c => {
-          const area = dados.areas.find(a => a.id === c.areaId);
-          return linhaCofre(c.acao, area, `restaurarCuidado('${c.id}')`, `excluirCuidado('${c.id}')`);
-        }).join("");
-      }
-      if (prod.length) {
-        html += `<h4 class="ac-cofre-tit" style="margin-top:18px">Produtos arquivados</h4>`;
-        html += prod.map(p => {
-          const area = dados.areas.find(a => a.id === p.areaId);
-          return linhaCofre(p.nome, area, `restaurarProduto('${p.id}')`, `excluirProduto('${p.id}')`);
-        }).join("");
-      }
-      box.innerHTML = html;
-    }
-
-    function linhaCofre(texto, area, restaurarFn, excluirFn) {
-      const icone = area
-        ? `<span class="ac-mini-icone" style="color:${area.cor};background:${corSoft(area.cor)}"><i class="fa-solid ${area.icone}"></i></span>`
-        : "";
-      const nomeArea = area ? esc(area.nome) : "Sem área";
-      return `
-        <div class="ac-area-linha">
-          <div class="ac-area-linha__id">
-            ${icone}
-            <div>
-              <p class="ac-area-linha__nome ac-risco">${esc(texto)}</p>
-              <p class="ac-area-linha__meta">${nomeArea}</p>
-            </div>
-          </div>
-          <div class="ac-item__acoes">
-            <button class="mini" onclick="${restaurarFn}" aria-label="Restaurar"><i class="fa-solid fa-rotate-left"></i></button>
-            <button class="mini mini--perigo" onclick="${excluirFn}" aria-label="Excluir"><i class="fa-solid fa-trash"></i></button>
-          </div>
-        </div>`;
-    }
-
-    /* Fechar qualquer modal com a tecla Esc. */
     document.addEventListener("keydown", (e) => {
       if (e.key === "Escape") {
         document.querySelectorAll(".modal.is-open").forEach(m => m.classList.remove("is-open"));
@@ -935,8 +1157,7 @@
       }
     });
 
-    /* PARTIDA: desenha a tela assim que o script carrega.
-       (O app.js, incluído antes, já montou sidebar, tema e rodapé.) */
+    /* PARTIDA: desenha a tela. (O app.js já montou sidebar/tema/rodapé.) */
     render();
   </script>
 </body>

@@ -260,6 +260,24 @@ function montarSidebar() {
         <i class="fa-solid fa-angles-left"></i>
       </button>
     </aside>`;
+
+  // Contador de tarefas pendentes — badge verde ao lado de "Tarefas" no menu.
+  // Lê direto do Store sem precisar que a página de Tarefas esteja aberta,
+  // então o número aparece em QUALQUER página do planner.
+  try {
+    const tarefas = Store.ler("tarefas", []);
+    const pendentes = tarefas.filter(t => !t.concluida).length;
+    if (pendentes > 0) {
+      const linkTarefas = container.querySelector('a[href="tarefas.html"]');
+      if (linkTarefas) {
+        const badge = document.createElement("span");
+        badge.textContent = pendentes > 99 ? "99+" : String(pendentes);
+        badge.style.cssText = "margin-left:auto;background:var(--accent);color:#fff;" +
+          "font-size:9px;font-weight:800;border-radius:99px;padding:2px 7px;flex-shrink:0;";
+        linkTarefas.appendChild(badge);
+      }
+    }
+  } catch(e) { /* silencia se os dados ainda não existirem */ }
 }
 
 

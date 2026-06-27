@@ -328,6 +328,105 @@
     .sa-exr__nome { font-size:12px; font-weight:800; margin-right:2px; }
     .sa-tag2 { font-size:10px; font-weight:700; padding:2px 8px; border:1px solid var(--border); border-radius:8px; color:var(--text-muted); white-space:nowrap; }
 
+    /* radar + split lado a lado no desktop; empilha no mobile */
+    .sa-toprow { display:flex; gap:20px; align-items:flex-start; margin-bottom:20px; }
+    .sa-toprow .sa-radar { flex:0 0 400px; max-width:400px; margin-bottom:0; }
+    .sa-toprow .sa-splitcard { flex:1; min-width:0; margin-bottom:0; }
+
+    /* ===================================================================== */
+    /* NUTRIÇÃO · aba Alimentação (prefixo nu-)                              */
+    /* ===================================================================== */
+    .nu-subtabs { display:flex; gap:8px; overflow-x:auto; margin-bottom:18px; flex-wrap:wrap; }
+    .nu-subtab {
+      flex-shrink:0; padding:9px 14px; border-radius:99px; border:1px solid var(--border);
+      background:var(--bg-soft); color:var(--text-muted); font-weight:800; font-size:11px;
+      cursor:pointer; display:flex; align-items:center; gap:7px; transition:.2s;
+    }
+    .nu-subtab:hover { color:var(--text-strong); }
+    .nu-subtab.is-active { color:#fff; background:var(--accent); border-color:var(--accent); }
+    .nu-subpanel { display:none; }
+    .nu-subpanel.is-active { display:block; animation:fadeUp .35s ease both; }
+
+    /* faixa de status da semana (topo do "Hoje") */
+    .nu-now { display:flex; align-items:center; gap:14px; flex-wrap:wrap;
+      padding:16px; border-radius:14px; background:var(--bg-soft);
+      border:1px solid var(--border); border-left:5px solid var(--accent); margin-bottom:18px; }
+    .nu-now__big { font-size:26px; font-weight:900; color:var(--text-strong); line-height:1; }
+    .nu-now__lbl { font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:1px; color:var(--text-muted); }
+
+    /* cartões de refeição do "Hoje" */
+    .nu-meal { display:flex; gap:14px; padding:15px; border-radius:14px; background:var(--panel);
+      border:1px solid var(--border); border-left:4px solid var(--accent); margin-bottom:11px; }
+    .nu-meal__ic { width:42px; height:42px; border-radius:12px; display:flex; align-items:center;
+      justify-content:center; font-size:18px; background:var(--bg-soft); flex-shrink:0; }
+    .nu-meal__lbl { font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:1px; color:var(--text-muted); }
+    .nu-meal__nome { font-size:14px; font-weight:700; color:var(--text-strong); margin-top:3px; line-height:1.4; }
+    .nu-meal__sub { font-size:11px; color:var(--text-muted); margin-top:5px; line-height:1.45; }
+
+    /* chips e macros */
+    .nu-chip { display:inline-flex; align-items:center; gap:5px; padding:4px 11px; border-radius:999px;
+      font-size:10px; font-weight:800; background:var(--bg-soft); border:1px solid var(--border); }
+    .nu-macros { display:flex; gap:8px; flex-wrap:wrap; margin-top:12px; }
+    .nu-macro { flex:1; min-width:84px; text-align:center; background:var(--bg-soft); border:1px solid var(--border);
+      border-radius:10px; padding:9px; }
+    .nu-macro b { display:block; font-size:13px; color:var(--text-strong); }
+    .nu-macro span { font-size:9px; text-transform:uppercase; letter-spacing:1px; color:var(--text-muted); font-weight:800; }
+
+    /* cronograma — semana colapsável */
+    .nu-wk { border:1px solid var(--border); border-radius:14px; margin-bottom:10px; overflow:hidden; background:var(--panel); }
+    .nu-wk.is-now { border-color:var(--accent); box-shadow:0 0 0 1px var(--accent); }
+    .nu-wk__head { display:flex; align-items:center; gap:11px; padding:13px 15px; cursor:pointer; user-select:none; }
+    .nu-wk__head h4 { font-size:13px; margin:0; flex:1; color:var(--text-strong); }
+    .nu-wk__chev { transition:.25s; color:var(--text-muted); }
+    .nu-wk.is-open .nu-wk__chev { transform:rotate(90deg); }
+    .nu-wk__body { display:none; padding:2px 15px 15px; }
+    .nu-wk.is-open .nu-wk__body { display:block; }
+    .nu-wk__row { display:flex; gap:10px; padding:9px 0; border-top:1px dashed var(--border); font-size:12px; }
+    .nu-wk__row b { flex-shrink:0; width:78px; color:var(--text-muted); font-size:9px; text-transform:uppercase; letter-spacing:.5px; padding-top:3px; font-weight:800; }
+    .nu-wk__row span { color:var(--text-strong); line-height:1.45; }
+
+    /* fases */
+    .nu-fase { border:1px solid var(--border); border-left-width:5px; border-radius:14px; padding:16px; background:var(--panel); margin-bottom:12px; }
+    .nu-fase.is-now { box-shadow:0 0 0 1px var(--accent); }
+    .nu-fase__top { display:flex; align-items:center; gap:9px; margin-bottom:6px; }
+    .nu-fase__top h4 { margin:0; font-size:15px; flex:1; color:var(--text-strong); }
+    .nu-fase__txt { font-size:12px; color:var(--text-muted); line-height:1.5; margin:4px 0; }
+
+    /* biblioteca de receitas */
+    .nu-rec { border:1px solid var(--border); border-radius:14px; padding:15px; background:var(--panel); margin-bottom:11px; }
+    .nu-rec__top { display:flex; align-items:flex-start; gap:10px; margin-bottom:8px; }
+    .nu-rec__top h4 { margin:0; font-size:14px; flex:1; color:var(--text-strong); line-height:1.35; }
+    .nu-rec__ing { font-size:12px; color:var(--text-muted); line-height:1.5; }
+    .nu-rec__dica { font-size:11px; font-style:italic; color:var(--text-muted); margin-top:8px;
+      background:var(--bg-soft); border-radius:8px; padding:8px 10px; border-left:3px solid var(--accent); }
+
+    /* lista de compras */
+    .nu-catname { font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:1px;
+      color:var(--accent); margin:18px 0 9px; }
+    .nu-buy { display:flex; align-items:center; gap:11px; padding:10px 12px; border-radius:10px;
+      background:var(--bg-soft); border:1px solid var(--border); margin-bottom:6px; cursor:pointer; transition:.15s; }
+    .nu-buy.is-done { opacity:.5; }
+    .nu-buy.is-done .nu-buy__txt { text-decoration:line-through; }
+    .nu-buy__box { width:20px; height:20px; border-radius:6px; border:2px solid var(--border);
+      display:flex; align-items:center; justify-content:center; flex-shrink:0; color:#fff; font-size:11px; }
+    .nu-buy.is-done .nu-buy__box { background:var(--accent); border-color:var(--accent); }
+    .nu-buy__txt { font-size:13px; flex:1; color:var(--text-strong); }
+
+    @media (max-width:880px){
+      .sa-toprow { flex-direction:column; }
+      .sa-toprow .sa-radar { flex:none; max-width:none; width:100%; }
+    }
+
+    /* dica/progressão do exercício com destaque de fundo */
+    .sa-exr__dica { font-style:normal; background:var(--panel); border:1px solid var(--border); border-radius:8px; padding:7px 10px; margin-top:7px; line-height:1.45; }
+    .sa-exr__dica i { color:var(--accent); margin-right:5px; }
+
+    /* seletor de planos de corrida */
+    .sa-plan-sel { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:16px; }
+    .sa-plan-sel button { flex:1; min-width:120px; padding:10px 12px; border-radius:12px; background:var(--bg-soft); border:1px solid var(--border); color:var(--text-muted); font-weight:800; font-size:11px; cursor:pointer; text-align:left; line-height:1.3; }
+    .sa-plan-sel button.is-on { border-color:var(--sa-corrida); color:var(--text-strong); box-shadow:var(--shadow); }
+    .sa-plan-sel button small { display:block; font-size:9px; font-weight:700; color:var(--text-muted); margin-top:2px; }
+
     @media (max-width:520px){
       .sa-row2 { grid-template-columns:1fr; }
       .sa-xp { flex-direction:column; text-align:center; }
@@ -441,25 +540,50 @@
       <!-- ============================================================== -->
       <section id="sa-panel-treino" class="sa-panel">
 
-        <!-- ===== RADAR DE CONSTÂNCIA (topo, compartilhado) ===== -->
-        <div class="card sa-card-top sa-radar" style="margin-bottom:20px;">
-          <div class="sa-head">
-            <h3><i class="fa-solid fa-fire" style="color:var(--accent)"></i> Radar de Constância</h3>
-            <div style="display:flex; gap:6px;">
-              <button class="btn btn--icon" onclick="SA.mesRadar(-1)"><i class="fa-solid fa-chevron-left"></i></button>
-              <button class="btn btn--icon" onclick="SA.mesRadar(1)"><i class="fa-solid fa-chevron-right"></i></button>
+        <!-- ===== TOPO: Futebol (só na aba futebol) ===== -->
+        <div id="futebol-top" style="display:none; margin-bottom:20px;">
+          <div class="card sa-card-top" style="border-top-color:var(--sa-fut)">
+            <div class="sa-head">
+              <h3><i class="fa-solid fa-futbol" style="color:var(--sa-fut)"></i> Peladas &amp; Jogos</h3>
+              <button class="btn btn--primary" style="background:var(--sa-fut); border-color:var(--sa-fut)" onclick="SA.openFut()"><i class="fa-solid fa-plus"></i> Registrar Jogo</button>
             </div>
+            <div class="sa-stats">
+              <div class="sa-stat"><div class="sa-stat__num" id="fut-jogos" style="color:var(--sa-fut)">0</div><div class="sa-stat__lbl">Jogos</div></div>
+              <div class="sa-stat"><div class="sa-stat__num" id="fut-gols">0</div><div class="sa-stat__lbl">Gols</div></div>
+              <div class="sa-stat"><div class="sa-stat__num" id="fut-assist">0</div><div class="sa-stat__lbl">Assist.</div></div>
+              <div class="sa-stat"><div class="sa-stat__num" id="fut-nota">--</div><div class="sa-stat__lbl">Nota média</div></div>
+            </div>
+            <div class="sa-list" id="fut-lista"></div>
           </div>
-          <div class="sa-stats">
-            <div class="sa-stat"><div class="sa-stat__num" id="radar-musc" style="color:var(--sa-musc)">0</div><div class="sa-stat__lbl">💪 Musc.</div></div>
-            <div class="sa-stat"><div class="sa-stat__num" id="radar-cor" style="color:var(--sa-corrida)">0</div><div class="sa-stat__lbl">🏃 Corrida</div></div>
-            <div class="sa-stat"><div class="sa-stat__num" id="radar-fut" style="color:var(--sa-fut)">0</div><div class="sa-stat__lbl">⚽ Futebol</div></div>
-            <div class="sa-stat"><div class="sa-stat__num" id="radar-total">0</div><div class="sa-stat__lbl">Total dias</div></div>
+        </div>
+
+        <!-- ===== RADAR (compacto) + MAPA DO SPLIT lado a lado ===== -->
+        <div class="sa-toprow">
+          <div class="card sa-card-top sa-radar">
+            <div class="sa-head">
+              <h3><i class="fa-solid fa-fire" style="color:var(--accent)"></i> Radar de Constância</h3>
+              <div style="display:flex; gap:6px;">
+                <button class="btn btn--icon" onclick="SA.mesRadar(-1)"><i class="fa-solid fa-chevron-left"></i></button>
+                <button class="btn btn--icon" onclick="SA.mesRadar(1)"><i class="fa-solid fa-chevron-right"></i></button>
+              </div>
+            </div>
+            <div class="sa-stats">
+              <div class="sa-stat"><div class="sa-stat__num" id="radar-musc" style="color:var(--sa-musc)">0</div><div class="sa-stat__lbl">💪 Musc.</div></div>
+              <div class="sa-stat"><div class="sa-stat__num" id="radar-cor" style="color:var(--sa-corrida)">0</div><div class="sa-stat__lbl">🏃 Corrida</div></div>
+              <div class="sa-stat"><div class="sa-stat__num" id="radar-fut" style="color:var(--sa-fut)">0</div><div class="sa-stat__lbl">⚽ Futebol</div></div>
+              <div class="sa-stat"><div class="sa-stat__num" id="radar-total">0</div><div class="sa-stat__lbl">Total</div></div>
+            </div>
+            <p style="text-align:center; font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:1px; margin-bottom:10px;" id="radar-label">--</p>
+            <div class="sa-cal-week"><span>D</span><span>S</span><span>T</span><span>Q</span><span>Q</span><span>S</span><span>S</span></div>
+            <div class="sa-cal" id="radar-grid"></div>
+            <p style="font-size:10px; color:var(--text-muted); margin-top:10px; text-align:center;"><i class="fa-solid fa-hand-pointer"></i> 1× 💪 · 2× 🏃 · 3× ⚽ · 4× limpa</p>
           </div>
-          <p style="text-align:center; font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:1px; margin-bottom:10px;" id="radar-label">--</p>
-          <div class="sa-cal-week"><span>D</span><span>S</span><span>T</span><span>Q</span><span>Q</span><span>S</span><span>S</span></div>
-          <div class="sa-cal" id="radar-grid"></div>
-          <p style="font-size:10px; color:var(--text-muted); margin-top:10px; text-align:center;"><i class="fa-solid fa-hand-pointer"></i> Clique no dia: 1× 💪 musculação · 2× 🏃 corrida · 3× ⚽ futebol · 4× limpa</p>
+
+          <div class="card sa-card-top sa-splitcard">
+            <div class="sa-head"><h3><i class="fa-solid fa-diagram-project"></i> Mapa do Split (referência)</h3></div>
+            <p style="font-size:11px; color:var(--text-muted); margin-bottom:14px;">Os 8 grupos do ciclo e seus exercícios por seção. Clique para abrir.</p>
+            <div class="sa-split" id="peri-split"></div>
+          </div>
         </div>
 
         <!-- ===== SUB-ABAS ===== -->
@@ -473,17 +597,12 @@
 
         <!-- ===== SUB: PERIODIZAÇÃO (hub) ===== -->
         <div id="sa-sub-peri" class="sa-subpanel is-active">
-          <div class="card sa-card-top" style="margin-bottom:20px;">
+          <div class="card sa-card-top">
             <div class="sa-head"><h3><i class="fa-solid fa-layer-group"></i> Ciclo de Treino — Periodização Clássica</h3></div>
             <p style="font-size:11px; color:var(--text-muted); margin-bottom:16px;">
               Defina a <b>data de início</b> de cada fase e <b>ative</b> a fase atual. As séries, reps e carga das fichas de Força seguem a fase ativa automaticamente.
             </p>
             <div class="grid grid--2" id="peri-fases"></div>
-          </div>
-          <div class="card sa-card-top">
-            <div class="sa-head"><h3><i class="fa-solid fa-diagram-project"></i> Mapa do Split (referência)</h3></div>
-            <p style="font-size:11px; color:var(--text-muted); margin-bottom:14px;">Os 8 grupos do ciclo e seus exercícios por seção. Clique para abrir.</p>
-            <div class="sa-split" id="peri-split"></div>
           </div>
         </div>
 
@@ -525,16 +644,15 @@
         <!-- ===== SUB: CORRIDA (plano de 12 semanas) ===== -->
         <div id="sa-sub-corrida" class="sa-subpanel">
           <div class="card sa-card-top" style="border-top-color:var(--sa-corrida); margin-bottom:20px;">
-            <div class="sa-head"><h3><i class="fa-solid fa-flag-checkered" style="color:var(--sa-corrida)"></i> Plano de Corrida — 12 Semanas</h3></div>
-            <div class="sa-fase-banner" style="border-left-color:var(--sa-corrida)">
-              <span>🎯 <b style="color:var(--sa-corrida)">5 km em menos de 30 min</b></span>
-              <span>⏱️ Ritmo-alvo: &lt; 6:00/km (&gt; 10 km/h)</span>
-            </div>
+            <div class="sa-head"><h3><i class="fa-solid fa-flag-checkered" style="color:var(--sa-corrida)"></i> Planos de Corrida</h3></div>
+            <p style="font-size:11px; color:var(--text-muted); margin-bottom:12px;">Escolha seu objetivo. Cada plano usa a mesma lógica 80/20, com mais ou menos semanas — e guarda o próprio progresso.</p>
+            <div class="sa-plan-sel" id="cor-plan-sel"></div>
+            <div class="sa-fase-banner" id="cor-alvo" style="border-left-color:var(--sa-corrida)"></div>
             <div class="sa-row2">
               <div class="sa-field"><label class="sa-label">Início do plano</label><input type="date" class="sa-input" id="cor-inicio" onchange="SA.setCorInicio()"></div>
               <div class="sa-field"><label class="sa-label">Conclusão prevista</label><input type="text" class="sa-input" id="cor-fim" readonly></div>
             </div>
-            <p style="font-size:11px; font-weight:800; margin-bottom:6px;">Progresso: <span id="cor-prog-txt">0 de 36 corridas (0%)</span></p>
+            <p style="font-size:11px; font-weight:800; margin-bottom:6px;">Progresso: <span id="cor-prog-txt">0 de 0 corridas (0%)</span></p>
             <div class="sa-xp__track"><div class="sa-xp__fill" id="cor-prog-bar" style="background:linear-gradient(90deg,#d97706,var(--sa-corrida))"></div></div>
           </div>
           <div class="card sa-card-top" style="border-top-color:var(--sa-corrida); margin-bottom:20px;">
@@ -547,22 +665,8 @@
           </div>
         </div>
 
-        <!-- ===== SUB: FUTEBOL ===== -->
-        <div id="sa-sub-futebol" class="sa-subpanel">
-          <div class="card sa-card-top" style="border-top-color:var(--sa-fut)">
-            <div class="sa-head">
-              <h3><i class="fa-solid fa-futbol" style="color:var(--sa-fut)"></i> Peladas &amp; Jogos</h3>
-              <button class="btn btn--primary" style="background:var(--sa-fut); border-color:var(--sa-fut)" onclick="SA.openFut()"><i class="fa-solid fa-plus"></i> Registrar Jogo</button>
-            </div>
-            <div class="sa-stats">
-              <div class="sa-stat"><div class="sa-stat__num" id="fut-jogos" style="color:var(--sa-fut)">0</div><div class="sa-stat__lbl">Jogos</div></div>
-              <div class="sa-stat"><div class="sa-stat__num" id="fut-gols">0</div><div class="sa-stat__lbl">Gols</div></div>
-              <div class="sa-stat"><div class="sa-stat__num" id="fut-assist">0</div><div class="sa-stat__lbl">Assist.</div></div>
-              <div class="sa-stat"><div class="sa-stat__num" id="fut-nota">--</div><div class="sa-stat__lbl">Nota média</div></div>
-            </div>
-            <div class="sa-list" id="fut-lista"></div>
-          </div>
-        </div>
+        <!-- ===== SUB: FUTEBOL (conteúdo fica no topo, acima do radar) ===== -->
+        <div id="sa-sub-futebol" class="sa-subpanel"></div>
 
         <!-- ===== SUB: OUTROS ===== -->
         <div id="sa-sub-outros" class="sa-subpanel">
@@ -584,69 +688,120 @@
       <!-- ABA 3 · ALIMENTAÇÃO & HIDRATAÇÃO                               -->
       <!-- ============================================================== -->
       <section id="sa-panel-nutri" class="sa-panel">
-        <div class="grid grid--2">
 
-          <!-- Plano alimentar -->
-          <div class="card sa-card-top">
+        <!-- sub-abas da Alimentação -->
+        <div class="nu-subtabs">
+          <button class="nu-subtab is-active" onclick="NU.subtab('hoje')"><i class="fa-solid fa-bowl-food"></i> Hoje</button>
+          <button class="nu-subtab" onclick="NU.subtab('crono')"><i class="fa-solid fa-calendar-days"></i> Cronograma</button>
+          <button class="nu-subtab" onclick="NU.subtab('fases')"><i class="fa-solid fa-layer-group"></i> Fases</button>
+          <button class="nu-subtab" onclick="NU.subtab('receitas')"><i class="fa-solid fa-book-open"></i> Receitas</button>
+          <button class="nu-subtab" onclick="NU.subtab('compras')"><i class="fa-solid fa-cart-shopping"></i> Compras</button>
+          <button class="nu-subtab" onclick="NU.subtab('progresso')"><i class="fa-solid fa-chart-line"></i> Progresso</button>
+        </div>
+
+        <!-- ===== HOJE ===== -->
+        <div id="nu-sub-hoje" class="nu-subpanel is-active">
+          <div class="grid grid--2">
+            <div>
+              <div class="card sa-card-top" style="border-top-color:var(--sa-good)">
+                <div class="sa-head"><h3><i class="fa-solid fa-bowl-food"></i> O que comer hoje</h3></div>
+                <div id="nu-hoje"></div>
+              </div>
+            </div>
+
+            <!-- Hidratação (integrada à fase) -->
+            <div>
+              <div class="card sa-card-top" style="border-top-color:var(--sa-agua)">
+                <div class="sa-head">
+                  <h3><i class="fa-solid fa-droplet" style="color:var(--sa-agua)"></i> Hidratação</h3>
+                  <div style="display:flex; gap:6px; align-items:center;">
+                    <button class="btn btn--icon" onclick="SA.diaAgua(-1)"><i class="fa-solid fa-chevron-left"></i></button>
+                    <span id="agua-dia" style="font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:1px; width:60px; text-align:center;">HOJE</span>
+                    <button class="btn btn--icon" onclick="SA.diaAgua(1)"><i class="fa-solid fa-chevron-right"></i></button>
+                  </div>
+                </div>
+                <div style="display:flex; gap:18px; align-items:center;">
+                  <div class="sa-water"><div class="sa-water__fill" id="agua-fill"></div><div class="sa-water__drop"><i class="fa-solid fa-droplet"></i></div></div>
+                  <div style="flex:1;">
+                    <div class="sa-stat" style="margin-bottom:12px;">
+                      <div class="sa-stat__num" style="color:var(--sa-agua)"><span id="agua-ml">0</span> ml</div>
+                      <div class="sa-stat__lbl">Meta: <span id="agua-meta">2500</span> ml</div>
+                    </div>
+                    <div class="sa-row2" style="gap:8px;">
+                      <button class="btn" onclick="SA.addAgua(250)">+250</button>
+                      <button class="btn" onclick="SA.addAgua(500)">+500</button>
+                      <button class="btn" onclick="SA.addAgua(-250)">-250</button>
+                      <button class="btn" onclick="SA.setMetaAgua()"><i class="fa-solid fa-sliders"></i></button>
+                    </div>
+                    <p style="font-size:10px; color:var(--text-muted); margin-top:10px; text-align:center;">Dias na meta: <b id="agua-dias" style="color:var(--sa-agua)">0</b></p>
+                  </div>
+                </div>
+                <div id="nu-agua-meta-fase" style="margin-top:14px;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== CRONOGRAMA ===== -->
+        <div id="nu-sub-crono" class="nu-subpanel">
+          <div class="card sa-card-top" style="border-top-color:var(--sa-good)">
             <div class="sa-head">
-              <h3><i class="fa-solid fa-utensils"></i> Plano Alimentar</h3>
-              <button class="btn btn--primary" onclick="SA.openRefeicao()"><i class="fa-solid fa-plus"></i> Refeição</button>
+              <h3><i class="fa-solid fa-calendar-days"></i> Cronograma · 12 Semanas</h3>
             </div>
-            <div class="sa-list" id="refeicoes-lista" style="margin-bottom:16px;"></div>
-            <button class="btn" style="width:100%; justify-content:center;" onclick="SA.arquivarDieta()"><i class="fa-solid fa-box-archive"></i> Arquivar este plano</button>
-            <div style="margin-top:16px;">
-              <p class="sa-label">Planos salvos</p>
-              <div class="sa-list" id="dietas-arquivadas"></div>
-            </div>
-          </div>
-
-          <!-- Hidratação + prato -->
-          <div style="display:flex; flex-direction:column; gap:20px;">
-            <div class="card sa-card-top" style="border-top-color:var(--sa-agua)">
-              <div class="sa-head">
-                <h3><i class="fa-solid fa-droplet" style="color:var(--sa-agua)"></i> Hidratação</h3>
-                <div style="display:flex; gap:6px; align-items:center;">
-                  <button class="btn btn--icon" onclick="SA.diaAgua(-1)"><i class="fa-solid fa-chevron-left"></i></button>
-                  <span id="agua-dia" style="font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:1px; width:60px; text-align:center;">HOJE</span>
-                  <button class="btn btn--icon" onclick="SA.diaAgua(1)"><i class="fa-solid fa-chevron-right"></i></button>
-                </div>
-              </div>
-              <div style="display:flex; gap:18px; align-items:center;">
-                <div class="sa-water"><div class="sa-water__fill" id="agua-fill"></div><div class="sa-water__drop"><i class="fa-solid fa-droplet"></i></div></div>
-                <div style="flex:1;">
-                  <div class="sa-stat" style="margin-bottom:12px;">
-                    <div class="sa-stat__num" style="color:var(--sa-agua)"><span id="agua-ml">0</span> ml</div>
-                    <div class="sa-stat__lbl">Meta: <span id="agua-meta">2500</span> ml</div>
-                  </div>
-                  <div class="sa-row2" style="gap:8px;">
-                    <button class="btn" onclick="SA.addAgua(250)">+250</button>
-                    <button class="btn" onclick="SA.addAgua(500)">+500</button>
-                    <button class="btn" onclick="SA.addAgua(-250)">-250</button>
-                    <button class="btn" onclick="SA.setMetaAgua()"><i class="fa-solid fa-sliders"></i></button>
-                  </div>
-                  <p style="font-size:10px; color:var(--text-muted); margin-top:10px; text-align:center;">Dias na meta: <b id="agua-dias" style="color:var(--sa-agua)">0</b></p>
-                </div>
-              </div>
-            </div>
-
-            <div class="card sa-card-top">
-              <div class="sa-head"><h3><i class="fa-solid fa-plate-wheat"></i> Guia do Prato</h3></div>
-              <div class="sa-check" style="border-left:4px solid var(--sa-good)"><span class="sa-check__txt">50% Salada / Vegetais</span></div>
-              <div class="sa-check" style="border-left:4px solid var(--sa-bad); margin-top:8px;"><span class="sa-check__txt">25% Proteína magra</span></div>
-              <div class="sa-check" style="border-left:4px solid var(--sa-mid); margin-top:8px;"><span class="sa-check__txt">25% Carboidrato complexo</span></div>
-            </div>
+            <p style="font-size:11px; color:var(--text-muted); margin-bottom:16px;">Cardápio completo de cada semana. A semana atual fica em destaque. Toque para abrir; use o lápis para editar.</p>
+            <div id="nu-crono"></div>
           </div>
         </div>
 
-        <!-- Códex de alimentos -->
-        <div class="card sa-card-top" style="margin-top:20px;">
-          <div class="sa-head">
-            <h3><i class="fa-solid fa-leaf"></i> Códex de Alimentos</h3>
-            <button class="btn btn--primary" onclick="SA.openAlimento()"><i class="fa-solid fa-plus"></i> Cadastrar</button>
+        <!-- ===== FASES ===== -->
+        <div id="nu-sub-fases" class="nu-subpanel">
+          <div class="card sa-card-top" style="border-top-color:var(--sa-good)">
+            <div class="sa-head"><h3><i class="fa-solid fa-layer-group"></i> Fases da Periodização</h3></div>
+            <div style="display:flex; gap:10px; align-items:flex-end; flex-wrap:wrap; margin-bottom:18px;">
+              <div class="sa-field" style="flex:1; min-width:180px; margin:0;">
+                <label class="sa-label">Início da Semana 1</label>
+                <input type="date" class="sa-input" id="nu-inicio" onchange="NU.setInicio(this.value)">
+              </div>
+              <p style="font-size:11px; color:var(--text-muted); flex:2; min-width:200px;">Defina só esta data — as 6 fases (2 semanas cada) e os status são calculados automaticamente.</p>
+            </div>
+            <div id="nu-fases"></div>
           </div>
-          <p style="font-size:11px; color:var(--text-muted); margin-bottom:16px;">Anote como cada alimento te faz sentir (vitalidade de 1 a 5). Com o tempo você descobre seus padrões.</p>
-          <div class="grid grid--3" id="alimentos-lista"></div>
         </div>
+
+        <!-- ===== RECEITAS ===== -->
+        <div id="nu-sub-receitas" class="nu-subpanel">
+          <div class="card sa-card-top" style="border-top-color:var(--sa-good)">
+            <div class="sa-head"><h3><i class="fa-solid fa-book-open"></i> Biblioteca de Receitas</h3></div>
+            <div class="nu-subtabs" style="margin-bottom:16px;">
+              <button class="nu-subtab is-active" onclick="NU.recTab('cafes', this)"><i class="fa-solid fa-mug-saucer"></i> Cafés</button>
+              <button class="nu-subtab" onclick="NU.recTab('pratos', this)"><i class="fa-solid fa-drumstick-bite"></i> Pratos</button>
+              <button class="nu-subtab" onclick="NU.recTab('lanches', this)"><i class="fa-solid fa-apple-whole"></i> Lanches</button>
+              <button class="nu-subtab" onclick="NU.recTab('marmitas', this)"><i class="fa-solid fa-box"></i> Marmitas A/B</button>
+            </div>
+            <div id="nu-rec"></div>
+          </div>
+        </div>
+
+        <!-- ===== COMPRAS ===== -->
+        <div id="nu-sub-compras" class="nu-subpanel">
+          <div class="card sa-card-top" style="border-top-color:var(--sa-good)">
+            <div class="sa-head">
+              <h3><i class="fa-solid fa-cart-shopping"></i> Lista de Compras</h3>
+              <button class="btn" onclick="NU.limparCompras()"><i class="fa-solid fa-rotate-left"></i> Desmarcar</button>
+            </div>
+            <div id="nu-compras"></div>
+          </div>
+        </div>
+
+        <!-- ===== PROGRESSO ===== -->
+        <div id="nu-sub-progresso" class="nu-subpanel">
+          <div class="card sa-card-top" style="border-top-color:var(--sa-good)">
+            <div class="sa-head"><h3><i class="fa-solid fa-chart-line"></i> Progresso Semanal</h3></div>
+            <p style="font-size:11px; color:var(--text-muted); margin-bottom:16px;">Registre toda segunda-feira: peso, cintura, energia, disposição, sono e hidratação.</p>
+            <div id="nu-prog"></div>
+          </div>
+        </div>
+
       </section>
 
       <!-- ============================================================== -->
@@ -877,39 +1032,13 @@
     </div>
   </div>
 
-  <!-- Refeição -->
-  <div id="sa-modal-refeicao" class="modal">
+  <!-- Formulário genérico de Nutrição (usado em fases, receitas, métricas, compras) -->
+  <div id="nu-modal-form" class="modal">
     <div class="modal__box">
-      <div class="modal__head"><h3 id="ref-titulo"><i class="fa-solid fa-utensils"></i> Refeição</h3><button class="modal__close" onclick="SA.closeM('sa-modal-refeicao')"><i class="fa-solid fa-xmark"></i></button></div>
+      <div class="modal__head"><h3 id="nu-form-titulo"><i class="fa-solid fa-pen"></i> Editar</h3><button class="modal__close" onclick="SA.closeM('nu-modal-form')"><i class="fa-solid fa-xmark"></i></button></div>
       <div class="modal__body sa-modal-body">
-        <input type="hidden" id="ref-id">
-        <div class="sa-row2">
-          <div class="sa-field"><label class="sa-label">Nome</label><input type="text" class="sa-input" id="ref-nome" placeholder="Café da manhã"></div>
-          <div class="sa-field"><label class="sa-label">Horário</label><input type="time" class="sa-input" id="ref-hora"></div>
-        </div>
-        <div class="sa-field"><label class="sa-label">Alimentos</label><textarea class="sa-input" id="ref-itens" style="min-height:110px;" placeholder="- 2 ovos&#10;- 1 fatia de pão integral&#10;- café sem açúcar"></textarea></div>
-        <button class="btn btn--primary" style="width:100%; justify-content:center;" onclick="SA.saveRefeicao()">Salvar refeição</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Alimento (códex) -->
-  <div id="sa-modal-alimento" class="modal">
-    <div class="modal__box">
-      <div class="modal__head"><h3><i class="fa-solid fa-leaf"></i> Cadastrar Alimento</h3><button class="modal__close" onclick="SA.closeM('sa-modal-alimento')"><i class="fa-solid fa-xmark"></i></button></div>
-      <div class="modal__body sa-modal-body">
-        <div class="sa-field"><label class="sa-label">Alimento</label><input type="text" class="sa-input" id="ali-nome" placeholder="Arroz, ovos, batata frita..."></div>
-        <div class="sa-row2">
-          <div class="sa-field"><label class="sa-label">Kcal (porção)</label><input type="number" class="sa-input" id="ali-kcal" placeholder="130"></div>
-          <div class="sa-field"><label class="sa-label">Macro dominante</label>
-            <select class="sa-input" id="ali-macro">
-              <option>Proteína</option><option>Carboidrato</option><option>Gordura</option><option>Fibras/Micros</option>
-            </select>
-          </div>
-        </div>
-        <div class="sa-field"><label class="sa-label">Vitalidade: <span id="ali-v-val">3</span>/5 (como te faz sentir)</label><input type="range" class="sa-range" id="ali-vit" min="1" max="5" value="3" oninput="document.getElementById('ali-v-val').innerText=this.value"></div>
-        <div class="sa-field"><label class="sa-label">Reação do corpo</label><textarea class="sa-input" id="ali-obs" placeholder="Me dá sono / ótimo pré-treino"></textarea></div>
-        <button class="btn btn--primary" style="width:100%; justify-content:center;" onclick="SA.saveAlimento()">Salvar no códex</button>
+        <div id="nu-form-body"></div>
+        <button class="btn btn--primary" style="width:100%; justify-content:center;" onclick="NU.formSave()">Salvar</button>
       </div>
     </div>
   </div>
@@ -1073,6 +1202,8 @@
       document.getElementById("sa-sub-" + id).classList.add("is-active");
       document.querySelectorAll(".sa-subtab").forEach(b => b.classList.remove("is-active"));
       event.currentTarget.classList.add("is-active");
+      // Futebol: "Peladas & Jogos" sobe pro topo (acima do radar) só nesta aba
+      document.getElementById("futebol-top").style.display = (id === "futebol") ? "block" : "none";
     },
 
     /* ================================================================== */
@@ -1340,7 +1471,7 @@
           '<button class="sa-x sa-pencil" onclick="SA.openEx(' + i + ')" style="margin-left:auto;"><i class="fa-solid fa-pen"></i></button>' +
           '<button class="sa-x" onclick="SA.delEx(' + i + ')"><i class="fa-solid fa-trash"></i></button>' +
           '</div>' +
-          (textoDica ? '<div class="sa-exr__dica">' + textoDica + '</div>' : '') +
+          (textoDica ? '<div class="sa-exr__dica"><i class="fa-regular fa-lightbulb"></i>' + textoDica + '</div>' : '') +
           '</div></div>';
       });
       html += '</div>';
@@ -1483,15 +1614,27 @@
     /* ================================================================== */
     setCorInicio() {
       this.corrida.inicio = document.getElementById("cor-inicio").value;
-      this.save("corrida_v2", this.corrida); this.renderCorrida();
+      this.save("corrida_v3", this.corrida); this.renderCorrida();
+    },
+    planoAtual() { return this.PLANOS[this.corrida.planoAtivo] || this.PLANOS["5k"]; },
+    regsAtivo() {
+      const id = this.corrida.planoAtivo;
+      if (!this.corrida.registros[id]) this.corrida.registros[id] = {};
+      return this.corrida.registros[id];
+    },
+    setPlano(id) {
+      this.corrida.planoAtivo = id;
+      this.regsAtivo();
+      this.save("corrida_v3", this.corrida);
+      this.renderCorrida();
     },
     runId(s, letra) { return "S" + s + letra; },
-    totalRuns() { let t = 0; this.corrida.plano.forEach(w => t += w.corridas.length); return t; },
-    feitasCount() { return Object.keys(this.corrida.registros).length; },
+    totalRuns() { let t = 0; this.planoAtual().plano.forEach(w => t += w.corridas.length); return t; },
+    feitasCount() { return Object.keys(this.regsAtivo()).length; },
     openCorrida(rid, titulo) {
       document.getElementById("corr-runid").value = rid;
       document.getElementById("corr-titulo").innerHTML = '<i class="fa-solid fa-stopwatch" style="color:var(--sa-corrida)"></i> ' + titulo;
-      const reg = this.corrida.registros[rid] || {};
+      const reg = this.regsAtivo()[rid] || {};
       document.getElementById("corr-data").value = reg.data || this.hojeChave();
       document.getElementById("corr-dist").value = reg.dist || "";
       document.getElementById("corr-tempo").value = reg.tempo || "";
@@ -1508,14 +1651,15 @@
       const velMed = (dist > 0 && tempo > 0) ? Math.round((dist / (tempo / 60)) * 10) / 10 : 0;
       const rNum = (dist > 0 && tempo > 0) ? tempo / dist : 0;
       const rTxt = rNum ? (Math.floor(rNum) + ":" + String(Math.round((rNum % 1) * 60)).padStart(2, "0")) : "--";
-      const novo = !this.corrida.registros[rid];
-      this.corrida.registros[rid] = {
+      const bucket = this.regsAtivo();
+      const novo = !bucket[rid];
+      bucket[rid] = {
         data, dist, tempo, velMed, ritmoMed: rTxt,
         ritmax: document.getElementById("corr-ritmax").value.trim(),
         velmax: parseFloat(document.getElementById("corr-velmax").value) || null,
         nota: document.getElementById("corr-nota").value.trim()
       };
-      this.save("corrida_v2", this.corrida);
+      this.save("corrida_v3", this.corrida);
       this.marcarRadar(data, "corrida");
       this.closeM("sa-modal-corrida"); this.renderCorrida();
       if (novo) this.darXP(30, "corrida registrada");
@@ -1523,31 +1667,46 @@
     },
     delCorridaReg(rid) {
       this.confirmar("Apagar o registro desta corrida?", () => {
-        delete this.corrida.registros[rid];
-        this.save("corrida_v2", this.corrida); this.renderCorrida();
+        delete this.regsAtivo()[rid];
+        this.save("corrida_v3", this.corrida); this.renderCorrida();
       });
     },
     renderCorrida() {
+      const plano = this.planoAtual();
+      const regs = this.regsAtivo();
+      // seletor de planos
+      const sel = document.getElementById("cor-plan-sel");
+      sel.innerHTML = "";
+      Object.keys(this.PLANOS).forEach(id => {
+        const p = this.PLANOS[id];
+        sel.innerHTML += '<button class="' + (id === this.corrida.planoAtivo ? "is-on" : "") + '" onclick="SA.setPlano(\'' + id + '\')">' + p.nome + '<small>' + p.semanas + ' semanas</small></button>';
+      });
+      // alvo do plano
+      document.getElementById("cor-alvo").innerHTML =
+        '<span>🎯 <b style="color:var(--sa-corrida)">' + plano.alvo + '</b></span><span>⏱️ Ritmo-alvo: ' + plano.ritmo + '</span>';
+      // datas
       document.getElementById("cor-inicio").value = this.corrida.inicio || "";
       let fim = "—";
       if (this.corrida.inicio) {
         const d = new Date(this.corrida.inicio + "T00:00:00");
-        d.setDate(d.getDate() + 12 * 7 - 1);
+        d.setDate(d.getDate() + plano.semanas * 7 - 1);
         fim = this.brData(this.chaveData(d));
       }
       document.getElementById("cor-fim").value = fim;
+      // progresso
       const total = this.totalRuns(), feitas = this.feitasCount();
       const pct = total ? Math.round(feitas / total * 100) : 0;
       document.getElementById("cor-prog-txt").innerText = feitas + " de " + total + " corridas (" + pct + "%)";
       document.getElementById("cor-prog-bar").style.width = pct + "%";
+      // cronograma
       const cont = document.getElementById("cor-plano");
       cont.innerHTML = "";
-      this.corrida.plano.forEach(w => {
-        const feitasSem = w.corridas.filter(r => this.corrida.registros[this.runId(w.semana, r.letra)]).length;
+      plano.plano.forEach(w => {
+        const feitasSem = w.corridas.filter(r => regs[this.runId(w.semana, r.letra)]).length;
         let runsHtml = "";
         w.corridas.forEach(r => {
           const rid = this.runId(w.semana, r.letra);
-          const reg = this.corrida.registros[rid];
+          const reg = regs[rid];
           const titulo = ("Semana " + w.semana + " · " + r.letra + " — " + r.tipoNome).replace(/'/g, "");
           runsHtml +=
             '<div class="sa-run ' + (reg ? "is-done" : "") + '">' +
@@ -1570,7 +1729,7 @@
       });
       this.renderCorLegenda();
     },
-    renderCorLegenda() {
+        renderCorLegenda() {
       const c = document.getElementById("cor-legenda");
       if (!c || c.dataset.done) return;
       const tipos = [
@@ -1799,6 +1958,50 @@
       ];
     },
 
+    planosDef() {
+      return {
+        "5k":  { nome: "5 km sub-30",   alvo: "5 km em menos de 30 min", ritmo: "&lt; 6:00/km", semanas: 12, plano: this.seedPlanoCorrida() },
+        "10k": { nome: "10 km",          alvo: "completar 10 km correndo", ritmo: "~6:30/km",    semanas: 10, plano: this.plano10k() },
+        "21k": { nome: "Meia-maratona",  alvo: "21 km (meia-maratona)",    ritmo: "~7:00/km",    semanas: 14, plano: this.plano21k() }
+      };
+    },
+    plano10k() {
+      const R = (l,t,e,ref,km,desc,opc) => ({ letra:l, tipoNome:t, emoji:e, ref, km, desc, opc:!!opc });
+      const W = (semana,foco,corridas,icone) => ({ semana, foco, corridas, icone });
+      return [
+        W(1,"Base aeróbica — criar volume leve",[R("A","Leve","🟢","25 min","~3.5 km","Trote leve no ritmo de conversa."),R("B","Leve","🟢","28 min","~4 km","Trote leve e constante."),R("C","Longa","⚫","30 min","~4 km","Corrida longa bem leve.",1)]),
+        W(2,"Construir o hábito de 3 corridas",[R("A","Leve","🟢","28 min","~4 km","Trote leve."),R("B","Fartlek","🔄","28 min","~4 km","20 min leve + 5 acelerações de 30s quando quiser."),R("C","Longa","⚫","35 min","~4.5 km","Longa leve, sem pressa.",1)]),
+        W(3,"Introduzir ritmo de limiar",[R("A","Leve","🟢","30 min","~4.5 km","Trote leve."),R("B","Tempo","🟡","23 min","~3.5 km","10 leve + 8 forte sustentável + 5 leve."),R("C","Longa","⚫","40 min","~5 km","Longa leve.",1)]),
+        W(4,"Desenvolver velocidade",[R("A","Leve","🟢","30 min","~4.5 km","Trote leve."),R("B","Intervalo","🔵","30 min","~4.5 km","10 aquece + 5×(2 min forte / 2 min trote) + 5 leve."),R("C","Longa","⚫","45 min","~6 km","Longa leve.",1)]),
+        W(5,"Aumentar o limiar",[R("A","Leve","🟢","32 min","~5 km","Trote leve."),R("B","Tempo","🟡","32 min","~5 km","10 leve + 2×6 min tempo (3 min trote) + 5 leve."),R("C","Longa","⚫","50 min","~6.5 km","Longa leve.",1)]),
+        W(6,"Recuperar — semana mais leve",[R("A","Leve","🟢","25 min","~3.5 km","Trote bem leve."),R("B","Leve","🟢","28 min","~4 km","Trote leve solto."),R("C","Longa","⚫","35 min","~4.5 km","Longa curta e leve.",1)],"🔄"),
+        W(7,"Potência aeróbica",[R("A","Leve","🟢","34 min","~5 km","Trote leve."),R("B","Intervalo","🔵","32 min","~5 km","10 aquece + 6×(2 min forte / 90s trote) + 5 leve."),R("C","Longa","⚫","55 min","~7 km","Longa progressiva no fim.",1)]),
+        W(8,"Ensaiar o ritmo de prova",[R("A","Leve","🟢","32 min","~5 km","Trote leve."),R("B","Ritmo","🏁","30 min","~5 km","10 leve + 15 min no ritmo-alvo + 5 leve."),R("C","Longa","⚫","60 min","~8 km","Longa leve — pico de volume.",1)]),
+        W(9,"Afinar a forma",[R("A","Leve","🟢","28 min","~4 km","Trote leve."),R("B","Ritmo","🏁","31 min","~5 km","10 leve + 2×8 min no ritmo-alvo (3 trote) + 5 leve."),R("C","Longa","⚫","45 min","~6 km","Longa reduzida.",1)]),
+        W(10,"Descarga e PROVA",[R("A","Leve","🟢","22 min","~3 km","Trote bem leve, pernas soltas."),R("B","Intervalo","🔵","25 min","~3.5 km","10 aquece + 4×(1 min forte / 2 min trote) + 5 leve."),R("C","Ritmo/Prova","🏁","~65 min","~10 km","🏁 PROVA! 10 km. Comece controlado e segure o ritmo-alvo.",1)],"🏁")
+      ];
+    },
+    plano21k() {
+      const R = (l,t,e,ref,km,desc,opc) => ({ letra:l, tipoNome:t, emoji:e, ref, km, desc, opc:!!opc });
+      const W = (semana,foco,corridas,icone) => ({ semana, foco, corridas, icone });
+      return [
+        W(1,"Base aeróbica",[R("A","Leve","🟢","30 min","~4.5 km","Trote leve no ritmo de conversa."),R("B","Leve","🟢","32 min","~5 km","Trote leve constante."),R("C","Longa","⚫","40 min","~6 km","Corrida longa leve.",1)]),
+        W(2,"Volume confortável",[R("A","Leve","🟢","32 min","~5 km","Trote leve."),R("B","Fartlek","🔄","32 min","~5 km","25 min leve + 6 acelerações de 30s."),R("C","Longa","⚫","55 min","~8 km","Longa leve.",1)]),
+        W(3,"Introduzir limiar",[R("A","Leve","🟢","35 min","~5.5 km","Trote leve."),R("B","Tempo","🟡","25 min","~4 km","10 leve + 10 min tempo + 5 leve."),R("C","Longa","⚫","60 min","~9 km","Longa leve.",1)]),
+        W(4,"Velocidade e resistência",[R("A","Leve","🟢","35 min","~5.5 km","Trote leve."),R("B","Intervalo","🔵","35 min","~5.5 km","10 aquece + 5×(3 min forte / 2 min trote) + 5 leve."),R("C","Longa","⚫","70 min","~10 km","Longa leve.",1)]),
+        W(5,"Subir o volume longo",[R("A","Leve","🟢","38 min","~6 km","Trote leve."),R("B","Tempo","🟡","33 min","~5 km","10 leve + 2×8 min tempo (3 trote) + 5 leve."),R("C","Longa","⚫","85 min","~12 km","Longa leve — fundamental.",1)]),
+        W(6,"Recuperar",[R("A","Leve","🟢","28 min","~4 km","Trote bem leve."),R("B","Leve","🟢","32 min","~5 km","Trote leve solto."),R("C","Longa","⚫","55 min","~8 km","Longa reduzida.",1)],"🔄"),
+        W(7,"Construir resistência",[R("A","Leve","🟢","40 min","~6 km","Trote leve."),R("B","Intervalo","🔵","40 min","~6 km","10 aquece + 6×(3 min forte / 2 min trote) + 5 leve."),R("C","Longa","⚫","90 min","~13 km","Longa leve.",1)]),
+        W(8,"Limiar contínuo",[R("A","Leve","🟢","40 min","~6 km","Trote leve."),R("B","Tempo","🟡","35 min","~5.5 km","10 leve + 15 min tempo contínuo + 5 leve."),R("C","Longa","⚫","105 min","~15 km","Longa leve.",1)]),
+        W(9,"Resistência específica",[R("A","Leve","🟢","42 min","~6.5 km","Trote leve."),R("B","Intervalo","🔵","41 min","~6.5 km","10 aquece + 4×(4 min forte / 3 min trote) + 5 leve."),R("C","Longa","⚫","110 min","~16 km","Longa leve.",1)]),
+        W(10,"Pico do volume longo",[R("A","Leve","🟢","40 min","~6 km","Trote leve."),R("B","Ritmo","🏁","30 min","~4.5 km","10 leve + 12 min no ritmo-alvo + 5 leve."),R("C","Longa","⚫","125 min","~18 km","Longa máxima — o teste mental.",1)]),
+        W(11,"Manter e refinar",[R("A","Leve","🟢","38 min","~6 km","Trote leve."),R("B","Tempo","🟡","35 min","~5.5 km","10 leve + 2×10 min tempo + 5 leve."),R("C","Longa","⚫","110 min","~16 km","Longa leve.",1)]),
+        W(12,"Começar a afinar",[R("A","Leve","🟢","35 min","~5 km","Trote leve."),R("B","Intervalo","🔵","32 min","~5 km","10 aquece + 5×(3 min forte / 2 min trote) + 5 leve."),R("C","Longa","⚫","85 min","~12 km","Longa reduzida.",1)]),
+        W(13,"Afinação final",[R("A","Leve","🟢","28 min","~4 km","Trote leve."),R("B","Ritmo","🏁","25 min","~4 km","10 leve + 8 min no ritmo-alvo + 5 leve."),R("C","Longa","⚫","55 min","~8 km","Longa curta e leve.",1)]),
+        W(14,"Descarga e PROVA",[R("A","Leve","🟢","22 min","~3 km","Trote bem leve."),R("B","Leve","🟢","20 min","~3 km","Soltar as pernas, nada forte."),R("C","Ritmo/Prova","🏁","~150 min","~21 km","🏁 PROVA! Meia-maratona. Ritmo controlado do início ao fim.",1)],"🏁")
+      ];
+    },
+
     /* ================================================================== */
     /* ÁREA 2 · FUTEBOL                                                    */
     /* ================================================================== */
@@ -1913,127 +2116,6 @@
     /* ================================================================== */
     /* ÁREA 3 · ALIMENTAÇÃO + HIDRATAÇÃO                                   */
     /* ================================================================== */
-    openRefeicao(id) {
-      document.getElementById("ref-id").value = "";
-      document.getElementById("ref-nome").value = "";
-      document.getElementById("ref-hora").value = "";
-      document.getElementById("ref-itens").value = "";
-      document.getElementById("ref-titulo").innerHTML = '<i class="fa-solid fa-utensils"></i> Nova Refeição';
-      if (id) {
-        const r = this.nutri.dieta.find(x => x.id === id);
-        if (r) {
-          document.getElementById("ref-id").value = r.id;
-          document.getElementById("ref-nome").value = r.nome;
-          document.getElementById("ref-hora").value = r.hora;
-          document.getElementById("ref-itens").value = r.itens;
-          document.getElementById("ref-titulo").innerHTML = '<i class="fa-solid fa-pen"></i> Editar Refeição';
-        }
-      }
-      this.openM("sa-modal-refeicao");
-    },
-    saveRefeicao() {
-      const nome = document.getElementById("ref-nome").value.trim(); if (!nome) return;
-      const id = document.getElementById("ref-id").value;
-      const dados = { nome, hora: document.getElementById("ref-hora").value, itens: document.getElementById("ref-itens").value.trim() };
-      if (id) { Object.assign(this.nutri.dieta.find(x => x.id === parseInt(id)), dados); }
-      else { this.nutri.dieta.push({ id: Date.now(), ...dados }); }
-      this.nutri.dieta.sort((a, b) => (a.hora || "").localeCompare(b.hora || ""));
-      this.save("nutri", this.nutri); this.closeM("sa-modal-refeicao"); this.renderNutri();
-    },
-    delRefeicao(id) {
-      this.confirmar("Apagar esta refeição?", () => {
-        this.nutri.dieta = this.nutri.dieta.filter(r => r.id !== id);
-        this.save("nutri", this.nutri); this.renderNutri();
-      });
-    },
-    arquivarDieta() {
-      if (this.nutri.dieta.length === 0) { this.toast("Nenhuma refeição para arquivar."); return; }
-      this.perguntar("Nome do plano (ex: Seca Barriga)", "", (nome) => {
-        this.nutri.dietaHist.unshift({ id: Date.now(), data: this.hojeChave(), nome, dieta: JSON.parse(JSON.stringify(this.nutri.dieta)) });
-        this.nutri.dieta = [];
-        this.save("nutri", this.nutri); this.renderNutri(); this.toast("Plano arquivado!");
-      });
-    },
-    carregarDieta(id) {
-      const p = this.nutri.dietaHist.find(x => x.id === id); if (!p) return;
-      this.confirmar('Substituir o plano atual por "' + p.nome + '"?', () => {
-        this.nutri.dieta = JSON.parse(JSON.stringify(p.dieta));
-        this.save("nutri", this.nutri); this.renderNutri();
-      });
-    },
-    delDietaHist(id) {
-      this.confirmar("Apagar este plano salvo?", () => {
-        this.nutri.dietaHist = this.nutri.dietaHist.filter(p => p.id !== id);
-        this.save("nutri", this.nutri); this.renderNutri();
-      });
-    },
-    renderNutri() {
-      const lista = document.getElementById("refeicoes-lista");
-      lista.innerHTML = this.nutri.dieta.length ? "" : '<div class="sa-empty">Nenhuma refeição no plano atual.</div>';
-      this.nutri.dieta.forEach(r => {
-        lista.innerHTML +=
-          '<div class="sa-item"><div class="sa-item__main">' +
-          '<div class="sa-item__title">' + (r.hora ? r.hora + ' · ' : '') + r.nome + '</div>' +
-          '<div class="sa-item__sub" style="white-space:pre-line;">' + (r.itens || '') + '</div></div>' +
-          '<button class="sa-x sa-pencil" onclick="SA.openRefeicao(' + r.id + ')"><i class="fa-solid fa-pen"></i></button>' +
-          '<button class="sa-x" onclick="SA.delRefeicao(' + r.id + ')"><i class="fa-solid fa-trash"></i></button></div>';
-      });
-      const hist = document.getElementById("dietas-arquivadas");
-      hist.innerHTML = this.nutri.dietaHist.length ? "" : '<div class="sa-empty">Nenhum plano salvo.</div>';
-      this.nutri.dietaHist.forEach(p => {
-        hist.innerHTML +=
-          '<div class="sa-item"><div class="sa-item__main">' +
-          '<div class="sa-item__title">' + p.nome + '</div>' +
-          '<div class="sa-item__sub">' + this.brData(p.data) + ' · ' + p.dieta.length + ' refeições</div></div>' +
-          '<button class="sa-x" style="color:var(--accent)" onclick="SA.carregarDieta(' + p.id + ')"><i class="fa-solid fa-rotate-right"></i></button>' +
-          '<button class="sa-x" onclick="SA.delDietaHist(' + p.id + ')"><i class="fa-solid fa-trash"></i></button></div>';
-      });
-      this.renderAlimentos();
-    },
-
-    // --- códex de alimentos ---
-    openAlimento() {
-      ["ali-nome","ali-kcal","ali-obs"].forEach(id => document.getElementById(id).value = "");
-      document.getElementById("ali-macro").value = "Proteína";
-      document.getElementById("ali-vit").value = 3; document.getElementById("ali-v-val").innerText = "3";
-      this.openM("sa-modal-alimento");
-    },
-    saveAlimento() {
-      const nome = document.getElementById("ali-nome").value.trim(); if (!nome) return;
-      this.nutri.alimentos.push({
-        id: Date.now(), nome,
-        kcal: document.getElementById("ali-kcal").value,
-        macro: document.getElementById("ali-macro").value,
-        vitalidade: parseInt(document.getElementById("ali-vit").value),
-        obs: document.getElementById("ali-obs").value.trim()
-      });
-      this.save("nutri", this.nutri); this.closeM("sa-modal-alimento"); this.renderAlimentos();
-    },
-    delAlimento(id) {
-      this.confirmar("Excluir do códex?", () => {
-        this.nutri.alimentos = this.nutri.alimentos.filter(a => a.id !== id);
-        this.save("nutri", this.nutri); this.renderAlimentos();
-      });
-    },
-    renderAlimentos() {
-      const c = document.getElementById("alimentos-lista");
-      c.innerHTML = this.nutri.alimentos.length ? "" : '<div class="sa-empty">Códex vazio.</div>';
-      this.nutri.alimentos.forEach(a => {
-        const cor = a.vitalidade <= 2 ? "var(--sa-bad)" : a.vitalidade === 3 ? "var(--sa-mid)" : "var(--sa-good)";
-        const larg = (a.vitalidade / 5) * 100;
-        c.innerHTML +=
-          '<div class="card" style="background:var(--bg-soft);">' +
-          '<div class="sa-head" style="margin-bottom:10px;"><span class="sa-pill" style="color:var(--accent); border-color:var(--accent)">' + a.macro + '</span>' +
-          '<button class="sa-x" onclick="SA.delAlimento(' + a.id + ')"><i class="fa-solid fa-trash"></i></button></div>' +
-          '<div class="sa-item__title">' + a.nome + '</div>' +
-          '<div class="sa-item__sub" style="margin-bottom:10px;">' + (a.kcal ? a.kcal + ' kcal' : 'kcal n/d') + '</div>' +
-          '<div class="sa-xp__track" style="height:6px;"><div class="sa-xp__fill" style="width:' + larg + '%; background:' + cor + '"></div></div>' +
-          '<div style="font-size:9px; font-weight:800; color:var(--text-muted); margin-top:6px;">VITALIDADE ' + a.vitalidade + '/5</div>' +
-          (a.obs ? '<p style="font-size:11px; font-style:italic; color:var(--text-muted); margin-top:8px;">"' + a.obs + '"</p>' : '') +
-          '</div>';
-      });
-    },
-
     // --- hidratação ---
     diaAgua(d) { this.aguaDate.setDate(this.aguaDate.getDate() + d); this.renderAgua(); },
     addAgua(ml) {
@@ -2166,14 +2248,19 @@
       if (this.calistenia === null) { this.calistenia = { fichas: this.seedCalistenia() }; this.save("calistenia", this.calistenia); }
       this.forcaCheck = this.load("forca_check", {});
 
-      // ---- corrida (plano de 12 semanas) ----
-      this.corrida = this.load("corrida_v2", null);
-      if (this.corrida === null) { this.corrida = { inicio: "", plano: this.seedPlanoCorrida(), registros: {} }; this.save("corrida_v2", this.corrida); }
+      // ---- corrida: vários planos (5k, 10k, 21k...) cada um com progresso próprio ----
+      this.PLANOS = this.planosDef();
+      this.corrida = this.load("corrida_v3", null);
+      if (this.corrida === null) {
+        const v2 = this.load("corrida_v2", null);   // migra o 5k antigo, se existir
+        this.corrida = { planoAtivo: "5k", inicio: (v2 && v2.inicio) || "", registros: { "5k": (v2 && v2.registros) || {} } };
+        this.save("corrida_v3", this.corrida);
+      }
+      Object.keys(this.PLANOS).forEach(id => { if (!this.corrida.registros[id]) this.corrida.registros[id] = {}; });
 
       // ---- demais áreas (inalteradas) ----
       this.futebol = this.load("futebol", []);
       this.outros = this.load("outros", []);
-      this.nutri = this.load("nutri", { dieta: [], dietaHist: [], alimentos: [] });
       this.agua = this.load("agua", { metaPadrao: 2500, diario: {} });
       this.arquivos = this.load("arquivos", []);
 
@@ -2187,14 +2274,703 @@
       this.renderCorrida();
       this.renderFut();
       this.renderOutros();
-      this.renderNutri();
       this.renderAgua();
       this.renderArquivos();
     }
   };
 
+
+  /* ====================================================================== */
+  /* MÓDULO NUTRIÇÃO · NU                                                    */
+  /* Plano alimentar de 12 semanas (periodização nutricional).              */
+  /* Reaproveita os helpers do SA (datas, modais, gráfico, XP, toast).      */
+  /* Persiste tudo numa única chave: Store -> "planner_saude_nutri_v2".     */
+  /* ====================================================================== */
+  window.NU = {
+    d: null,                  // dados em memória
+    recAbaAtiva: "cafes",     // sub-aba ativa da Biblioteca de Receitas
+    _formCampos: null,        // campos do formulário genérico aberto
+    _formOnSave: null,        // callback do formulário genérico
+
+    /* ---------- persistência (sempre via Store, nunca localStorage) ----- */
+    load() { return Store.ler("saude_nutri_v2", null); },
+    save() { Store.salvar("saude_nutri_v2", this.d); },
+
+    /* ====================================================================
+       SEMENTE — todo o conteúdo que veio da planilha do Excel.
+       Só é gravada na 1ª vez; depois você pode editar à vontade.
+    ==================================================================== */
+    seed() {
+      return {
+        inicio: "",   // data de início da Semana 1 (você define na aba Fases)
+
+        // ---- 6 FASES (2 semanas cada = 12 semanas) ----
+        fases: [
+          { num:1, nome:"Base Limpa",        cor:"#22c55e", emoji:"🟢",
+            foco:"Eliminar ultraprocessados e criar a fundação alimentar.",
+            estrategia:"≥80% de refeições limpas, comida de verdade.",
+            prot:"1,8–2,0 g/kg", carb:"3,0–3,5 g/kg", agua:"2,0 L/dia",
+            objetivo:"≥80% refeições limpas; energia ≥6/10" },
+          { num:2, nome:"Ajuste de Macros",  cor:"#eab308", emoji:"🟡",
+            foco:"Calibrar proteína e carboidrato em cada refeição.",
+            estrategia:"Proteína presente em todas as refeições do dia.",
+            prot:"2,0–2,2 g/kg", carb:"3,0–3,5 g/kg", agua:"2,0 L/dia",
+            objetivo:"Meta de proteína ≥5 dias/sem; energia ≥7/10" },
+          { num:3, nome:"Peri-Treino",       cor:"#f97316", emoji:"🟠",
+            foco:"Nutrição estratégica em torno do treino.",
+            estrategia:"Refeição peri-treino + proteína até 30 min pós-treino.",
+            prot:"2,2–2,4 g/kg", carb:"3,5–4,0 g/kg", agua:"2,2 L/dia",
+            objetivo:"Refeição peri-treino ≥5x/sem; disposição pós-treino ≥8/10" },
+          { num:4, nome:"Anti-inflamatória", cor:"#3b82f6", emoji:"🔵",
+            foco:"Reduzir inflamação e acelerar a recuperação.",
+            estrategia:"Cúrcuma + pimenta-preta nas refeições; peixe ≥3x/sem.",
+            prot:"2,0–2,2 g/kg", carb:"2,5–3,0 g/kg", agua:"2,3 L/dia",
+            objetivo:"Energia ≥8/10; sono ≥8/10; peixe ≥3x/semana" },
+          { num:5, nome:"Refinamento",       cor:"#a855f7", emoji:"🟣",
+            foco:"Variedade de proteínas e ajuste fino de porções.",
+            estrategia:"5+ fontes de proteína na semana; variar preparos.",
+            prot:"2,0–2,2 g/kg", carb:"3,0–3,5 g/kg", agua:"2,5 L/dia",
+            objetivo:"5+ fontes de proteína/sem; hidratação ≥2,5L/dia" },
+          { num:6, nome:"Consolidação",      cor:"#a16207", emoji:"🟤",
+            foco:"Transformar tudo em hábito sustentável para a vida.",
+            estrategia:"Marmitas no domingo; rotina automática e eficiente.",
+            prot:"1,8–2,0 g/kg", carb:"3,0–3,5 g/kg", agua:"2,5 L/dia",
+            objetivo:"Hábitos ≥90% do tempo; energia ≥9/10" }
+        ],
+
+        // ---- 6 CAFÉS DA MANHÃ (rotacionam ①–⑥) ----
+        cafes: [
+          { nome:"Aveia Cremosa com Banana e Castanhas", ing:"Aveia 40g + banana + mel + 2 castanhas-do-pará + café sem açúcar", prot:"8g", carb:"45g", prep:"5 min", fase:"Qualquer fase", benef:"Beta-glucana = colesterol + saúde intestinal", dica:"Troque a banana por morango ou mamão" },
+          { nome:"Ovos Mexidos + Pão Integral", ing:"3 ovos mexidos + pão integral 2 fatias + tomate cereja + café", prot:"22g", carb:"30g", prep:"8 min", fase:"Qualquer fase", benef:"Proteína completa + vitamina D + colina = foco", dica:"Adicione espinafre ou queijo minas" },
+          { nome:"Iogurte Grego + Frutas Vermelhas + Granola", ing:"Iogurte grego integral 170g + frutas vermelhas + granola natural + café", prot:"17g", carb:"35g", prep:"3 min", fase:"Qualquer fase", benef:"Probiótico + antioxidante + cálcio", dica:"Granola sem açúcar adicionado (máx 5g/100g)" },
+          { nome:"Tapioca Proteica com Ovo e Cottage", ing:"Tapioca 2 un. + ovo mexido + queijo cottage + suco de laranja natural", prot:"18g", carb:"40g", prep:"10 min", fase:"Qualquer fase", benef:"Proteína completa + carbo de baixo índice glicêmico", dica:"Troque o ovo por frango desfiado" },
+          { nome:"Vitamina Proteica Natural (pré-treino)", ing:"Banana + leite desnatado 200ml + aveia 30g + cacau em pó + mel", prot:"10g", carb:"50g", prep:"5 min", fase:"Fase 3 (peri-treino)", benef:"Teobromina do cacau = foco; aveia = energia sustentada", dica:"Ótimo antes do treino matinal" },
+          { nome:"Overnight Oats (preparar na véspera)", ing:"Aveia + chia + leite + banana + mel (montar na noite anterior)", prot:"10g", carb:"50g", prep:"5 min (véspera)", fase:"Qualquer fase", benef:"Amido resistente = prebiótico natural para o intestino", dica:"Adicione pasta de amendoim" }
+        ],
+
+        // ---- 6 PRATOS PRINCIPAIS (1 por ciclo de 2 semanas) ----
+        pratos: [
+          { ciclo:"Sem 1-2", fase:"🟢 Base Limpa", a:"Frango grelhado com ervas frescas e limão", b:"Omelete de legumes (3 ovos + vegetais coloridos)", prot:"Frango / Ovo", carb:"Arroz integral + feijão", prep:"20 min", benef:"Alta proteína completa; ótima biodisponibilidade do ovo", dica:"Tempere com salsinha, cebolinha e alho: mais sabor sem calorias extras" },
+          { ciclo:"Sem 3-4", fase:"🟡 Ajuste de Macros", a:"Tilápia assada ao limão e ervas", b:"Salmão grelhado com azeite extra-virgem", prot:"Peixe branco / Salmão", carb:"Batata doce assada", prep:"25 min", benef:"Ômega-3 do salmão reduz inflamação e melhora composição corporal", dica:"Asse em papel alumínio com folha de louro para manter a suculência" },
+          { ciclo:"Sem 5-6", fase:"🟠 Peri-Treino", a:"Frango + banana 90 min antes do treino", b:"Salmão grelhado até 30 min após o treino", prot:"Frango / Salmão", carb:"Quinoa + Banana", prep:"25 min", benef:"Janela anabólica: insulina + leucina = síntese proteica máxima", dica:"Banana = carbo de absorção rápida ideal para pré-treino até 60 min antes" },
+          { ciclo:"Sem 7-8", fase:"🔵 Anti-inflamatória", a:"Salmão ao cúrcuma, gengibre e pimenta-preta", b:"Sopa anti-inflamatória: frango + cúrcuma + legumes", prot:"Salmão / Frango", carb:"Mandioquinha + arroz", prep:"30 min", benef:"Curcumina + piperina aumenta a bio-absorção em 2.000%; reduz IL-6", dica:"SEMPRE adicione pimenta-preta com a cúrcuma — sem ela a absorção cai 95%" },
+          { ciclo:"Sem 9-10", fase:"🟣 Refinamento", a:"Peixe ao molho de ervas e tomate natural", b:"Patinho grelhado com chimichurri de ervas frescas", prot:"Peixe / Carne magra", carb:"Arroz 7 grãos", prep:"25 min", benef:"Variedade = microbioma diverso = imunidade e saúde metabólica", dica:"Alterne proteínas diferentes todos os dias para variar aminoácidos" },
+          { ciclo:"Sem 11-12", fase:"🟤 Consolidação", a:"Frango assado completo com legumes coloridos no forno", b:"Bowl proteico: quinoa + ovo + vegetais + azeite + semente de abóbora", prot:"Frango / Ovo", carb:"Batata doce + Quinoa", prep:"35 min", benef:"Simplicidade + diversidade = aderência de longo prazo", dica:"Prepare marmitas para a semana toda: hábito-chave da consolidação" }
+        ],
+
+        // ---- 10 LANCHES ----
+        lanches: [
+          { nome:"Iogurte Grego + Frutas Vermelhas", ing:"Iogurte grego 170g + mirtilos/morangos + mel + chia", prot:"15g", kcal:"180", hora:"10h ou 16h", benef:"Probiótico + antioxidante + ômega-3 da chia", fase:"Qualquer", obs:"Melhor lanche para saúde intestinal" },
+          { nome:"Ovos Cozidos + Tomate Cereja", ing:"2 ovos cozidos + tomate cereja + sal rosa + pimenta", prot:"12g", kcal:"160", hora:"Qualquer hora", benef:"Alta saciedade + vitamina D + colina", fase:"Qualquer", obs:"Prático; prepara na véspera" },
+          { nome:"Mix de Oleaginosas", ing:"30g: amêndoas + 2 castanhas-do-pará + nozes", prot:"6g", kcal:"180", hora:"10h ou 16h", benef:"Selênio + magnésio + gorduras mono-insaturadas", fase:"Qualquer", obs:"Nunca ultrapassar 30g" },
+          { nome:"Fruta + Pasta de Amendoim Natural", ing:"Banana ou maçã + 1 col. pasta de amendoim (sem açúcar)", prot:"5g", kcal:"200", hora:"Pré-treino 30-60 min antes", benef:"Carbo rápido + gordura saudável = energia sustentada", fase:"Fase 3", obs:"Pasta sem açúcar adicionado" },
+          { nome:"Tapioca Proteica", ing:"2 tapiocas + queijo cottage 3 col. + ovo mexido", prot:"18g", kcal:"220", hora:"Manhã (até 12h)", benef:"Proteína completa + carbo = saciedade prolongada", fase:"Qualquer", obs:"Substitui pão industrializado" },
+          { nome:"Vitamina Proteica Natural", ing:"Banana + leite desnatado 200ml + aveia 30g + cacau puro", prot:"10g", kcal:"250", hora:"Pré-treino 60 min antes", benef:"Energia sustentada + teobromina = foco", fase:"Fase 3", obs:"Cacau puro: 4x mais antioxidantes que ao leite" },
+          { nome:"Kefir + Castanhas", ing:"Kefir integral 200ml + 5 castanhas variadas", prot:"8g", kcal:"150", hora:"Manhã ou noite", benef:"Probiótico + prebiótico = microbioma + imunidade", fase:"Fase 4", obs:"Kefir tem 3x mais probióticos que iogurte" },
+          { nome:"Queijo Cottage + Fruta Tropical", ing:"Cottage 4 col. + abacaxi ou mamão ou manga", prot:"14g", kcal:"160", hora:"16h (antes do jantar)", benef:"Caseína = proteína de absorção lenta; sacia até o jantar", fase:"Qualquer", obs:"Mais proteína por kcal que outros lácteos" },
+          { nome:"Wrap Integral com Atum", ing:"Wrap integral + atum ao natural 1 lata + alface + tomate", prot:"20g", kcal:"280", hora:"Almoço alternativo 12-14h", benef:"Alta proteína + fibra + ômega-3", fase:"Qualquer", obs:"Atum ao natural, não em óleo" },
+          { nome:"Abacate com Limão e Sal Rosa", ing:"½ abacate + limão espremido + sal rosa + pimenta", prot:"2g", kcal:"160", hora:"Tarde 15-17h", benef:"Gorduras mono-insaturadas = saciedade + saúde cardiovascular", fase:"Fase 4", obs:"Limão no abacate inibe a oxidação" }
+        ],
+
+        // ---- MARMITAS A/B (preparadas no domingo) ----
+        marmitas: {
+          A: [
+            { tipo:"🍽️ Almoço", horario:"12:00–13:30",
+              optA:"Frango grelhado (150g) + arroz integral (4 col.) + feijão (2 conchas) + salada verde + azeite",
+              ingA:"Frango peito 600g, arroz integral, feijão carioca, mix salada, azeite, alho, limão, temperos",
+              optB:"Tilápia assada (150g) + batata doce média + brócolis refogado no alho",
+              ingB:"Filé de tilápia 600g, batata doce 4 un., brócolis 1 maço, azeite, alho, limão",
+              dom:"Salmão grelhado + quinoa + aspargos",
+              domDica:"Tempere frango e tilápia no sábado à noite. Cozinhe arroz e feijão para a semana toda. Monte 4 marmitas de cada." },
+            { tipo:"🌙 Jantar", horario:"19:00–20:00",
+              optA:"Omelete de legumes (3 ovos + cebola, pimentão, tomate) + salada verde",
+              ingA:"Ovos 18 un./semana, cebola, pimentão colorido, tomate, alface, azeite",
+              optB:"Sopa de lentilha com cenoura e couve + 1 fatia de pão integral",
+              ingB:"Lentilha 500g, cenoura, couve, caldo caseiro, pão integral",
+              dom:"Frango assado inteiro + batata doce + salada colorida",
+              domDica:"Sopa de lentilha rende 5-6 porções, pode congelar metade! Omelete: preparar na hora (10 min)." }
+          ],
+          B: [
+            { tipo:"🍽️ Almoço", horario:"12:00–13:30",
+              optA:"Salmão assado (150g) + quinoa (3 col.) + couve refogada no alho + cenoura",
+              ingA:"Salmão 600g, quinoa, couve, cenoura, azeite, alho, limão",
+              optB:"Patinho moído (150g) + batata doce + espinafre salteado com azeite e alho",
+              ingB:"Patinho moído 600g, batata doce 4 un., espinafre, cebola, alho, azeite",
+              dom:"Costela magra + mandioca cozida + vinagrete caseiro",
+              domDica:"Asse o salmão em 2 assadeiras com papel alumínio. Patinho: refogue com temperos naturais. Divida em 4 marmitas cada." },
+            { tipo:"🌙 Jantar", horario:"19:00–20:00",
+              optA:"Sopa caseira de frango com legumes (cenoura, batata, vagem)",
+              ingA:"Frango coxa/peito 600g, cenoura, batata, vagem, caldo caseiro, temperos",
+              optB:"Omelete de salmão (2 ovos + salmão 80g) + espinafre refogado + tomate",
+              ingB:"Ovos 12 un., salmão 320g, espinafre, tomate, azeite",
+              dom:"Patinho grelhado + purê de mandioquinha + couve",
+              domDica:"Sopa de frango: faça em panela grande (8+ porções), congele metade! Omelete de salmão: rápido (10 min) para noites corridas." }
+          ]
+        },
+
+        // ---- CRONOGRAMA 12 SEMANAS (referencia tudo acima) ----
+        crono: [
+          { cafe:"① Aveia cremosa + banana + 2 castanhas-do-pará + café", almocoA:"Frango grelhado 150g + arroz integral + feijão + salada verde", almocoB:"Tilápia assada 150g + batata doce + brócolis refogado", jantarA:"Omelete 3 ovos + cebola + pimentão + tomate + salada", jantarB:"Sopa de lentilha com cenoura e couve + pão integral", lanche:"Iogurte grego + frutas vermelhas + mel", foco:"Eliminar ultraprocessados. Começar gradual. Registrar energia." },
+          { cafe:"② Ovos mexidos 3 + pão integral + tomate cereja + café", almocoA:"Salmão assado 150g + quinoa 3 col. + couve refogada + cenoura", almocoB:"Patinho moído 150g + batata doce + espinafre salteado", jantarA:"Sopa caseira de frango com legumes (cenoura, batata, vagem)", jantarB:"Omelete de salmão (2 ovos + salmão 80g) + espinafre + tomate", lanche:"Mix oleaginosas 30g: castanha + amêndoa + nozes", foco:"Manter ≥80% refeições limpas. Medir peso e cintura na segunda." },
+          { cafe:"③ Iogurte grego 170g + frutas vermelhas + granola + café", almocoA:"Frango grelhado 150g + arroz integral + feijão + salada", almocoB:"Tilápia assada 150g + batata doce + brócolis", jantarA:"Omelete de legumes (3 ovos + vegetais coloridos)", jantarB:"Sopa de lentilha com gengibre e couve", lanche:"Tapioca peq. + queijo cottage 3 col.", foco:"Proteína em TODAS as refeições. Meta: 1,8-2g/kg/dia. Energia ≥7/10." },
+          { cafe:"④ Tapioca proteica 2 un. + ovo mexido + cottage + suco de laranja", almocoA:"Salmão assado 150g + quinoa + couve + cenoura", almocoB:"Patinho moído 150g + batata doce + espinafre", jantarA:"Sopa de frango com legumes variados", jantarB:"Omelete de salmão + espinafre + tomate cereja", lanche:"Queijo cottage 4 col. + abacaxi ou mamão", foco:"Avaliar hidratação (≥2L/dia). Balancear macros: carbo + prot. + gordura saudável." },
+          { cafe:"⑤ Vitamina proteica: banana + leite + aveia 30g + cacau (pré-treino)", almocoA:"Frango grelhado + arroz integral + feijão (60-90 min antes do treino)", almocoB:"Tilápia assada + batata doce + brócolis (ideal pós-treino)", jantarA:"Omelete de legumes (preparar na hora)", jantarB:"Sopa de lentilha com cúrcuma + pimenta-preta", lanche:"Banana + pasta de amendoim natural (pré-treino 30-60 min)", foco:"Refeição peri-treino ≥5x/semana. Proteína até 30 min pós-treino." },
+          { cafe:"⑥ Overnight oats: aveia + chia + leite + banana + mel (véspera)", almocoA:"Salmão assado + quinoa + couve (pós-treino: ômega-3 para recuperação)", almocoB:"Patinho moído + batata doce + espinafre (refeição de energia)", jantarA:"Sopa de frango com legumes (comfort food + proteína completa)", jantarB:"Omelete de salmão + espinafre (rápido e rico em proteína)", lanche:"Vitamina proteica natural (pré-treino)", foco:"Janela anabólica ativa ≥5x/sem. Registrar disposição pós-treino." },
+          { cafe:"① Aveia + banana + castanhas + café (adicionar cúrcuma na aveia!)", almocoA:"Frango grelhado + arroz + feijão + salada (cúrcuma + pimenta-preta)", almocoB:"Tilápia assada + batata doce + brócolis (cúrcuma no preparo)", jantarA:"Omelete de legumes + cúrcuma + gengibre ralado", jantarB:"Sopa de lentilha com gengibre + cúrcuma + pimenta-preta", lanche:"Kefir 200ml + 5 castanhas (probiótico anti-inflamatório)", foco:"Cúrcuma + pimenta-preta em TODAS as refeições. Peixe ≥3x/semana. Sono ≥8h." },
+          { cafe:"② Ovos mexidos + pão integral + tomate cereja + café", almocoA:"Salmão assado + quinoa + couve (rico em ômega-3 = anti-inflamatório)", almocoB:"Patinho moído + batata doce + espinafre (+ cúrcuma no preparo)", jantarA:"Sopa de frango com cúrcuma, gengibre e legumes", jantarB:"Omelete de salmão + espinafre + tomate (3x ômega-3 na semana)", lanche:"Abacate ½ un. + limão + sal rosa (gorduras anti-inflamatórias)", foco:"Energia ≥8/10, sono ≥8/10. Incluir frutas vermelhas no café." },
+          { cafe:"③ Iogurte grego + frutas vermelhas + granola + café", almocoA:"Frango grelhado + arroz 7 grãos + feijão + salada variada", almocoB:"Tilápia assada + quinoa (trocar batata doce por quinoa para variar)", jantarA:"Omelete com vegetais diferentes (espinafre, abobrinha)", jantarB:"Sopa de lentilha com ervas novas (alecrim, tomilho, sálvia)", lanche:"Mix oleaginosas + fruta da estação", foco:"5+ fontes de proteína diferentes na semana. Hidratação ≥2,5L/dia." },
+          { cafe:"④ Tapioca proteica + ovo + cottage + suco de laranja", almocoA:"Salmão assado + tabulé de quinoa + couve (variação do preparo)", almocoB:"Patinho moído + batata doce + espinafre (add pimentão e ervas novas)", jantarA:"Sopa de frango com legumes variados (vagem, milho verde)", jantarB:"Omelete de salmão + tomate + cebola roxa + alcaparras", lanche:"Queijo cottage + abacaxi + chia", foco:"Ajuste fino de porções. Variar temperos e preparo. Disposição ≥8/10." },
+          { cafe:"⑤ Vitamina proteica natural (banco de energia para o dia)", almocoA:"Frango grelhado + arroz integral + feijão (clássico consolidado)", almocoB:"Tilápia assada + batata doce + brócolis (preparo automático em 25 min)", jantarA:"Omelete de legumes (montar em 8 min no ponto certo)", jantarB:"Sopa de lentilha (caldo caseiro rico, ervas e gengibre)", lanche:"Iogurte grego + mel + granola (simples e eficiente)", foco:"Hábitos ≥90% do tempo. Prepare marmitas no domingo. Energia ≥9/10." },
+          { cafe:"⑥ Overnight oats + chia + pasta de amendoim (autonomia total)", almocoA:"Salmão assado + quinoa + couve (ervas, limão, azeite extra-virgem)", almocoB:"Patinho moído + batata doce + espinafre (20 min, tempero perfeito)", jantarA:"Sopa de frango (caldo caseiro rico feito desde o domingo)", jantarB:"Omelete de salmão + espinafre + tomate (rápido e nutritivo)", lanche:"Mix oleaginosas + kefir (hábito consolidado)", foco:"🏆 12 semanas concluídas! Energia ≥9/10. Saúde, disposição e hábito para a vida." }
+        ],
+
+        // ---- MÉTRICAS (12 semanas em branco para preencher toda segunda) ----
+        metricas: [1,2,3,4,5,6,7,8,9,10,11,12].map(function(){
+          return { data:"", peso:"", cintura:"", energia:"", disposicao:"", sono:"", hidratacao:"", obs:"" };
+        }),
+
+        // ---- lista de compras (estado dos checkboxes + itens extra) ----
+        compras: { check:{}, extra:[] }
+      };
+    },
+
+    /* ====================================================================
+       HELPERS de data / semana / fase
+    ==================================================================== */
+    parseData(s) { if (!s) return null; var p = s.split("-"); return new Date(+p[0], +p[1]-1, +p[2]); },
+    hoje() { var h = new Date(); return new Date(h.getFullYear(), h.getMonth(), h.getDate()); },
+    diffDias(a, b) { return Math.floor((b - a) / 86400000); },
+    clamp(n, mn, mx) { return Math.max(mn, Math.min(mx, n)); },
+
+    semanaAtual() {
+      var ini = this.parseData(this.d.inicio);
+      if (!ini) return 1;
+      return this.clamp(Math.floor(this.diffDias(ini, this.hoje()) / 7) + 1, 1, 12);
+    },
+    faseNum(sem) { return this.clamp(Math.ceil(sem / 2), 1, 6); },
+    tipoSemana(sem) { return (sem % 2 === 1) ? "A" : "B"; },   // ímpar=A, par=B
+
+    faseDatas(num) {
+      var ini = this.parseData(this.d.inicio);
+      if (!ini) return null;
+      var i = new Date(ini); i.setDate(i.getDate() + (num - 1) * 14);
+      var f = new Date(i);   f.setDate(f.getDate() + 13);
+      return { ini:i, fim:f };
+    },
+    statusFase(num) {
+      var dt = this.faseDatas(num);
+      if (!dt) return { txt:"Não iniciada", emoji:"⏳" };
+      var h = this.hoje();
+      if (h < dt.ini) return { txt:"Não iniciada", emoji:"⏳" };
+      if (h > dt.fim) return { txt:"Concluída", emoji:"✅" };
+      return { txt:"Em andamento", emoji:"🔄" };
+    },
+    brDataObj(d) { return ("0"+d.getDate()).slice(-2) + "/" + ("0"+(d.getMonth()+1)).slice(-2); },
+
+    /* escapes para evitar quebra de HTML/JS ao montar as telas */
+    esc(s) { s = String(s); return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); },
+    escAttr(s) { return this.esc(s).replace(/"/g,"&quot;"); },
+    escJs(s) { return String(s).replace(/\\/g,"\\\\").replace(/'/g,"\\'"); },
+
+    /* ====================================================================
+       NAVEGAÇÃO (sub-abas)
+    ==================================================================== */
+    subtab(id) {
+      var ordem = ["hoje","crono","fases","receitas","compras","progresso"];
+      document.querySelectorAll("#sa-panel-nutri > .nu-subpanel").forEach(function(p){ p.classList.remove("is-active"); });
+      document.getElementById("nu-sub-" + id).classList.add("is-active");
+      var btns = document.querySelectorAll("#sa-panel-nutri > .nu-subtabs > .nu-subtab");
+      btns.forEach(function(b){ b.classList.remove("is-active"); });
+      var i = ordem.indexOf(id);
+      if (btns[i]) btns[i].classList.add("is-active");
+    },
+    recTab(aba, btn) {
+      this.recAbaAtiva = aba;
+      var cont = btn.parentElement;
+      cont.querySelectorAll(".nu-subtab").forEach(function(b){ b.classList.remove("is-active"); });
+      btn.classList.add("is-active");
+      this.renderReceitas();
+    },
+
+    /* ====================================================================
+       FORMULÁRIO GENÉRICO — um único modal serve para tudo
+    ==================================================================== */
+    openForm(titulo, campos, valores, onSave) {
+      this._formCampos = campos;
+      this._formOnSave = onSave;
+      document.getElementById("nu-form-titulo").innerHTML = '<i class="fa-solid fa-pen"></i> ' + titulo;
+      var h = "";
+      var self = this;
+      campos.forEach(function(c){
+        var v = (valores && valores[c.key] != null) ? valores[c.key] : "";
+        h += '<div class="sa-field"><label class="sa-label">' + c.label + '</label>';
+        if (c.tipo === "textarea") {
+          h += '<textarea class="sa-input" id="nuf-' + c.key + '" style="min-height:80px;">' + self.esc(v) + '</textarea>';
+        } else if (c.tipo === "select") {
+          h += '<select class="sa-input" id="nuf-' + c.key + '">';
+          c.opcoes.forEach(function(o){ h += '<option' + (String(o)===String(v)?' selected':'') + '>' + o + '</option>'; });
+          h += '</select>';
+        } else {
+          h += '<input type="' + (c.tipo || "text") + '" class="sa-input" id="nuf-' + c.key + '" value="' + self.escAttr(v) + '">';
+        }
+        h += '</div>';
+      });
+      document.getElementById("nu-form-body").innerHTML = h;
+      SA.openM("nu-modal-form");
+    },
+    formSave() {
+      var obj = {};
+      this._formCampos.forEach(function(c){
+        var el = document.getElementById("nuf-" + c.key);
+        obj[c.key] = el ? el.value : "";
+      });
+      SA.closeM("nu-modal-form");
+      if (this._formOnSave) this._formOnSave(obj);
+    },
+
+    /* ====================================================================
+       RENDER — desenha tudo
+    ==================================================================== */
+    renderAll() {
+      if (!document.getElementById("nu-inicio")) return;
+      document.getElementById("nu-inicio").value = this.d.inicio || "";
+      this.renderHoje();
+      this.renderCrono();
+      this.renderFases();
+      this.renderReceitas();
+      this.renderCompras();
+      this.renderProgresso();
+      if (window.SA && SA.renderAgua) SA.renderAgua();
+    },
+
+    /* ---------- HOJE ---------- */
+    mealCard(ic, lbl, nome, sub) {
+      return '<div class="nu-meal"><div class="nu-meal__ic">' + ic + '</div><div>' +
+        '<div class="nu-meal__lbl">' + lbl + '</div>' +
+        '<div class="nu-meal__nome">' + (nome || "—") + '</div>' +
+        (sub ? '<div class="nu-meal__sub">💡 ' + sub + '</div>' : '') +
+        '</div></div>';
+    },
+    renderHoje() {
+      var box = document.getElementById("nu-hoje");
+      var metaBox = document.getElementById("nu-agua-meta-fase");
+      if (!this.d.inicio) {
+        box.innerHTML = '<div class="sa-empty" style="padding:18px; text-align:center;">' +
+          '<p style="margin-bottom:12px;">Defina a data de início do plano para ver o cardápio de hoje.</p>' +
+          '<button class="btn btn--primary" onclick="NU.subtab(\'fases\')">Definir início</button></div>';
+        metaBox.innerHTML = "";
+        return;
+      }
+      var sem = this.semanaAtual();
+      var fase = this.d.fases[this.faseNum(sem) - 1];
+      var tipo = this.tipoSemana(sem);
+      var w = this.d.crono[sem - 1];
+      var dia = this.hoje().getDay();   // 0 Dom .. 6 Sáb
+      var nomesDia = ["Domingo","Segunda","Terça","Quarta","Quinta","Sexta","Sábado"];
+
+      var almoco, jantar, tagDia, subDom = "";
+      if (dia === 0) {
+        almoco = this.d.marmitas[tipo][0].dom; jantar = this.d.marmitas[tipo][1].dom;
+        tagDia = "Domingo especial · dia de preparar as marmitas"; subDom = this.d.marmitas[tipo][0].domDica;
+      } else if (dia === 1 || dia === 3 || dia === 5) {
+        almoco = w.almocoA; jantar = w.jantarA; tagDia = "Opção A · Seg / Qua / Sex";
+      } else {
+        almoco = w.almocoB; jantar = w.jantarB; tagDia = "Opção B · Ter / Qui / Sáb";
+      }
+
+      var h = "";
+      h += '<div class="nu-now">' +
+        '<div><div class="nu-now__big">S' + sem + '</div><div class="nu-now__lbl">de 12</div></div>' +
+        '<div style="flex:1; min-width:150px;">' +
+          '<span class="nu-chip" style="color:' + fase.cor + '">' + fase.emoji + ' ' + fase.nome + '</span>' +
+          '<p style="font-size:12px; color:var(--text-muted); margin-top:8px;">' + nomesDia[dia] + ' · ' + tagDia + '</p>' +
+        '</div></div>';
+
+      h += '<div class="nu-meal" style="border-left-color:' + fase.cor + '"><div class="nu-meal__ic">🎯</div><div>' +
+        '<div class="nu-meal__lbl">Foco da semana</div><div class="nu-meal__nome" style="font-size:13px;">' + w.foco + '</div></div></div>';
+
+      h += this.mealCard("☀️", "Café da manhã", w.cafe, "");
+      h += this.mealCard("🥇", "Almoço · 12:00–13:30", almoco, dia === 0 ? subDom : "");
+      h += this.mealCard("🌙", "Jantar · 19:00–20:00", jantar, "");
+      h += this.mealCard("🥤", "Lanche sugerido", w.lanche, "");
+      box.innerHTML = h;
+
+      metaBox.innerHTML = '<div class="sa-check" style="border-left:4px solid var(--sa-agua)">' +
+        '<span class="sa-check__txt">Meta da fase ' + fase.emoji + ': <b>' + fase.agua + '</b></span></div>';
+    },
+
+    /* ---------- CRONOGRAMA ---------- */
+    wkRow(b, s) { return '<div class="nu-wk__row"><b>' + b + '</b><span>' + (s || "—") + '</span></div>'; },
+    toggleSem(n) { document.getElementById("nu-wk-" + n).classList.toggle("is-open"); },
+    renderCrono() {
+      var box = document.getElementById("nu-crono");
+      var semNow = this.d.inicio ? this.semanaAtual() : 0;
+      var h = "", self = this;
+      this.d.crono.forEach(function(w, i){
+        var sem = i + 1;
+        var fase = self.d.fases[self.faseNum(sem) - 1];
+        var ehNow = (sem === semNow);
+        h += '<div class="nu-wk' + (ehNow ? ' is-now is-open' : '') + '" id="nu-wk-' + sem + '">' +
+          '<div class="nu-wk__head" onclick="NU.toggleSem(' + sem + ')">' +
+            '<span style="font-size:16px;">' + fase.emoji + '</span>' +
+            '<h4>Semana ' + sem + (ehNow ? ' · <span style="color:var(--accent)">agora</span>' : '') + '</h4>' +
+            '<button class="btn btn--icon" onclick="event.stopPropagation(); NU.editSemana(' + sem + ')"><i class="fa-solid fa-pen"></i></button>' +
+            '<i class="fa-solid fa-chevron-right nu-wk__chev"></i>' +
+          '</div>' +
+          '<div class="nu-wk__body">' +
+            self.wkRow("Café", w.cafe) + self.wkRow("Almoço A", w.almocoA) + self.wkRow("Almoço B", w.almocoB) +
+            self.wkRow("Jantar A", w.jantarA) + self.wkRow("Jantar B", w.jantarB) +
+            self.wkRow("Lanche", w.lanche) + self.wkRow("Foco", w.foco) +
+          '</div></div>';
+      });
+      box.innerHTML = h;
+    },
+    editSemana(n) {
+      var self = this;
+      this.openForm("Semana " + n, [
+        { key:"cafe", label:"Café da manhã", tipo:"text" },
+        { key:"almocoA", label:"Almoço A (Seg/Qua/Sex)", tipo:"textarea" },
+        { key:"almocoB", label:"Almoço B (Ter/Qui/Sáb)", tipo:"textarea" },
+        { key:"jantarA", label:"Jantar A (Seg/Qua/Sex)", tipo:"textarea" },
+        { key:"jantarB", label:"Jantar B (Ter/Qui/Sáb)", tipo:"textarea" },
+        { key:"lanche", label:"Lanche sugerido", tipo:"text" },
+        { key:"foco", label:"Foco da semana", tipo:"textarea" }
+      ], this.d.crono[n-1], function(v){
+        Object.assign(self.d.crono[n-1], v);
+        self.save(); self.renderCrono(); self.renderHoje(); SA.toast("Semana " + n + " atualizada!");
+      });
+    },
+
+    /* ---------- FASES ---------- */
+    renderFases() {
+      var box = document.getElementById("nu-fases");
+      var fnow = this.d.inicio ? this.faseNum(this.semanaAtual()) : 0;
+      var h = "", self = this;
+      this.d.fases.forEach(function(f, i){
+        var num = i + 1;
+        var st = self.statusFase(num);
+        var dt = self.faseDatas(num);
+        var datas = dt ? (self.brDataObj(dt.ini) + " → " + self.brDataObj(dt.fim)) : "defina o início";
+        h += '<div class="nu-fase' + (num === fnow ? ' is-now' : '') + '" style="border-left-color:' + f.cor + '">' +
+          '<div class="nu-fase__top"><span style="font-size:18px;">' + f.emoji + '</span>' +
+            '<h4>' + num + ' · ' + f.nome + '</h4>' +
+            '<span class="nu-chip">' + st.emoji + ' ' + st.txt + '</span>' +
+            '<button class="btn btn--icon" onclick="NU.editFase(' + num + ')"><i class="fa-solid fa-pen"></i></button></div>' +
+          '<p class="nu-fase__txt"><b>Foco:</b> ' + f.foco + '</p>' +
+          '<p class="nu-fase__txt"><b>Estratégia:</b> ' + f.estrategia + '</p>' +
+          '<div class="nu-macros">' +
+            '<div class="nu-macro"><b>' + f.prot + '</b><span>Proteína</span></div>' +
+            '<div class="nu-macro"><b>' + f.carb + '</b><span>Carboidrato</span></div>' +
+            '<div class="nu-macro"><b>' + f.agua + '</b><span>Hidratação</span></div></div>' +
+          '<p class="nu-fase__txt" style="margin-top:10px;"><b>🎯 Objetivo:</b> ' + f.objetivo + '</p>' +
+          '<p style="font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:1px; color:var(--text-muted); margin-top:8px;"><i class="fa-regular fa-calendar"></i> ' + datas + ' · 2 semanas</p>' +
+          '</div>';
+      });
+      box.innerHTML = h;
+    },
+    editFase(num) {
+      var self = this, f = this.d.fases[num-1];
+      this.openForm("Fase " + num + " · " + f.nome, [
+        { key:"foco", label:"Foco nutricional", tipo:"textarea" },
+        { key:"estrategia", label:"Estratégia chave", tipo:"textarea" },
+        { key:"prot", label:"Proteína alvo (g/kg)", tipo:"text" },
+        { key:"carb", label:"Carboidrato alvo (g/kg)", tipo:"text" },
+        { key:"agua", label:"Hidratação alvo", tipo:"text" },
+        { key:"objetivo", label:"Objetivo mensurável", tipo:"textarea" }
+      ], f, function(v){
+        Object.assign(self.d.fases[num-1], v);
+        self.save(); self.renderFases(); self.renderHoje(); SA.toast("Fase atualizada!");
+      });
+    },
+    setInicio(val) {
+      this.d.inicio = val || "";
+      this.save();
+      this.renderAll();
+      if (val) SA.toast("Início definido! Datas e status calculados.");
+    },
+
+    /* ---------- RECEITAS (biblioteca editável) ---------- */
+    renderReceitas() {
+      var box = document.getElementById("nu-rec");
+      if (this.recAbaAtiva === "cafes") box.innerHTML = this.renderCafes();
+      else if (this.recAbaAtiva === "pratos") box.innerHTML = this.renderPratos();
+      else if (this.recAbaAtiva === "lanches") box.innerHTML = this.renderLanches();
+      else box.innerHTML = this.renderMarmitas();
+    },
+    delItem(tipo, i) {
+      var self = this;
+      SA.confirmar("Remover este item?", function(){ self.d[tipo].splice(i,1); self.save(); self.renderReceitas(); SA.toast("Removido."); });
+    },
+    renderCafes() {
+      var h = '<button class="btn btn--primary" style="margin-bottom:14px;" onclick="NU.addCafe()"><i class="fa-solid fa-plus"></i> Novo café</button>';
+      this.d.cafes.forEach(function(c, i){
+        h += '<div class="nu-rec"><div class="nu-rec__top"><span style="font-size:16px;">☀️</span><h4>' + c.nome + '</h4>' +
+          '<button class="btn btn--icon" onclick="NU.editCafe(' + i + ')"><i class="fa-solid fa-pen"></i></button>' +
+          '<button class="btn btn--icon" onclick="NU.delItem(\'cafes\',' + i + ')"><i class="fa-solid fa-trash"></i></button></div>' +
+          '<p class="nu-rec__ing">' + c.ing + '</p>' +
+          '<div style="display:flex; gap:6px; flex-wrap:wrap; margin-top:10px;">' +
+            '<span class="nu-chip">🥩 ' + c.prot + '</span><span class="nu-chip">🍚 ' + c.carb + '</span>' +
+            '<span class="nu-chip">⏱️ ' + c.prep + '</span><span class="nu-chip">' + c.fase + '</span></div>' +
+          (c.benef ? '<p class="nu-rec__ing" style="margin-top:8px;"><b>Benefício:</b> ' + c.benef + '</p>' : '') +
+          (c.dica ? '<div class="nu-rec__dica">💡 ' + c.dica + '</div>' : '') + '</div>';
+      });
+      return h;
+    },
+    camposCafe() { return [
+      { key:"nome", label:"Nome", tipo:"text" }, { key:"ing", label:"Ingredientes", tipo:"textarea" },
+      { key:"prot", label:"Proteína", tipo:"text" }, { key:"carb", label:"Carboidrato", tipo:"text" },
+      { key:"prep", label:"Tempo de preparo", tipo:"text" }, { key:"fase", label:"Fase ideal", tipo:"text" },
+      { key:"benef", label:"Benefício", tipo:"textarea" }, { key:"dica", label:"Dica / variação", tipo:"text" } ]; },
+    addCafe() { var s=this; this.openForm("Novo café", this.camposCafe(), {}, function(v){ s.d.cafes.push(v); s.save(); s.renderReceitas(); SA.toast("Café adicionado!"); }); },
+    editCafe(i) { var s=this; this.openForm("Editar café", this.camposCafe(), this.d.cafes[i], function(v){ Object.assign(s.d.cafes[i],v); s.save(); s.renderReceitas(); SA.toast("Salvo!"); }); },
+
+    renderPratos() {
+      var h = '<button class="btn btn--primary" style="margin-bottom:14px;" onclick="NU.addPrato()"><i class="fa-solid fa-plus"></i> Novo prato</button>';
+      this.d.pratos.forEach(function(p, i){
+        h += '<div class="nu-rec"><div class="nu-rec__top"><span style="font-size:16px;">🍽️</span><h4>' + p.ciclo + ' · ' + p.fase + '</h4>' +
+          '<button class="btn btn--icon" onclick="NU.editPrato(' + i + ')"><i class="fa-solid fa-pen"></i></button>' +
+          '<button class="btn btn--icon" onclick="NU.delItem(\'pratos\',' + i + ')"><i class="fa-solid fa-trash"></i></button></div>' +
+          '<p class="nu-rec__ing"><b>A:</b> ' + p.a + '</p><p class="nu-rec__ing" style="margin-top:4px;"><b>B:</b> ' + p.b + '</p>' +
+          '<div style="display:flex; gap:6px; flex-wrap:wrap; margin-top:10px;">' +
+            '<span class="nu-chip">🥩 ' + p.prot + '</span><span class="nu-chip">🍚 ' + p.carb + '</span><span class="nu-chip">⏱️ ' + p.prep + '</span></div>' +
+          (p.benef ? '<p class="nu-rec__ing" style="margin-top:8px;"><b>Benefício:</b> ' + p.benef + '</p>' : '') +
+          (p.dica ? '<div class="nu-rec__dica">⭐ ' + p.dica + '</div>' : '') + '</div>';
+      });
+      return h;
+    },
+    camposPrato() { return [
+      { key:"ciclo", label:"Ciclo (ex: Sem 1-2)", tipo:"text" }, { key:"fase", label:"Fase", tipo:"text" },
+      { key:"a", label:"Prato A", tipo:"textarea" }, { key:"b", label:"Prato B", tipo:"textarea" },
+      { key:"prot", label:"Proteína base", tipo:"text" }, { key:"carb", label:"Carboidrato base", tipo:"text" },
+      { key:"prep", label:"Tempo de preparo", tipo:"text" }, { key:"benef", label:"Benefício científico", tipo:"textarea" },
+      { key:"dica", label:"Dica de ouro", tipo:"textarea" } ]; },
+    addPrato() { var s=this; this.openForm("Novo prato", this.camposPrato(), {}, function(v){ s.d.pratos.push(v); s.save(); s.renderReceitas(); SA.toast("Prato adicionado!"); }); },
+    editPrato(i) { var s=this; this.openForm("Editar prato", this.camposPrato(), this.d.pratos[i], function(v){ Object.assign(s.d.pratos[i],v); s.save(); s.renderReceitas(); SA.toast("Salvo!"); }); },
+
+    renderLanches() {
+      var h = '<button class="btn btn--primary" style="margin-bottom:14px;" onclick="NU.addLanche()"><i class="fa-solid fa-plus"></i> Novo lanche</button>';
+      this.d.lanches.forEach(function(l, i){
+        h += '<div class="nu-rec"><div class="nu-rec__top"><span style="font-size:16px;">🥤</span><h4>' + l.nome + '</h4>' +
+          '<button class="btn btn--icon" onclick="NU.editLanche(' + i + ')"><i class="fa-solid fa-pen"></i></button>' +
+          '<button class="btn btn--icon" onclick="NU.delItem(\'lanches\',' + i + ')"><i class="fa-solid fa-trash"></i></button></div>' +
+          '<p class="nu-rec__ing">' + l.ing + '</p>' +
+          '<div style="display:flex; gap:6px; flex-wrap:wrap; margin-top:10px;">' +
+            '<span class="nu-chip">🥩 ' + l.prot + '</span><span class="nu-chip">🔥 ' + l.kcal + ' kcal</span>' +
+            '<span class="nu-chip">🕐 ' + l.hora + '</span><span class="nu-chip">' + l.fase + '</span></div>' +
+          (l.benef ? '<p class="nu-rec__ing" style="margin-top:8px;"><b>Benefício:</b> ' + l.benef + '</p>' : '') +
+          (l.obs ? '<div class="nu-rec__dica">💡 ' + l.obs + '</div>' : '') + '</div>';
+      });
+      return h;
+    },
+    camposLanche() { return [
+      { key:"nome", label:"Nome", tipo:"text" }, { key:"ing", label:"Ingredientes", tipo:"textarea" },
+      { key:"prot", label:"Proteína", tipo:"text" }, { key:"kcal", label:"Calorias (kcal)", tipo:"text" },
+      { key:"hora", label:"Horário ideal", tipo:"text" }, { key:"fase", label:"Fase recomendada", tipo:"text" },
+      { key:"benef", label:"Benefício", tipo:"textarea" }, { key:"obs", label:"Observação", tipo:"text" } ]; },
+    addLanche() { var s=this; this.openForm("Novo lanche", this.camposLanche(), {}, function(v){ s.d.lanches.push(v); s.save(); s.renderReceitas(); SA.toast("Lanche adicionado!"); }); },
+    editLanche(i) { var s=this; this.openForm("Editar lanche", this.camposLanche(), this.d.lanches[i], function(v){ Object.assign(s.d.lanches[i],v); s.save(); s.renderReceitas(); SA.toast("Salvo!"); }); },
+
+    renderMarmitas() {
+      var h = '<p style="font-size:11px; color:var(--text-muted); margin-bottom:14px;">Marmitas preparadas no domingo. Semanas ímpares usam o cardápio <b>A</b>; pares, o <b>B</b>. Os ingredientes alimentam a Lista de Compras.</p>';
+      var self = this;
+      ["A","B"].forEach(function(tipo){
+        h += '<h4 style="margin:14px 0 8px; color:var(--text-strong);">🗓️ Cardápio ' + tipo + (tipo==="A"?' (semanas ímpares)':' (semanas pares)') + '</h4>';
+        self.d.marmitas[tipo].forEach(function(m, i){
+          h += '<div class="nu-rec"><div class="nu-rec__top"><h4>' + m.tipo + ' · ' + m.horario + '</h4>' +
+            '<button class="btn btn--icon" onclick="NU.editMarmita(\'' + tipo + '\',' + i + ')"><i class="fa-solid fa-pen"></i></button></div>' +
+            '<p class="nu-rec__ing"><b>Opção A (Seg/Qua/Sex):</b> ' + m.optA + '</p>' +
+            '<p class="nu-rec__ing" style="margin-top:4px;"><b>Opção B (Ter/Qui/Sáb):</b> ' + m.optB + '</p>' +
+            '<p class="nu-rec__ing" style="margin-top:4px;"><b>Domingo:</b> ' + m.dom + '</p>' +
+            '<div class="nu-rec__dica">💡 ' + m.domDica + '</div></div>';
+        });
+      });
+      return h;
+    },
+    editMarmita(tipo, i) {
+      var self = this, m = this.d.marmitas[tipo][i];
+      this.openForm("Marmita " + tipo + " · " + m.tipo, [
+        { key:"horario", label:"Horário", tipo:"text" },
+        { key:"optA", label:"Opção A (Seg/Qua/Sex)", tipo:"textarea" },
+        { key:"ingA", label:"Ingredientes A (separe por vírgula)", tipo:"textarea" },
+        { key:"optB", label:"Opção B (Ter/Qui/Sáb)", tipo:"textarea" },
+        { key:"ingB", label:"Ingredientes B (separe por vírgula)", tipo:"textarea" },
+        { key:"dom", label:"Domingo especial", tipo:"textarea" },
+        { key:"domDica", label:"Dica de preparo dominical", tipo:"textarea" }
+      ], m, function(v){
+        Object.assign(self.d.marmitas[tipo][i], v);
+        self.save(); self.renderReceitas(); self.renderCompras(); SA.toast("Marmita atualizada!");
+      });
+    },
+
+    /* ---------- COMPRAS (lista automática da semana ativa) ---------- */
+    categoriza(item) {
+      var s = item.toLowerCase();
+      if (/frango|til[áa]pia|salm[ãa]o|patinho|peixe|atum|carne|costela|ovo|lentilha/.test(s)) return "Proteínas";
+      if (/arroz|feij[ãa]o|quinoa|batata|mandioc|p[ãa]o|aveia|tapioca|granola|wrap|macarr/.test(s)) return "Carboidratos & Grãos";
+      if (/iogurte|cottage|queijo|kefir|leite/.test(s)) return "Laticínios";
+      if (/banana|ma[çc][ãa]|mam[ãa]o|abacaxi|manga|morango|mirtilo|frutas?|abacate|laranja/.test(s)) return "Frutas";
+      if (/salada|br[óo]colis|couve|cenoura|espinafre|tomate|cebola|piment[ãa]o|alface|abobrinha|vagem|aspargos|legumes|alho|gengibre|milho/.test(s)) return "Hortifrúti";
+      if (/azeite|lim[ãa]o|sal\b|temperos|caldo|mel|cacau|chia|castanha|am[êe]ndoa|nozes|c[úu]rcuma|pimenta|louro|ervas|oleaginos/.test(s)) return "Temperos & Diversos";
+      return "Outros";
+    },
+    itensDaSemana() {
+      if (!this.d.inicio) return [];
+      var tipo = this.tipoSemana(this.semanaAtual());
+      var set = {};
+      this.d.marmitas[tipo].forEach(function(m){
+        [m.ingA, m.ingB].forEach(function(txt){
+          (txt || "").split(",").forEach(function(raw){
+            var it = raw.trim();
+            if (it) set[it.toLowerCase()] = it;
+          });
+        });
+      });
+      return Object.keys(set).map(function(k){ return set[k]; });
+    },
+    renderCompras() {
+      var box = document.getElementById("nu-compras");
+      if (!this.d.inicio) {
+        box.innerHTML = '<div class="sa-empty" style="padding:20px; text-align:center;">Defina o início do plano (aba Fases) para gerar a lista.</div>';
+        return;
+      }
+      var self = this;
+      var sem = this.semanaAtual(), tipo = this.tipoSemana(sem);
+      var itens = this.itensDaSemana();
+      var grupos = {};
+      itens.forEach(function(it){ var c = self.categoriza(it); (grupos[c] = grupos[c] || []).push(it); });
+
+      var ordem = ["Proteínas","Carboidratos & Grãos","Hortifrúti","Frutas","Laticínios","Temperos & Diversos","Outros"];
+      var total = 0, feitos = 0, corpo = "";
+
+      ordem.forEach(function(cat){
+        var lista = grupos[cat]; if (!lista || !lista.length) return;
+        corpo += '<div class="nu-catname">' + cat + '</div>';
+        lista.forEach(function(it){
+          total++;
+          var key = it.toLowerCase();
+          var done = !!self.d.compras.check[key];
+          if (done) feitos++;
+          corpo += '<div class="nu-buy' + (done?' is-done':'') + '" onclick="NU.toggleCompra(\'' + self.escJs(key) + '\')">' +
+            '<div class="nu-buy__box">' + (done?'<i class="fa-solid fa-check"></i>':'') + '</div>' +
+            '<span class="nu-buy__txt">' + it + '</span></div>';
+        });
+      });
+
+      if (this.d.compras.extra && this.d.compras.extra.length) {
+        corpo += '<div class="nu-catname">✚ Adicionados por você</div>';
+        this.d.compras.extra.forEach(function(e, idx){
+          total++;
+          var key = e.item.toLowerCase();
+          var done = !!self.d.compras.check[key];
+          if (done) feitos++;
+          corpo += '<div class="nu-buy' + (done?' is-done':'') + '">' +
+            '<div class="nu-buy__box" onclick="NU.toggleCompra(\'' + self.escJs(key) + '\')">' + (done?'<i class="fa-solid fa-check"></i>':'') + '</div>' +
+            '<span class="nu-buy__txt" onclick="NU.toggleCompra(\'' + self.escJs(key) + '\')">' + e.item + '</span>' +
+            '<button class="btn btn--icon" onclick="NU.delCompra(' + idx + ')"><i class="fa-solid fa-trash"></i></button></div>';
+        });
+      }
+
+      var pct = total ? Math.round(feitos / total * 100) : 0;
+      var h = '<p style="font-size:11px; color:var(--text-muted); margin-bottom:6px;">Gerada a partir das marmitas da <b>Semana ' + sem + '</b> (cardápio ' + tipo + ').</p>';
+      h += '<div class="sa-xp__track" style="height:8px; margin:8px 0 4px;"><div class="sa-xp__fill" style="width:' + pct + '%"></div></div>';
+      h += '<p style="font-size:10px; font-weight:800; color:var(--text-muted); text-align:right; margin-bottom:6px;">' + feitos + ' / ' + total + ' itens</p>';
+      h += corpo;
+      h += '<button class="btn btn--primary" style="width:100%; justify-content:center; margin-top:14px;" onclick="NU.addCompra()"><i class="fa-solid fa-plus"></i> Adicionar item</button>';
+      box.innerHTML = h;
+    },
+    toggleCompra(key) { this.d.compras.check[key] = !this.d.compras.check[key]; this.save(); this.renderCompras(); },
+    delCompra(idx) { this.d.compras.extra.splice(idx,1); this.save(); this.renderCompras(); },
+    limparCompras() {
+      var self = this;
+      SA.confirmar("Desmarcar todos os itens da lista?", function(){ self.d.compras.check = {}; self.save(); self.renderCompras(); SA.toast("Lista zerada."); });
+    },
+    addCompra() {
+      var self = this;
+      this.openForm("Adicionar item", [
+        { key:"item", label:"Item", tipo:"text" },
+        { key:"cat", label:"Categoria", tipo:"select", opcoes:["Proteínas","Carboidratos & Grãos","Hortifrúti","Frutas","Laticínios","Temperos & Diversos","Outros"] }
+      ], { cat:"Outros" }, function(v){
+        if (!v.item.trim()) return;
+        self.d.compras.extra.push({ item:v.item.trim(), cat:v.cat });
+        self.save(); self.renderCompras(); SA.toast("Item adicionado!");
+      });
+    },
+
+    /* ---------- PROGRESSO (métricas semanais) ---------- */
+    renderProgresso() {
+      var box = document.getElementById("nu-prog");
+      var m = this.d.metricas;
+      var preenchidas = m.filter(function(x){ return x.peso || x.energia || x.sono; }).length;
+      var serie = function(campo){
+        return m.map(function(x, i){ return { value: parseFloat(String(x[campo]).replace(",",".")), label:"S"+(i+1) }; })
+                .filter(function(p){ return !isNaN(p.value); });
+      };
+
+      var h = '<div class="nu-meal" style="border-left-color:var(--accent)"><div class="nu-meal__ic">🎯</div><div>' +
+        '<div class="nu-meal__lbl">Meta final</div>' +
+        '<div class="nu-meal__sub" style="font-size:12px;">Energia 9/10 · Disposição 9/10 · Sono 8/10 · Hidratação 2,5 L/dia — hábito consolidado e sustentável.</div></div></div>';
+      h += '<p style="font-size:11px; font-weight:800; color:var(--text-muted); margin:8px 0 14px;">Evolução: <b style="color:var(--accent)">' + preenchidas + ' / 12</b> semanas registradas</p>';
+
+      h += '<div class="grid grid--2">';
+      h += '<div><p class="sa-label" style="text-align:center;">Peso (kg)</p>' + SA.grafico(serie("peso"), "var(--accent)", "kg") + '</div>';
+      h += '<div><p class="sa-label" style="text-align:center;">Energia (1-10)</p>' + SA.grafico(serie("energia"), "var(--sa-mid)", "") + '</div>';
+      h += '<div><p class="sa-label" style="text-align:center;">Sono (1-10)</p>' + SA.grafico(serie("sono"), "var(--sa-sono)", "") + '</div>';
+      h += '<div><p class="sa-label" style="text-align:center;">Hidratação (L/dia)</p>' + SA.grafico(serie("hidratacao"), "var(--sa-agua)", "L") + '</div>';
+      h += '</div>';
+
+      h += '<div style="margin-top:8px;">';
+      m.forEach(function(x, i){
+        var tem = x.peso || x.energia || x.sono || x.cintura || x.disposicao || x.hidratacao;
+        var resumo = tem ? ' · ' + (x.peso?x.peso+'kg ':'') + (x.energia?'⚡'+x.energia+' ':'') + (x.sono?'😴'+x.sono+' ':'') + (x.hidratacao?'💧'+x.hidratacao+'L':'')
+                         : ' <span style="color:var(--text-muted); font-weight:400;">— sem registro</span>';
+        h += '<div class="nu-buy" style="cursor:default;"><span class="nu-buy__txt"><b>Semana ' + (i+1) + '</b>' + resumo + '</span>' +
+          '<button class="btn btn--icon" onclick="NU.editMetrica(' + i + ')"><i class="fa-solid fa-pen"></i></button></div>';
+      });
+      h += '</div>';
+      box.innerHTML = h;
+    },
+    editMetrica(i) {
+      var self = this;
+      this.openForm("Métricas · Semana " + (i+1), [
+        { key:"data", label:"Data da medição", tipo:"date" },
+        { key:"peso", label:"Peso (kg)", tipo:"number" },
+        { key:"cintura", label:"Cintura (cm)", tipo:"number" },
+        { key:"energia", label:"Energia (1-10)", tipo:"number" },
+        { key:"disposicao", label:"Disposição (1-10)", tipo:"number" },
+        { key:"sono", label:"Sono (1-10)", tipo:"number" },
+        { key:"hidratacao", label:"Hidratação (L/dia)", tipo:"number" },
+        { key:"obs", label:"Observações / ajustes", tipo:"textarea" }
+      ], this.d.metricas[i], function(v){
+        Object.assign(self.d.metricas[i], v);
+        self.save(); self.renderProgresso(); SA.toast("Semana " + (i+1) + " registrada!"); SA.darXP(15, "métrica registrada");
+      });
+    },
+
+    /* ====================================================================
+       INICIALIZAÇÃO
+    ==================================================================== */
+    migrar() {
+      var s = this.seed();
+      ["fases","cafes","pratos","lanches","crono","metricas"].forEach(function(k){
+        if (!Array.isArray(this.d[k])) this.d[k] = s[k];
+      }, this);
+      if (!this.d.marmitas) this.d.marmitas = s.marmitas;
+      if (!this.d.compras) this.d.compras = { check:{}, extra:[] };
+      if (!this.d.compras.check) this.d.compras.check = {};
+      if (!this.d.compras.extra) this.d.compras.extra = [];
+      if (typeof this.d.inicio !== "string") this.d.inicio = "";
+    },
+    init() {
+      this.d = this.load();
+      if (!this.d) { this.d = this.seed(); this.save(); }
+      else this.migrar();
+      this.renderAll();
+    }
+  };
+
   // O script roda no fim do <body>, então o DOM já existe: pode iniciar.
   SA.init();
+  NU.init();
   </script>
 </body>
 </html>

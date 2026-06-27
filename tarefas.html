@@ -147,9 +147,10 @@
     .tk-item:hover { border-color: var(--text-muted); }
     .tk-item:active { transform: scale(.99); }
     .tk-item.is-active { border-color: var(--accent); background: var(--accent-soft); }
-    .tk-item.prio-alta  { border-left-color: #ef4444; }
-    .tk-item.prio-media { border-left-color: #f59e0b; }
-    .tk-item.prio-baixa { border-left-color: #22c55e; }
+    /* Fundo pastel por prioridade — mesma lógica do quadro, visual unificado */
+    .tk-item.prio-alta  { border-left-color: rgba(239,68,68,.5);  background: rgba(239,68,68,.07); }
+    .tk-item.prio-media { border-left-color: rgba(245,158,11,.5); background: rgba(245,158,11,.07); }
+    .tk-item.prio-baixa { border-left-color: rgba(34,197,94,.5);  background: rgba(34,197,94,.07); }
 
     /* A "bolinha" de concluir */
     .tk-check {
@@ -207,52 +208,96 @@
     .tk-vazio p { font-size: 12px; margin-top: 6px; max-width: 280px; }
 
     .tk-back {
-      display: none;                /* só aparece no celular */
+      display: none;
       margin-bottom: 14px;
     }
 
-    /* Cabeçalho do detalhe */
+    /* ---- Cabeçalho com identidade da tarefa ---- */
+    /* Faixa colorida no topo do card — cor da categoria injetada via JS */
+    .tk-det-header {
+      margin: -22px -22px 18px;        /* "escapa" do padding do .card */
+      padding: 16px 22px 14px;
+      border-radius: 14px 14px 0 0;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg-soft);
+      transition: background .3s;
+    }
+    .tk-det-header__breadcrumb {
+      font-size: 10px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase;
+      color: var(--text-muted); margin-bottom: 8px;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .tk-det-header__breadcrumb .bc-ponto {
+      width: 8px; height: 8px; border-radius: 99px; flex-shrink: 0;
+    }
+    .tk-det-header__breadcrumb .bc-sep { opacity: .4; }
+
+    /* Título editável — mais destaque */
     .tk-det-titulo {
       width: 100%;
       background: transparent; border: none;
       color: var(--text-strong);
-      font-family: inherit; font-size: 22px; font-weight: 900; letter-spacing: -.5px;
-      outline: none;
-      padding: 4px 0;
+      font-family: inherit; font-size: 20px; font-weight: 900; letter-spacing: -.5px;
+      outline: none; padding: 2px 0 6px;
       border-bottom: 2px solid transparent;
       transition: border-color .15s;
+      display: block;
     }
     .tk-det-titulo:focus { border-bottom-color: var(--accent); }
 
-    .tk-det-controles {
-      display: flex; flex-wrap: wrap; gap: 10px; align-items: center;
-      margin: 16px 0;
-      padding-bottom: 16px;
+    /* Barra de progresso das subtarefas — sobe pro cabeçalho */
+    .tk-det-prog {
+      display: flex; align-items: center; gap: 10px; margin-top: 10px;
+    }
+    .tk-det-prog__trilho {
+      flex: 1; height: 5px; border-radius: 99px;
+      background: var(--border); overflow: hidden;
+    }
+    .tk-det-prog__barra {
+      height: 100%; width: 0%; border-radius: 99px;
+      background: var(--accent); transition: width .35s ease;
+    }
+    .tk-det-prog__txt {
+      font-size: 10px; font-weight: 800; color: var(--text-muted); flex-shrink: 0;
+    }
+
+    /* ---- Metadados em duas linhas ---- */
+    .tk-det-meta {
+      display: flex; flex-direction: column; gap: 10px;
+      margin: 14px 0; padding-bottom: 14px;
       border-bottom: 1px solid var(--border);
     }
+    .tk-det-meta__linha {
+      display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end;
+    }
+    .tk-det-meta__titulo {
+      width: 100%;
+      font-size: 8px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase;
+      color: var(--text-muted); margin-bottom: 2px;
+    }
     .tk-control {
-      display: flex; flex-direction: column; gap: 5px;
+      display: flex; flex-direction: column; gap: 4px;
     }
     .tk-control > label {
       font-size: 8px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase;
       color: var(--text-muted);
     }
-    .tk-control select, .tk-control input {
+    .tk-control select, .tk-control input[type=date] {
       background: var(--bg-soft); border: 1px solid var(--border);
       border-radius: 9px; padding: 8px 10px;
       color: var(--text-strong);
       font-family: inherit; font-size: 12px; font-weight: 700;
       outline: none; transition: border-color .15s;
     }
-    .tk-control select:focus, .tk-control input:focus { border-color: var(--accent); }
+    .tk-control select:focus, .tk-control input[type=date]:focus { border-color: var(--accent); }
     .tk-det-acoes { margin-left: auto; display: flex; gap: 8px; align-self: flex-end; }
 
-    /* Botões de ação coloridos (concluir/excluir) */
+    /* Botões de ação */
     .tk-btn-danger { border-color: rgba(239,68,68,.4) !important; color: #ef4444 !important; }
     .tk-btn-danger:hover { background: rgba(239,68,68,.12); }
 
-    /* Blocos de conteúdo do detalhe */
-    .tk-bloco { margin-top: 22px; }
+    /* ---- Blocos de conteúdo ---- */
+    .tk-bloco { margin-top: 20px; }
     .tk-bloco__label {
       font-size: 11px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase;
       color: var(--text-strong);
@@ -261,9 +306,7 @@
     .tk-bloco__label i { color: var(--accent); }
 
     .tk-textarea {
-      width: 100%;
-      min-height: 110px;
-      resize: vertical;
+      width: 100%; min-height: 100px; resize: vertical;
       background: var(--bg-soft); border: 1px solid var(--border);
       border-radius: 12px; padding: 14px;
       color: var(--text-strong);
@@ -272,16 +315,24 @@
     }
     .tk-textarea:focus { border-color: var(--accent); }
 
-    /* Subtarefas */
-    .tk-progress-trilho {
-      height: 7px; border-radius: 99px; background: var(--bg-soft);
-      overflow: hidden; margin-bottom: 12px; border: 1px solid var(--border);
+    /* Bloco de fechamento: aparece com destaque só quando tarefa está concluída */
+    .tk-bloco-fechamento {
+      margin-top: 20px;
+      border-radius: 14px; padding: 16px;
+      background: rgba(34,197,94,.07);
+      border: 1px solid rgba(34,197,94,.25);
+      display: none;          /* escondido por padrão */
     }
-    .tk-progress-barra {
-      height: 100%; width: 0%;
-      background: var(--accent); border-radius: 99px;
-      transition: width .3s ease;
+    .tk-bloco-fechamento.visivel { display: block; }
+    .tk-bloco-fechamento .tk-bloco__label { color: #22c55e; }
+    .tk-bloco-fechamento .tk-bloco__label i { color: #22c55e; }
+    .tk-bloco-fechamento .tk-textarea {
+      background: rgba(34,197,94,.06); border-color: rgba(34,197,94,.2);
+      min-height: 80px;
     }
+
+    /* Subtarefas (barra de progresso fica no cabeçalho; aqui só a lista) */
+    .tk-progress-trilho { display: none; } /* ocultamos a barra do bloco — está no header */
     .tk-sub {
       display: flex; align-items: center; gap: 10px;
       background: var(--bg-soft); border: 1px solid var(--border);
@@ -453,6 +504,16 @@
       cursor: pointer; transition: background .15s;
     }
     .tk-q-item:hover { background: var(--bg-soft); }
+
+    /* Fundo da tarefa tingido pela prioridade — pastel, transparência baixa.
+       Como cada tarefa sempre tem prioridade, todas ganham seu tom suave. */
+    .tk-q-item.prio-alta  { background: rgba(239, 68, 68, 0.10);  border: 1px solid rgba(239, 68, 68, 0.18); }
+    .tk-q-item.prio-media { background: rgba(245, 158, 11, 0.11); border: 1px solid rgba(245, 158, 11, 0.20); }
+    .tk-q-item.prio-baixa { background: rgba(34, 197, 94, 0.10);  border: 1px solid rgba(34, 197, 94, 0.18); }
+    /* No hover o mesmo tom fica só um pouco mais presente */
+    .tk-q-item.prio-alta:hover  { background: rgba(239, 68, 68, 0.18); }
+    .tk-q-item.prio-media:hover { background: rgba(245, 158, 11, 0.20); }
+    .tk-q-item.prio-baixa:hover { background: rgba(34, 197, 94, 0.18); }
     .tk-q-check {
       flex-shrink: 0; width: 18px; height: 18px; border-radius: 99px;
       border: 2px solid var(--text-muted); display: grid; place-items: center;
@@ -480,6 +541,131 @@
       transition: all .15s;
     }
     .tk-q-add button:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* Barra lateral clicável que cicla a prioridade */
+    .tk-prio-bar {
+      flex-shrink: 0; width: 5px; align-self: stretch;
+      border-radius: 99px; cursor: pointer; margin-right: 4px;
+      transition: opacity .15s;
+    }
+    .tk-prio-bar:hover { opacity: .7; }
+    .tk-item.prio-alta  .tk-prio-bar { background: rgba(239,68,68,.7); }
+    .tk-item.prio-media .tk-prio-bar { background: rgba(245,158,11,.7); }
+    .tk-item.prio-baixa .tk-prio-bar { background: rgba(34,197,94,.7); }
+
+    /* ---------- Campo de busca ---------- */
+    .tk-busca {
+      display: flex; align-items: center; gap: 10px;
+      background: var(--bg-soft); border: 1px solid var(--border);
+      border-radius: 10px; padding: 0 12px;
+      transition: border-color .15s;
+    }
+    .tk-busca:focus-within { border-color: var(--accent); }
+    .tk-busca i { color: var(--text-muted); font-size: 12px; flex-shrink: 0; }
+    .tk-busca input {
+      flex: 1; background: transparent; border: none;
+      color: var(--text-strong); font-family: inherit;
+      font-size: 13px; font-weight: 600; padding: 11px 0;
+      outline: none;
+    }
+    .tk-busca button { color: var(--text-muted); font-size: 13px; padding: 4px; }
+    .tk-busca button:hover { color: var(--accent); }
+
+    /* ---------- Foco do Dia ---------- */
+    .tk-foco__titulo {
+      font-size: 10px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase;
+      color: #ef4444; display: flex; align-items: center; gap: 7px; margin-bottom: 7px;
+    }
+    .tk-foco__titulo i { animation: pulsar 1.8s ease-in-out infinite; }
+    @keyframes pulsar { 0%,100% { opacity:1; } 50% { opacity:.4; } }
+    #tk-foco-dia { border-radius: 12px; padding: 12px; background: rgba(239,68,68,.07); border: 1px solid rgba(239,68,68,.2); }
+
+    /* ---------- Ícone de objetivo vinculado na lista ---------- */
+    .tk-obj-badge {
+      font-size: 9px; font-weight: 700; color: var(--accent);
+      display: inline-flex; align-items: center; gap: 4px;
+    }
+
+    /* ---------- Filtro por categoria (select) ---------- */
+    .tk-filtros select {
+      background: var(--bg-soft); border: 1px solid var(--border); border-radius: 8px;
+      color: var(--text-muted); font-family: inherit; font-size: 10px; font-weight: 700;
+      padding: 8px; outline: none; max-width: 175px;
+    }
+    .tk-filtros select:focus { border-color: var(--accent); }
+    #tk-ordenar { margin-left: auto; }
+
+    /* ---------- Visão Geral: seções por domínio ---------- */
+    .tk-dom { margin-bottom: 26px; }
+    .tk-dom__titulo {
+      font-size: 13px; font-weight: 900; letter-spacing: 1px; text-transform: uppercase;
+      color: var(--text-strong);
+      display: flex; align-items: center; gap: 10px; margin-bottom: 14px;
+    }
+    .tk-dom__titulo::before {
+      content: ""; width: 4px; height: 16px; border-radius: 99px; background: var(--accent);
+    }
+    .tk-q-sub { display: block; font-size: 10px; font-weight: 600; color: var(--text-muted); margin-top: 2px; }
+
+    /* ---------- Modal de categorias: editor em árvore ---------- */
+    #modal-tags .modal__box { max-width: 560px; }
+    #modal-tags .modal__body { max-height: 72vh; overflow-y: auto; }
+
+    .tk-domed { margin-bottom: 16px; }
+    .tk-domed__cab {
+      font-size: 10px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase;
+      color: var(--accent); margin-bottom: 8px;
+    }
+    .tk-cated {
+      background: var(--bg-soft); border: 1px solid var(--border);
+      border-radius: 10px; padding: 8px; margin-bottom: 8px;
+    }
+    .tk-cated__head { display: flex; align-items: center; gap: 8px; }
+    .tk-cated__head input[type=color] {
+      width: 30px; height: 30px; border-radius: 8px; border: 1px solid var(--border);
+      background: var(--panel); cursor: pointer; padding: 3px; flex-shrink: 0;
+    }
+    .tk-cated__nome {
+      flex: 1; min-width: 0; background: transparent; border: 1px solid transparent;
+      border-radius: 8px; padding: 6px 8px;
+      color: var(--text-strong); font-family: inherit; font-size: 13px; font-weight: 700;
+      outline: none; transition: border-color .15s, background .15s;
+    }
+    .tk-cated__nome:hover { background: var(--panel); }
+    .tk-cated__nome:focus { border-color: var(--accent); background: var(--panel); }
+    .tk-cated__exp {
+      flex-shrink: 0; background: var(--panel); border: 1px solid var(--border);
+      border-radius: 8px; padding: 6px 9px; color: var(--text-muted);
+      font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; gap: 5px;
+      transition: all .15s;
+    }
+    .tk-cated__exp:hover { border-color: var(--accent); color: var(--accent); }
+    .tk-cated .del { color: var(--text-muted); padding: 6px; font-size: 12px; flex-shrink: 0; }
+    .tk-cated .del:hover { color: #ef4444; }
+
+    .tk-subed { margin: 8px 0 2px; padding-left: 8px; border-left: 2px solid var(--border); }
+    .tk-subed__linha { display: flex; align-items: center; gap: 6px; margin-bottom: 5px; }
+    .tk-subed__linha > i { color: var(--text-muted); font-size: 10px; flex-shrink: 0; }
+    .tk-subed__linha input {
+      flex: 1; min-width: 0; background: var(--panel); border: 1px solid var(--border);
+      border-radius: 7px; padding: 6px 8px; color: var(--text-strong);
+      font-family: inherit; font-size: 12px; font-weight: 600; outline: none;
+    }
+    .tk-subed__linha input:focus { border-color: var(--accent); }
+    .tk-subed__add, .tk-cated__add { display: flex; gap: 6px; margin-top: 6px; }
+    .tk-subed__add input, .tk-cated__add input {
+      flex: 1; min-width: 0; border: 1px solid var(--border);
+      border-radius: 8px; padding: 8px 10px; color: var(--text-strong);
+      font-family: inherit; font-size: 12px; font-weight: 600; outline: none;
+      background: var(--panel);
+    }
+    .tk-cated__add input { background: var(--bg-soft); }
+    .tk-subed__add input:focus, .tk-cated__add input:focus { border-color: var(--accent); }
+    .tk-subed__add button, .tk-cated__add button {
+      width: 36px; border-radius: 8px; background: var(--panel);
+      border: 1px solid var(--border); color: var(--text-muted); transition: all .15s; flex-shrink: 0;
+    }
+    .tk-subed__add button:hover, .tk-cated__add button:hover { border-color: var(--accent); color: var(--accent); }
 
     /* ---------- CELULAR: vira uma coluna só ---------- */
     @media (max-width: 900px) {
@@ -543,6 +729,19 @@
         <!-- ========================= ESQUERDA: LISTA ========================= -->
         <section class="tk-lista">
 
+          <!-- Campo de busca em tempo real -->
+          <div class="tk-busca">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" id="tk-busca" placeholder="Buscar tarefas..." oninput="setBusca(this.value)">
+            <button id="tk-busca-clear" onclick="limparBusca()" aria-label="Limpar busca" style="display:none"><i class="fa-solid fa-xmark"></i></button>
+          </div>
+
+          <!-- Foco do Dia: atrasadas + vencendo hoje (só quando existem) -->
+          <div id="tk-foco-dia" style="display:none;">
+            <p class="tk-foco__titulo"><i class="fa-solid fa-fire"></i> Foco do dia</p>
+            <div id="tk-foco-itens"></div>
+          </div>
+
           <!-- Filtro Pendentes / Concluídas -->
           <div class="tk-status">
             <button id="status-pendentes" class="is-active" onclick="setStatus('pendentes')">
@@ -583,40 +782,69 @@
               <i class="fa-solid fa-arrow-left"></i> <span>Voltar para a lista</span>
             </button>
 
-            <!-- Título editável -->
-            <input type="text" class="tk-det-titulo" id="tk-d-titulo"
-                   placeholder="Título da tarefa" oninput="atualizar('titulo', this.value)">
-
-            <!-- Controles do cabeçalho: prazo, prioridade, categoria + ações -->
-            <div class="tk-det-controles">
-              <div class="tk-control">
-                <label>Prazo</label>
-                <input type="date" id="tk-d-prazo" onchange="atualizar('prazo', this.value)">
+            <!-- CABEÇALHO COM IDENTIDADE: faixa colorida + breadcrumb + título + barra de progresso -->
+            <div class="tk-det-header" id="tk-det-header">
+              <div class="tk-det-header__breadcrumb" id="tk-det-breadcrumb">
+                <!-- preenchido pelo JS com: ● Categoria › Subcategoria -->
               </div>
-              <div class="tk-control">
-                <label>Prioridade</label>
-                <select id="tk-d-prio" onchange="atualizar('prioridade', this.value)">
-                  <option value="alta">🔴 Alta</option>
-                  <option value="media">🟠 Média</option>
-                  <option value="baixa">🟢 Baixa</option>
-                </select>
-              </div>
-              <div class="tk-control">
-                <label>Categoria</label>
-                <select id="tk-d-tag" onchange="atualizar('tag', this.value)"></select>
-              </div>
-
-              <div class="tk-det-acoes">
-                <button class="btn btn--primary" id="tk-d-concluir" onclick="alternarConcluir()">
-                  <i class="fa-solid fa-check"></i> <span>Concluir</span>
-                </button>
-                <button class="btn btn--icon tk-btn-danger" onclick="excluirAtiva()" aria-label="Excluir tarefa" title="Excluir">
-                  <i class="fa-solid fa-trash"></i>
-                </button>
+              <input type="text" class="tk-det-titulo" id="tk-d-titulo"
+                     placeholder="Título da tarefa" oninput="atualizar('titulo', this.value)">
+              <div class="tk-det-prog" id="tk-det-prog" style="display:none;">
+                <div class="tk-det-prog__trilho">
+                  <div class="tk-det-prog__barra" id="tk-det-prog-barra"></div>
+                </div>
+                <span class="tk-det-prog__txt" id="tk-det-prog-txt"></span>
               </div>
             </div>
 
-            <!-- Bloco: como resolver (plano de execução) -->
+            <!-- LINHA 1 DE METADADOS: Quando / Como (Prazo + Prioridade) + Ações -->
+            <div class="tk-det-meta">
+              <p class="tk-det-meta__titulo">Quando &amp; Como</p>
+              <div class="tk-det-meta__linha">
+                <div class="tk-control">
+                  <label>Prazo</label>
+                  <input type="date" id="tk-d-prazo" onchange="atualizar('prazo', this.value)">
+                </div>
+                <div class="tk-control">
+                  <label>Prioridade</label>
+                  <select id="tk-d-prio" onchange="atualizar('prioridade', this.value)">
+                    <option value="alta">🔴 Alta</option>
+                    <option value="media">🟠 Média</option>
+                    <option value="baixa">🟢 Baixa</option>
+                  </select>
+                </div>
+                <div class="tk-det-acoes">
+                  <button class="btn btn--primary" id="tk-d-concluir" onclick="alternarConcluir()">
+                    <i class="fa-solid fa-check"></i> <span>Concluir</span>
+                  </button>
+                  <button class="btn btn--icon" onclick="duplicarAtiva()" aria-label="Duplicar" title="Duplicar tarefa">
+                    <i class="fa-solid fa-copy"></i>
+                  </button>
+                  <button class="btn btn--icon tk-btn-danger" onclick="excluirAtiva()" aria-label="Excluir" title="Excluir tarefa">
+                    <i class="fa-solid fa-trash"></i>
+                  </button>
+                </div>
+              </div>
+
+              <!-- LINHA 2: O que é (Categoria + Subcategoria + Objetivo) -->
+              <p class="tk-det-meta__titulo" style="margin-top:6px;">O que é</p>
+              <div class="tk-det-meta__linha">
+                <div class="tk-control">
+                  <label>Categoria</label>
+                  <select id="tk-d-cat" onchange="atualizar('catId', this.value)"></select>
+                </div>
+                <div class="tk-control">
+                  <label>Subcategoria</label>
+                  <select id="tk-d-sub" onchange="atualizar('subId', this.value)"></select>
+                </div>
+                <div class="tk-control">
+                  <label><i class="fa-solid fa-bullseye" style="color:var(--accent)"></i> Objetivo</label>
+                  <select id="tk-d-obj" onchange="atualizar('objId', this.value)"></select>
+                </div>
+              </div>
+            </div>
+
+            <!-- BLOCO 1: Como resolver (estratégia — como fazer) -->
             <div class="tk-bloco">
               <p class="tk-bloco__label"><i class="fa-solid fa-lightbulb"></i> Como resolver</p>
               <textarea class="tk-textarea" id="tk-d-plano"
@@ -624,9 +852,12 @@
                 oninput="atualizar('plano', this.value)"></textarea>
             </div>
 
-            <!-- Bloco: subtarefas -->
+            <!-- BLOCO 2: Subtarefas (execução — o que fazer agora) -->
             <div class="tk-bloco">
-              <p class="tk-bloco__label"><i class="fa-solid fa-list-ul"></i> Subtarefas <span id="tk-sub-cont" style="color:var(--text-muted); font-weight:700;"></span></p>
+              <p class="tk-bloco__label">
+                <i class="fa-solid fa-list-ul"></i> Subtarefas
+                <span id="tk-sub-cont" style="color:var(--text-muted); font-weight:700;"></span>
+              </p>
               <div class="tk-progress-trilho"><div class="tk-progress-barra" id="tk-sub-barra"></div></div>
               <div id="tk-sub-lista"></div>
               <form class="tk-sub-add" onsubmit="event.preventDefault(); addSub();">
@@ -635,19 +866,14 @@
               </form>
             </div>
 
-            <!-- Bloco: anexos (arquivos do computador) -->
+            <!-- BLOCO 3: Anexos (suporte — material de apoio) -->
             <div class="tk-bloco">
               <p class="tk-bloco__label"><i class="fa-solid fa-paperclip"></i> Anexos</p>
-
-              <!-- input de arquivo escondido + botão bonito que o aciona -->
               <input type="file" id="tk-anexo-input" style="display:none" onchange="addAnexo(event)">
               <button class="btn" onclick="document.getElementById('tk-anexo-input').click()" style="width:100%; justify-content:center;">
                 <i class="fa-solid fa-upload"></i> Anexar arquivo (até 700KB)
               </button>
-
               <div id="tk-anexo-lista" style="margin-top:12px;"></div>
-
-              <!-- medidor de espaço do planner -->
               <div class="tk-uso">
                 <div class="tk-uso__topo">
                   <span><i class="fa-solid fa-database"></i> Espaço usado</span>
@@ -657,8 +883,8 @@
               </div>
             </div>
 
-            <!-- Bloco: anotações de fechamento -->
-            <div class="tk-bloco">
+            <!-- BLOCO 4: Anotações de fechamento — aparece destacado só ao concluir -->
+            <div class="tk-bloco-fechamento" id="tk-bloco-fechamento">
               <p class="tk-bloco__label"><i class="fa-solid fa-flag-checkered"></i> Anotações de fechamento</p>
               <textarea class="tk-textarea" id="tk-d-fechamento"
                 placeholder="O que aprendeu? Como ficou resolvido? Anote aqui antes de arquivar."
@@ -679,7 +905,7 @@
             <span>Gerenciar categorias</span>
           </button>
         </div>
-        <div class="tk-quadro" id="tk-quadro"></div>
+        <div id="tk-quadro"></div>
       </div>
 
     </div>
@@ -707,21 +933,16 @@
     </div>
   </div>
 
-  <!-- MODAL DE GERENCIAR CATEGORIAS (só desta página) -->
+  <!-- MODAL DE GERENCIAR CATEGORIAS (editor em árvore: Domínio > Categoria > Subcategoria) -->
   <div id="modal-tags" class="modal">
     <div class="modal__box">
       <div class="modal__head">
-        <h3><i class="fa-solid fa-tags" style="color:var(--accent)"></i> Categorias (Tags)</h3>
+        <h3><i class="fa-solid fa-sitemap" style="color:var(--accent)"></i> Categorias</h3>
         <button class="modal__close" onclick="fecharTags()"><i class="fa-solid fa-xmark"></i></button>
       </div>
       <div class="modal__body">
-        <p>Crie categorias pra classificar suas tarefas (ex.: Saúde, Estudos, Casa).</p>
-        <div id="tk-tag-lista"></div>
-        <form class="tk-novatag" onsubmit="event.preventDefault(); criarTag();">
-          <input type="text" id="tk-tag-nome" placeholder="Nome da categoria...">
-          <input type="color" id="tk-tag-cor" value="#10b981" title="Cor da categoria">
-          <button type="submit" class="btn btn--primary" style="padding:0 14px;"><i class="fa-solid fa-plus"></i></button>
-        </form>
+        <p>Sua árvore de categorias. Edite a cor/nome, abra para ver as subcategorias e adicione o que faltar. As mudanças refletem em todas as tarefas.</p>
+        <div id="tk-arvore"></div>
       </div>
     </div>
   </div>
@@ -738,162 +959,219 @@
     "use strict";
 
     /* =================================================================
-       1. ESTADO — as "variáveis vivas" da página enquanto ela está aberta
+       1. TAXONOMIA PADRÃO — sua árvore: Domínio > Categoria > Subcategoria
+       -----------------------------------------------------------------
+       Cada nó tem um "id" único e estável. As tarefas guardam o ID da
+       categoria/subcategoria (não o nome), então renomear nunca quebra
+       o vínculo. Isso só é criado na PRIMEIRA vez que a página abre.
        ================================================================= */
 
-    // Categorias que já vêm prontas na PRIMEIRA vez que você abre a página.
-    // Depois disso, mandam as suas (criar/excluir pela engrenagem).
-    const TAGS_PADRAO = [
-      { nome: "Pessoal",      cor: "#3b82f6" },
-      { nome: "Saúde",        cor: "#14b8a6" },
-      { nome: "Estudos",      cor: "#8b5cf6" },
-      { nome: "Casa",         cor: "#f59e0b" },
-      { nome: "Moto/Garagem", cor: "#ec4899" },
-      { nome: "Financeiro",   cor: "#22c55e" },
-      { nome: "Trabalho",     cor: "#06b6d4" },
-    ];
+    let _seq = 0; // contador pra garantir ids únicos mesmo criando vários de uma vez
+    function uid(prefixo) { return prefixo + Date.now().toString(36) + "_" + (_seq++).toString(36); }
 
-    let TAREFAS = Store.ler("tarefas", []);        // todas as tarefas
-    let TAGS    = Store.ler("tarefas_tags", null); // categorias
+    function taxonomiaPadrao() {
+      // função de apoio: cria uma categoria já com suas subcategorias
+      function cat(nome, cor, subs) {
+        return {
+          id: uid("c"), nome: nome, cor: cor,
+          subs: subs.map(function (s) { return { id: uid("s"), nome: s }; })
+        };
+      }
+      return [
+        { id: "dom_pessoal", nome: "Pessoal", cats: [
+          cat("Autocuidado",  "#ec4899", ["Cabelo, Pelos e Barba", "Dentes", "Unhas", "Pele", "Cheiro"]),
+          cat("Saúde",        "#14b8a6", ["Compromissos Médicos", "Alimentação e Hidratação", "Sono e Foco", "Exercícios Físicos"]),
+          cat("Estudos",      "#8b5cf6", ["Cursos", "Livros", "Podcasts", "Palestras", "Livres"]),
+          cat("Hobbies",      "#3b82f6", ["EAFC", "Stardew Valley", "Filmes e Séries", "Locais/Passeios"]),
+          cat("Bens Materiais","#f59e0b",["Moto Fz25", "Quarto", "Eletrônicos"]),
+          cat("Financeiro",   "#22c55e", ["Compras", "Controle", "Entradas", "Saídas", "Investimentos"]),
+        ]},
+        { id: "dom_profissional", nome: "Profissional", cats: [
+          cat("Administrativo", "#64748b", ["CNPJ/MEI", "Contratos"]),
+          cat("Aulas/Turmas",   "#06b6d4", ["Luxemburgo 1", "Luxemburgo 2", "Trigêmeos", "Ville Verdi", "Lucas e Gustavo Ivana", "Rafael", "Zayan"]),
+          cat("Divulgação e Comunicação", "#f43f5e", ["Instagram", "LinkedIn", "WhatsApp Business"]),
+          cat("Materiais",      "#b45309", []),
+          cat("Recreações",     "#84cc16", ["Agendamentos"]),
+          cat("Vendas OLX",     "#0ea5e9", []),
+          cat("Mercado de Afiliados", "#d946ef", []),
+        ]},
+      ];
+    }
 
-    // Só semeia as categorias padrão se você NUNCA mexeu nelas (null = nunca salvou).
-    // Assim, se um dia você apagar todas, elas não voltam sozinhas.
-    if (TAGS === null) { TAGS = TAGS_PADRAO.slice(); salvarTags(); }
-
-    // MIGRAÇÃO: tarefas criadas antes desta função não têm o campo "anexos".
-    // Aqui garantimos que toda tarefa tenha a "gaveta" (um array vazio), pra
-    // o resto do código nunca quebrar tentando ler algo que não existe.
-    let precisaMigrar = false;
-    TAREFAS.forEach(function (t) {
-      if (!Array.isArray(t.anexos)) { t.anexos = []; precisaMigrar = true; }
-    });
-    if (precisaMigrar) salvar();
+    /* =================================================================
+       2. ESTADO — as "variáveis vivas" da página
+       ================================================================= */
+    let TAREFAS   = Store.ler("tarefas", []);
+    let TAXONOMIA = Store.ler("tarefas_taxonomia", null);
+    if (TAXONOMIA === null) { TAXONOMIA = taxonomiaPadrao(); salvarTax(); } // semeia na 1ª vez
 
     let filtroStatus = "pendentes"; // "pendentes" ou "concluidas"
-    let filtroTag    = "todas";     // "todas", "sem" ou o nome de uma categoria
+    let filtroCat    = "";          // "" todas, "sem", ou um catId
     let ordenarPor   = "prioridade";
-    let ativaId      = null;        // qual tarefa está aberta no detalhe
-    let abaAtual     = Store.ler("tarefas_aba", "foco"); // "foco" ou "geral"
+    let ativaId      = null;
+    let abaAtual     = Store.ler("tarefas_aba", "foco");
+    let expandidas   = {};          // catId -> true (quais categorias estão abertas no modal)
+    let termoBusca   = "";          // texto digitado na busca em tempo real
 
-    const ORDEM_PRIO = { alta: 0, media: 1, baixa: 2 }; // pra ordenar por prioridade
-    const LIMITE_ANEXO = 700 * 1024; // 700KB por arquivo (localStorage é pequeno!)
+    const ORDEM_PRIO   = { alta: 0, media: 1, baixa: 2 };
+    const LIMITE_ANEXO = 700 * 1024;
+    const COR_PRIO     = { alta: "#ef4444", media: "#f59e0b", baixa: "#22c55e" };
 
     /* =================================================================
-       2. PERSISTÊNCIA — gravar no cofre (Store) com o prefixo planner_
+       3. PERSISTÊNCIA + BUSCAS NA ÁRVORE
        ================================================================= */
-    function salvar()     { Store.salvar("tarefas", TAREFAS); }
-    function salvarTags() { Store.salvar("tarefas_tags", TAGS); }
-
+    function salvar()    { Store.salvar("tarefas", TAREFAS); }
+    function salvarTax() { Store.salvar("tarefas_taxonomia", TAXONOMIA); }
     function acharTarefa(id) { return TAREFAS.find(function (t) { return t.id === id; }); }
-    function acharTag(nome)  { return TAGS.find(function (t) { return t.nome === nome; }); }
+
+    // Percorre a árvore pra achar uma categoria pelo id (ou pelo nome, na migração)
+    function acharCat(catId) {
+      for (let i = 0; i < TAXONOMIA.length; i++) {
+        const c = TAXONOMIA[i].cats.find(function (x) { return x.id === catId; });
+        if (c) return c;
+      }
+      return null;
+    }
+    function acharDomDaCat(catId) {
+      for (let i = 0; i < TAXONOMIA.length; i++) {
+        if (TAXONOMIA[i].cats.some(function (x) { return x.id === catId; })) return TAXONOMIA[i];
+      }
+      return null;
+    }
+    function acharCatPorNome(nome) {
+      for (let i = 0; i < TAXONOMIA.length; i++) {
+        const c = TAXONOMIA[i].cats.find(function (x) { return x.nome === nome; });
+        if (c) return c;
+      }
+      return null;
+    }
+    function acharSub(cat, subId) {
+      if (!cat) return null;
+      return cat.subs.find(function (s) { return s.id === subId; }) || null;
+    }
+    function corDaCat(catId) { const c = acharCat(catId); return c ? c.cor : "var(--text-muted)"; }
+    function nomeCat(catId)  { const c = acharCat(catId); return c ? c.nome : ""; }
+    function nomeSub(catId, subId) { const s = acharSub(acharCat(catId), subId); return s ? s.nome : ""; }
 
     /* =================================================================
-       3. HELPERS — funçõezinhas de apoio
+       4. MIGRAÇÃO — adapta tarefas antigas ao novo formato (uma vez)
+       -----------------------------------------------------------------
+       - garante a "gaveta" de anexos;
+       - troca o antigo "tag" (nome) por catId/subId. Se o nome bater com
+         uma categoria nova, aproveita; senão, fica "Sem categoria".
        ================================================================= */
-    // Evita que texto digitado quebre o HTML (segurança básica)
+    (function migrar() {
+      let mudou = false;
+      TAREFAS.forEach(function (t) {
+        if (!Array.isArray(t.anexos)) { t.anexos = []; mudou = true; }
+        if (t.catId === undefined) {
+          t.catId = "";
+          t.subId = "";
+          if (t.tag) { const c = acharCatPorNome(t.tag); if (c) t.catId = c.id; }
+          delete t.tag;
+          mudou = true;
+        }
+        if (t.subId === undefined) { t.subId = ""; mudou = true; }
+        if (t.objId === undefined) { t.objId = "";  mudou = true; } // vínculo com objetivo
+      });
+      if (mudou) salvar();
+    })();
+
+    /* =================================================================
+       5. HELPERS de texto/data
+       ================================================================= */
     function escapar(txt) {
       return String(txt || "").replace(/[&<>"']/g, function (c) {
         return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
       });
     }
-    // "2026-06-08" -> "08/06"
-    function fmtData(iso) {
-      if (!iso) return "";
-      const p = iso.split("-");
-      return p[2] + "/" + p[1];
-    }
-    // A tarefa está atrasada? (prazo passou e ainda não foi concluída)
+    function fmtData(iso) { if (!iso) return ""; const p = iso.split("-"); return p[2] + "/" + p[1]; }
     function atrasada(t) {
       if (!t.prazo || t.concluida) return false;
-      const hoje = new Date().toISOString().split("T")[0];
-      return t.prazo < hoje;
-    }
-    function corDaTag(nome) {
-      const tg = acharTag(nome);
-      return tg ? tg.cor : "var(--text-muted)";
+      return t.prazo < new Date().toISOString().split("T")[0];
     }
 
     /* =================================================================
-       4. CRIAR TAREFA — a partir do campo de criação rápida
+       6. CRIAR TAREFA (criação rápida do modo Foco)
        ================================================================= */
+    function tarefaNova(titulo, catId) {
+      return {
+        id: uid("t"), titulo: titulo, prioridade: "media", prazo: "",
+        catId: catId || "", subId: "", objId: "",
+        plano: "", subtarefas: [], fechamento: "", anexos: [],
+        concluida: false, criadaEm: Date.now()
+      };
+    }
+
     window.novaTarefa = function () {
       const campo = document.getElementById("tk-nova");
       const titulo = campo.value.trim();
       if (!titulo) return;
-
-      const tarefa = {
-        id: "t" + Date.now(),
-        titulo: titulo,
-        prioridade: "media",
-        prazo: "",
-        tag: "",              // "" = Sem categoria
-        plano: "",
-        subtarefas: [],
-        fechamento: "",
-        anexos: [],            // arquivos anexados (Rota 1: guardados aqui mesmo)
-        concluida: false,
-        criadaEm: Date.now()
-      };
-
-      TAREFAS.unshift(tarefa); // entra no topo
+      const t = tarefaNova(titulo, "");
+      TAREFAS.unshift(t);
       salvar();
       campo.value = "";
       renderLista();
-      abrirTarefa(tarefa.id);  // já abre pra você detalhar
+      abrirTarefa(t.id);
     };
 
     /* =================================================================
-       5. RENDERIZAR A LISTA — filtra, ordena e desenha os cartões
+       7. LISTA (modo Foco) — filtra, ordena e desenha
        ================================================================= */
     function renderLista() {
       renderFiltros();
-
+      renderFocoDia();    // bloco de tarefas urgentes no topo
       const area = document.getElementById("tk-itens");
 
-      // 5.1 Filtra por status (pendente x concluída)
+      const ordemCat = {}; let k = 0;
+      TAXONOMIA.forEach(function (d) { d.cats.forEach(function (c) { ordemCat[c.id] = k++; }); });
+
       let lista = TAREFAS.filter(function (t) {
         return filtroStatus === "concluidas" ? t.concluida : !t.concluida;
       });
+      if (filtroCat === "sem")   lista = lista.filter(function (t) { return !t.catId; });
+      else if (filtroCat !== "") lista = lista.filter(function (t) { return t.catId === filtroCat; });
 
-      // 5.2 Filtra por categoria
-      if (filtroTag === "sem") {
-        lista = lista.filter(function (t) { return !t.tag; });
-      } else if (filtroTag !== "todas") {
-        lista = lista.filter(function (t) { return t.tag === filtroTag; });
+      // Filtro de busca — compara título (e nome do objetivo vinculado)
+      if (termoBusca) {
+        const q = termoBusca.toLowerCase();
+        lista = lista.filter(function (t) {
+          if (t.titulo.toLowerCase().includes(q)) return true;
+          if (t.objId) { const o = listaObjetivos().find(function(x){ return x.id === t.objId; }); if (o && o.titulo.toLowerCase().includes(q)) return true; }
+          return false;
+        });
       }
 
-      // 5.3 Ordena
       lista.sort(function (a, b) {
         if (ordenarPor === "prioridade") return ORDEM_PRIO[a.prioridade] - ORDEM_PRIO[b.prioridade];
         if (ordenarPor === "recentes")   return b.criadaEm - a.criadaEm;
         if (ordenarPor === "prazo") {
-          // sem prazo vai pro fim
-          if (!a.prazo) return 1;
-          if (!b.prazo) return -1;
+          if (!a.prazo) return 1; if (!b.prazo) return -1;
           return a.prazo.localeCompare(b.prazo);
         }
         if (ordenarPor === "categoria") {
-          return (a.tag || "zzz").localeCompare(b.tag || "zzz");
+          const oa = a.catId in ordemCat ? ordemCat[a.catId] : 9999;
+          const ob = b.catId in ordemCat ? ordemCat[b.catId] : 9999;
+          return oa - ob;
         }
         return 0;
       });
 
-      // 5.4 Caso não tenha nada
       if (lista.length === 0) {
         area.innerHTML = '<p class="tk-mini-vazio">Nenhuma tarefa aqui ainda.</p>';
         return;
       }
 
-      // 5.5 Monta o HTML. Se ordenado por categoria, agrupa com cabeçalhos.
       let html = "";
       let grupoAtual = null;
       lista.forEach(function (t) {
         if (ordenarPor === "categoria") {
-          const nomeGrupo = t.tag || "Sem categoria";
-          if (nomeGrupo !== grupoAtual) {
-            grupoAtual = nomeGrupo;
+          const chave = t.catId || "sem";
+          if (chave !== grupoAtual) {
+            grupoAtual = chave;
+            const rotulo = t.catId ? nomeCat(t.catId) : "Sem categoria";
             html += '<p class="tk-grupo"><span class="ponto" style="background:' +
-                    corDaTag(t.tag) + '"></span>' + escapar(nomeGrupo) + "</p>";
+                    corDaCat(t.catId) + '"></span>' + escapar(rotulo) + "</p>";
           }
         }
         html += itemHTML(t);
@@ -901,83 +1179,80 @@
       area.innerHTML = html;
     }
 
-    // Desenha UM cartão de tarefa
     function itemHTML(t) {
       const ativo = t.id === ativaId ? " is-active" : "";
       const feita = t.concluida ? " is-feita" : "";
 
-      // etiqueta de categoria (se tiver)
+      // etiqueta de categoria (+ subcategoria, se tiver)
       let tagHTML = "";
-      if (t.tag) {
-        const cor = corDaTag(t.tag);
+      if (t.catId) {
+        const cor = corDaCat(t.catId);
+        const sub = t.subId ? " · " + escapar(nomeSub(t.catId, t.subId)) : "";
         tagHTML = '<span class="tk-tag" style="background:' + cor + '22; color:' + cor +
-                  '"><span class="ponto" style="background:' + cor + '"></span>' + escapar(t.tag) + "</span>";
+                  '"><span class="ponto" style="background:' + cor + '"></span>' + escapar(nomeCat(t.catId)) + sub + "</span>";
       }
 
-      // selo de prazo (se tiver)
       let prazoHTML = "";
       if (t.prazo) {
         prazoHTML = '<span class="tk-prazo' + (atrasada(t) ? " atrasada" : "") +
                     '"><i class="fa-solid fa-calendar-day"></i> ' + fmtData(t.prazo) + "</span>";
       }
 
-      // contador de subtarefas (se tiver)
       let subHTML = "";
       if (t.subtarefas.length) {
         const feitas = t.subtarefas.filter(function (s) { return s.feita; }).length;
-        subHTML = '<span class="tk-prazo"><i class="fa-solid fa-list-ul"></i> ' +
-                  feitas + "/" + t.subtarefas.length + "</span>";
+        subHTML = '<span class="tk-prazo"><i class="fa-solid fa-list-ul"></i> ' + feitas + "/" + t.subtarefas.length + "</span>";
       }
 
-      // clipe de anexos (se tiver)
       let anexoHTML = "";
       if (t.anexos && t.anexos.length) {
-        anexoHTML = '<span class="tk-prazo"><i class="fa-solid fa-paperclip"></i> ' +
-                    t.anexos.length + "</span>";
+        anexoHTML = '<span class="tk-prazo"><i class="fa-solid fa-paperclip"></i> ' + t.anexos.length + "</span>";
+      }
+
+      let objHTML = "";
+      if (t.objId) {
+        const objs = listaObjetivos();
+        const o = objs.find(function(x){ return x.id === t.objId; });
+        if (o) objHTML = '<span class="tk-obj-badge"><i class="fa-solid fa-bullseye"></i>' + escapar(o.titulo.substring(0,28)) + (o.titulo.length>28?"…":"") + "</span>";
       }
 
       return '' +
         '<div class="tk-item prio-' + t.prioridade + ativo + feita + '" onclick="abrirTarefa(\'' + t.id + '\')">' +
+          // Clicar na barra lateral (4px) cicla a prioridade sem abrir o detalhe
+          '<div class="tk-prio-bar" onclick="event.stopPropagation(); ciclarPrio(\'' + t.id + '\')" title="Clique para mudar prioridade"></div>' +
           '<div class="tk-check" onclick="event.stopPropagation(); alternarConcluirId(\'' + t.id + '\')"><i class="fa-solid fa-check"></i></div>' +
           '<div class="tk-item__corpo">' +
             '<div class="tk-item__titulo">' + escapar(t.titulo) + "</div>" +
-            '<div class="tk-item__meta">' + tagHTML + prazoHTML + subHTML + anexoHTML + "</div>" +
+            '<div class="tk-item__meta">' + tagHTML + prazoHTML + subHTML + anexoHTML + objHTML + "</div>" +
           "</div>" +
         "</div>";
     }
 
     /* =================================================================
-       6. FILTROS — chips de categoria + menu de ordenação
+       8. FILTROS — select de categoria (agrupado por domínio) + ordenar
        ================================================================= */
     function renderFiltros() {
       const cont = document.getElementById("tk-filtros");
-      let html = "";
 
-      html += chip("todas", "Todas", null);
-      html += chip("sem", "Sem categoria", "var(--text-muted)");
-      TAGS.forEach(function (tg) { html += chip(tg.nome, tg.nome, tg.cor); });
+      let opts = '<option value="">Todas as categorias</option><option value="sem">Sem categoria</option>';
+      TAXONOMIA.forEach(function (d) {
+        opts += '<optgroup label="' + escapar(d.nome) + '">';
+        d.cats.forEach(function (c) { opts += '<option value="' + c.id + '">' + escapar(c.nome) + "</option>"; });
+        opts += "</optgroup>";
+      });
 
-      // engrenagem pra gerenciar categorias
-      html += '<button class="tk-chip" onclick="abrirTags()" title="Gerenciar categorias">' +
-              '<i class="fa-solid fa-gear"></i></button>';
+      cont.innerHTML =
+        '<select id="tk-filtro-cat" onchange="setFiltroCat(this.value)">' + opts + "</select>" +
+        '<button class="tk-chip" onclick="abrirTags()" title="Gerenciar categorias"><i class="fa-solid fa-sitemap"></i> Categorias</button>' +
+        '<select class="tk-ordenar" id="tk-ordenar" onchange="setOrdenar(this.value)">' +
+          '<option value="prioridade">Ordenar: Prioridade</option>' +
+          '<option value="prazo">Ordenar: Prazo</option>' +
+          '<option value="categoria">Ordenar: Categoria</option>' +
+          '<option value="recentes">Ordenar: Recentes</option>' +
+        "</select>";
 
-      // menu de ordenação
-      html += '<select class="tk-ordenar" id="tk-ordenar" onchange="setOrdenar(this.value)">' +
-                '<option value="prioridade">Ordenar: Prioridade</option>' +
-                '<option value="prazo">Ordenar: Prazo</option>' +
-                '<option value="categoria">Ordenar: Categoria</option>' +
-                '<option value="recentes">Ordenar: Recentes</option>' +
-              "</select>";
-
-      cont.innerHTML = html;
+      document.getElementById("tk-filtro-cat").value = filtroCat;
       document.getElementById("tk-ordenar").value = ordenarPor;
-    }
-
-    function chip(valor, rotulo, cor) {
-      const ativo = filtroTag === valor ? " is-active" : "";
-      const ponto = cor ? '<span class="ponto" style="background:' + cor + '"></span>' : "";
-      return '<button class="tk-chip' + ativo + '" onclick="setTag(\'' + valor + '\')">' +
-             ponto + escapar(rotulo) + "</button>";
     }
 
     window.setStatus = function (s) {
@@ -986,11 +1261,11 @@
       document.getElementById("status-concluidas").classList.toggle("is-active", s === "concluidas");
       renderLista();
     };
-    window.setTag = function (valor) { filtroTag = valor; renderLista(); };
-    window.setOrdenar = function (valor) { ordenarPor = valor; renderLista(); };
+    window.setFiltroCat = function (v) { filtroCat = v; renderLista(); };
+    window.setOrdenar   = function (v) { ordenarPor = v; renderLista(); };
 
     /* =================================================================
-       7. ABRIR / FECHAR O DETALHE DE UMA TAREFA
+       9. ABRIR / FECHAR DETALHE
        ================================================================= */
     window.abrirTarefa = function (id) {
       const t = acharTarefa(id);
@@ -999,35 +1274,104 @@
 
       document.getElementById("tk-vazio").style.display = "none";
       document.getElementById("tk-painel").style.display = "block";
-      document.getElementById("tk-layout").classList.add("ver-detalhe"); // celular
+      document.getElementById("tk-layout").classList.add("ver-detalhe");
 
-      // preenche os campos
       document.getElementById("tk-d-titulo").value = t.titulo;
       document.getElementById("tk-d-prazo").value = t.prazo;
       document.getElementById("tk-d-prio").value = t.prioridade;
       document.getElementById("tk-d-plano").value = t.plano;
       document.getElementById("tk-d-fechamento").value = t.fechamento;
 
-      preencherSelectTags(t.tag);
+      preencherSelectsCategoria(t.catId, t.subId);
+      preencherSelectObj(t.objId);
       atualizarBotaoConcluir(t);
+      atualizarCabecalho(t);
       renderSubs();
       renderAnexos();
-      renderLista(); // pra destacar o item ativo
+      renderLista();
     };
 
     window.voltarLista = function () {
       document.getElementById("tk-layout").classList.remove("ver-detalhe");
     };
 
-    // Preenche o <select> de categorias do detalhe
-    function preencherSelectTags(selecionada) {
-      const sel = document.getElementById("tk-d-tag");
-      let html = '<option value="">Sem categoria</option>';
-      TAGS.forEach(function (tg) {
-        html += '<option value="' + escapar(tg.nome) + '">' + escapar(tg.nome) + "</option>";
+    // Preenche o select de Categoria (com grupos por domínio) e o de Subcategoria
+    function preencherSelectsCategoria(catId, subId) {
+      const selCat = document.getElementById("tk-d-cat");
+      let opts = '<option value="">Sem categoria</option>';
+      TAXONOMIA.forEach(function (d) {
+        opts += '<optgroup label="' + escapar(d.nome) + '">';
+        d.cats.forEach(function (c) { opts += '<option value="' + c.id + '">' + escapar(c.nome) + "</option>"; });
+        opts += "</optgroup>";
       });
-      sel.innerHTML = html;
-      sel.value = selecionada || "";
+      selCat.innerHTML = opts;
+      selCat.value = catId || "";
+      preencherSelectSub(catId, subId);
+    }
+
+    // O select de Subcategoria depende da categoria escolhida
+    function preencherSelectSub(catId, subId) {
+      const selSub = document.getElementById("tk-d-sub");
+      const cat = acharCat(catId);
+      if (!cat || cat.subs.length === 0) {
+        selSub.innerHTML = '<option value="">—</option>';
+        selSub.value = "";
+        selSub.disabled = true;
+        return;
+      }
+      selSub.disabled = false;
+      let opts = '<option value="">— (nenhuma)</option>';
+      cat.subs.forEach(function (s) { opts += '<option value="' + s.id + '">' + escapar(s.nome) + "</option>"; });
+      selSub.innerHTML = opts;
+      selSub.value = subId || "";
+    }
+
+    // Atualiza a faixa colorida + breadcrumb + barra de progresso do cabeçalho
+    function atualizarCabecalho(t) {
+      const cor   = t.catId ? corDaCat(t.catId) : "var(--text-muted)";
+      const cat   = t.catId ? nomeCat(t.catId)  : "";
+      const sub   = t.subId ? nomeSub(t.catId, t.subId) : "";
+
+      // Faixa de cor da categoria no header
+      const header = document.getElementById("tk-det-header");
+      header.style.background = t.catId
+        ? "linear-gradient(135deg, " + cor + "22 0%, var(--bg-soft) 100%)"
+        : "var(--bg-soft)";
+      header.style.borderBottom = "2px solid " + (t.catId ? cor + "55" : "var(--border)");
+
+      // Breadcrumb: ● Categoria › Subcategoria
+      const bc = document.getElementById("tk-det-breadcrumb");
+      if (cat) {
+        bc.innerHTML =
+          '<span class="bc-ponto" style="background:' + cor + '"></span>' +
+          escapar(cat) +
+          (sub ? '<span class="bc-sep">›</span>' + escapar(sub) : "");
+        bc.style.display = "flex";
+      } else {
+        bc.innerHTML = '<span style="opacity:.5">Sem categoria</span>';
+        bc.style.display = "flex";
+      }
+
+      // Barra de progresso no header (só se houver subtarefas)
+      const total  = t.subtarefas.length;
+      const feitas = t.subtarefas.filter(function(s){ return s.feita; }).length;
+      const progEl = document.getElementById("tk-det-prog");
+      if (total > 0) {
+        const pct = Math.round((feitas / total) * 100);
+        document.getElementById("tk-det-prog-barra").style.width = pct + "%";
+        document.getElementById("tk-det-prog-txt").textContent   = feitas + "/" + total;
+        progEl.style.display = "flex";
+      } else {
+        progEl.style.display = "none";
+      }
+
+      // Bloco de fechamento: visível só quando concluída (ou já tiver texto)
+      const blocoFech = document.getElementById("tk-bloco-fechamento");
+      if (t.concluida || t.fechamento) {
+        blocoFech.classList.add("visivel");
+      } else {
+        blocoFech.classList.remove("visivel");
+      }
     }
 
     function atualizarBotaoConcluir(t) {
@@ -1042,21 +1386,38 @@
     }
 
     /* =================================================================
-       8. EDITAR CAMPOS — salva conforme você digita/escolhe
+       10. EDITAR CAMPOS — salva conforme você digita/escolhe
        ================================================================= */
     window.atualizar = function (campo, valor) {
       const t = acharTarefa(ativaId);
       if (!t) return;
+
+      // Trocar de categoria zera a subcategoria (a antiga não pertence à nova)
+      if (campo === "catId") {
+        t.catId = valor;
+        t.subId = "";
+        salvar();
+        preencherSelectSub(valor, "");
+        renderLista();
+        if (abaAtual === "geral") renderQuadro();
+        return;
+      }
+
       t[campo] = valor;
       salvar();
-      // alguns campos mudam a aparência do cartão na lista -> redesenha
-      if (campo === "titulo" || campo === "prioridade" || campo === "prazo" || campo === "tag") {
+      if (campo === "titulo" || campo === "prioridade" || campo === "prazo" || campo === "subId") {
         renderLista();
+        if (abaAtual === "geral") renderQuadro();
+      }
+      // campos que afetam o cabeçalho do painel
+      if (campo === "catId" || campo === "subId" || campo === "titulo") {
+        const t2 = acharTarefa(ativaId);
+        if (t2) atualizarCabecalho(t2);
       }
     };
 
     /* =================================================================
-       9. CONCLUIR / REABRIR / EXCLUIR
+       11. CONCLUIR / REABRIR / EXCLUIR
        ================================================================= */
     window.alternarConcluir = function () { alternarConcluirId(ativaId); };
 
@@ -1065,8 +1426,12 @@
       if (!t) return;
       t.concluida = !t.concluida;
       salvar();
-      if (id === ativaId) atualizarBotaoConcluir(t);
+      if (id === ativaId) {
+        atualizarBotaoConcluir(t);
+        atualizarCabecalho(t);   // mostra/esconde o bloco de fechamento
+      }
       renderLista();
+      if (abaAtual === "geral") renderQuadro();
     };
 
     window.excluirAtiva = function () {
@@ -1080,17 +1445,18 @@
       document.getElementById("tk-vazio").style.display = "flex";
       voltarLista();
       renderLista();
+      if (abaAtual === "geral") renderQuadro();
     };
 
     /* =================================================================
-       10. SUBTAREFAS — adicionar, marcar, apagar + barra de progresso
+       12. SUBTAREFAS
        ================================================================= */
     window.addSub = function () {
       const t = acharTarefa(ativaId);
       const campo = document.getElementById("tk-sub-nova");
       const texto = campo.value.trim();
       if (!t || !texto) return;
-      t.subtarefas.push({ id: "s" + Date.now(), texto: texto, feita: false });
+      t.subtarefas.push({ id: uid("st"), texto: texto, feita: false });
       salvar();
       campo.value = "";
       renderSubs();
@@ -1126,27 +1492,25 @@
       });
       lista.innerHTML = html;
 
-      // barra de progresso + contador
       const total = t.subtarefas.length;
       const feitas = t.subtarefas.filter(function (s) { return s.feita; }).length;
       const pct = total ? Math.round((feitas / total) * 100) : 0;
       document.getElementById("tk-sub-barra").style.width = pct + "%";
       document.getElementById("tk-sub-cont").textContent = total ? "(" + feitas + "/" + total + ")" : "";
+
+      // Atualiza também a barra no cabeçalho
+      const t2 = acharTarefa(ativaId);
+      if (t2) atualizarCabecalho(t2);
     }
 
     /* =================================================================
-       10b. ANEXOS — anexar arquivos do PC (guardados aqui mesmo, Rota 1)
-       -----------------------------------------------------------------
-       O arquivo é lido e convertido em texto base64 (um "data URL") e
-       guardado junto da tarefa. Como o localStorage é pequeno, há um
-       limite por arquivo e um medidor de espaço logo abaixo.
+       13. ANEXOS (Rota 1: guardados aqui mesmo, com limite + medidor)
        ================================================================= */
     window.addAnexo = function (evento) {
       const t = acharTarefa(ativaId);
       const arquivo = evento.target.files[0];
       if (!t || !arquivo) return;
 
-      // Trava de tamanho: protege o planner inteiro de estourar
       if (arquivo.size > LIMITE_ANEXO) {
         alert('"' + arquivo.name + '" tem ' + fmtTamanho(arquivo.size) +
               ".\nO limite é 700KB por arquivo, porque o localStorage é pequeno.\n\n" +
@@ -1155,22 +1519,16 @@
         return;
       }
 
-      // FileReader lê o arquivo e devolve o conteúdo como base64 (data URL)
       const leitor = new FileReader();
       leitor.onload = function (e) {
         const anexo = {
-          id: "a" + Date.now(),
-          nome: arquivo.name,
+          id: uid("a"), nome: arquivo.name,
           tipo: arquivo.type || "application/octet-stream",
-          tamanho: arquivo.size,
-          dados: e.target.result   // o arquivo inteiro, em texto base64
+          tamanho: arquivo.size, dados: e.target.result
         };
         t.anexos.push(anexo);
-
-        // Se o navegador disser que NÃO há espaço, desfazemos e avisamos.
-        try {
-          salvar();
-        } catch (err) {
+        try { salvar(); }
+        catch (err) {
           t.anexos.pop();
           alert("Não consegui salvar: o espaço do navegador encheu.\n" +
                 "Remova anexos antigos (ou faça um backup) pra liberar espaço.");
@@ -1179,10 +1537,9 @@
         renderLista();
       };
       leitor.readAsDataURL(arquivo);
-      evento.target.value = ""; // permite reanexar o mesmo arquivo depois
+      evento.target.value = "";
     };
 
-    // Baixar/abrir um anexo: o data URL já carrega o arquivo inteiro
     window.baixarAnexo = function (anexoId) {
       const t = acharTarefa(ativaId);
       const a = t.anexos.find(function (x) { return x.id === anexoId; });
@@ -1211,13 +1568,9 @@
 
       let html = "";
       t.anexos.forEach(function (a) {
-        // Imagem mostra miniatura de verdade; outros tipos mostram um ícone
         let thumb;
-        if (a.tipo.indexOf("image/") === 0) {
-          thumb = '<img src="' + a.dados + '" alt="">';
-        } else {
-          thumb = '<i class="fa-solid ' + iconePorTipo(a.tipo) + '"></i>';
-        }
+        if (a.tipo.indexOf("image/") === 0) thumb = '<img src="' + a.dados + '" alt="">';
+        else thumb = '<i class="fa-solid ' + iconePorTipo(a.tipo) + '"></i>';
         html += '<div class="tk-anexo">' +
           '<div class="tk-anexo__thumb">' + thumb + "</div>" +
           '<div class="tk-anexo__info">' +
@@ -1231,40 +1584,34 @@
         "</div>";
       });
       lista.innerHTML = html;
-
       atualizarMedidor();
     }
 
-    // Soma o tamanho de tudo que o planner guardou no navegador
     function usoLocalStorage() {
       let total = 0;
       for (let i = 0; i < localStorage.length; i++) {
         const k = localStorage.key(i);
-        if (k.indexOf("planner_") === 0) {
-          total += (localStorage.getItem(k) || "").length + k.length;
-        }
+        if (k.indexOf("planner_") === 0) total += (localStorage.getItem(k) || "").length + k.length;
       }
-      return total; // em caracteres (≈ bytes)
+      return total;
     }
 
     function atualizarMedidor() {
       const usado = usoLocalStorage();
-      const limite = 5 * 1024 * 1024; // ~5MB de orçamento estimado
+      const limite = 5 * 1024 * 1024;
       const pct = Math.min(100, Math.round((usado / limite) * 100));
       document.getElementById("tk-uso-texto").textContent = fmtTamanho(usado) + " de ~5 MB";
       const barra = document.getElementById("tk-uso-barra");
       barra.style.width = pct + "%";
-      barra.classList.toggle("cheio", pct >= 80); // fica vermelho quando aperta
+      barra.classList.toggle("cheio", pct >= 80);
     }
 
-    // "12345" -> "12 KB"
     function fmtTamanho(bytes) {
       if (bytes < 1024) return bytes + " B";
       if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(0) + " KB";
       return (bytes / (1024 * 1024)).toFixed(1) + " MB";
     }
 
-    // Escolhe um ícone pelo tipo do arquivo
     function iconePorTipo(tipo) {
       if (tipo.indexOf("pdf") !== -1) return "fa-file-pdf";
       if (tipo.indexOf("word") !== -1 || tipo.indexOf("document") !== -1) return "fa-file-word";
@@ -1275,15 +1622,117 @@
     }
 
     /* =================================================================
-       10c. VISÃO GERAL — o quadro de cards por categoria
-       -----------------------------------------------------------------
-       NÃO existe dado próprio aqui. O quadro só DESENHA DE OUTRO JEITO
-       as mesmas TAREFAS. Por isso criar/concluir aqui reflete na hora
-       no modo Foco, e vice-versa: "uma verdade, duas telas".
+       BUSCA em tempo real
        ================================================================= */
-    const COR_PRIO = { alta: "#ef4444", media: "#f59e0b", baixa: "#22c55e" };
+    window.setBusca = function (v) {
+      termoBusca = v.trim();
+      document.getElementById("tk-busca-clear").style.display = termoBusca ? "block" : "none";
+      renderLista();
+    };
+    window.limparBusca = function () {
+      document.getElementById("tk-busca").value = "";
+      window.setBusca("");
+    };
 
-    // Troca a aba visível e lembra a escolha
+    /* =================================================================
+       FOCO DO DIA — tarefas atrasadas + vencendo hoje (pendentes)
+       ================================================================= */
+    function renderFocoDia() {
+      const hoje = (function(){
+        const d = new Date();
+        const m = String(d.getMonth()+1).padStart(2,"0");
+        const dia = String(d.getDate()).padStart(2,"0");
+        return d.getFullYear() + "-" + m + "-" + dia;
+      })();
+
+      const urgentes = TAREFAS.filter(function(t){
+        return !t.concluida && t.prazo && t.prazo <= hoje;
+      }).sort(function(a,b){ return a.prazo.localeCompare(b.prazo); });
+
+      const bloco = document.getElementById("tk-foco-dia");
+      const cont  = document.getElementById("tk-foco-itens");
+
+      if (!urgentes.length) { bloco.style.display = "none"; return; }
+      bloco.style.display = "block";
+
+      cont.innerHTML = urgentes.map(function(t){
+        const atras = t.prazo < hoje;
+        return '<div class="tk-item prio-' + t.prioridade + (t.id===ativaId?" is-active":"") + '" onclick="abrirTarefa(\'' + t.id + '\')" style="margin-bottom:5px;">' +
+          '<div class="tk-prio-bar" onclick="event.stopPropagation();ciclarPrio(\'' + t.id + '\')"></div>' +
+          '<div class="tk-check" onclick="event.stopPropagation();alternarConcluirId(\'' + t.id + '\')"><i class="fa-solid fa-check"></i></div>' +
+          '<div class="tk-item__corpo">' +
+            '<div class="tk-item__titulo">' + escapar(t.titulo) + "</div>" +
+            '<div class="tk-item__meta"><span class="tk-prazo' + (atras?" atrasada":"") + '"><i class="fa-solid fa-calendar-day"></i> ' + (atras?"Atrasada: ":"Hoje: ") + fmtData(t.prazo) + "</span></div>" +
+          "</div>" +
+        "</div>";
+      }).join("");
+    }
+
+    /* =================================================================
+       CICLAR PRIORIDADE com 1 clique na barra lateral
+       ================================================================= */
+    window.ciclarPrio = function(id) {
+      const t = acharTarefa(id);
+      if (!t) return;
+      const ciclo = { alta: "media", media: "baixa", baixa: "alta" };
+      t.prioridade = ciclo[t.prioridade];
+      salvar();
+      if (id === ativaId) document.getElementById("tk-d-prio").value = t.prioridade;
+      renderLista();
+      renderFocoDia();
+      if (abaAtual === "geral") renderQuadro();
+    };
+
+    /* =================================================================
+       DUPLICAR TAREFA — clona com status zerado e sem anexos pesados
+       ================================================================= */
+    window.duplicarAtiva = function() {
+      const orig = acharTarefa(ativaId);
+      if (!orig) return;
+      const clone = Object.assign({}, orig, {
+        id: uid("t"),
+        titulo: orig.titulo + " (cópia)",
+        concluida: false,
+        criadaEm: Date.now(),
+        subtarefas: orig.subtarefas.map(function(s){ return Object.assign({},s,{id:uid("st"),feita:false}); }),
+        anexos: [],   // não duplica anexos (economiza espaço)
+        fechamento: ""
+      });
+      TAREFAS.unshift(clone);
+      salvar();
+      renderLista();
+      abrirTarefa(clone.id);
+    };
+
+    /* =================================================================
+       OBJETIVOS — lê do Store sem depender de objetivos.html estar aberta
+       ================================================================= */
+    function listaObjetivos() {
+      return Store.ler("objetivos", []).filter(function(o){ return !o.arquivada; });
+    }
+
+    function preencherSelectObj(objId) {
+      const sel = document.getElementById("tk-d-obj");
+      const objs = listaObjetivos();
+      let html = '<option value="">— Nenhum —</option>';
+      // Agrupa por horizonte (Longo Prazo / Ano)
+      ["longo","ano"].forEach(function(h){
+        const grupo = objs.filter(function(o){ return o.horizonte === h; });
+        if (!grupo.length) return;
+        html += '<optgroup label="' + (h==="longo"?"Longo Prazo":"Este Ano") + '">';
+        grupo.forEach(function(o){ html += '<option value="' + o.id + '">' + escapar(o.titulo) + "</option>"; });
+        html += "</optgroup>";
+      });
+      sel.innerHTML = html;
+      sel.value = objId || "";
+    }
+
+    /* =================================================================
+       14. VISÃO GERAL — quadro em 2 seções (Pessoal/Profissional)
+       -----------------------------------------------------------------
+       Mesma fonte de dados do Foco. Uma coluna por categoria; cada
+       tarefa mostra a subcategoria como etiqueta. "Uma verdade, 2 telas".
+       ================================================================= */
     window.setAba = function (qual) {
       abaAtual = qual;
       Store.salvar("tarefas_aba", qual);
@@ -1291,96 +1740,78 @@
       document.getElementById("aba-geral").style.display = qual === "geral" ? "block" : "none";
       document.getElementById("aba-btn-foco").classList.toggle("is-active", qual === "foco");
       document.getElementById("aba-btn-geral").classList.toggle("is-active", qual === "geral");
-      if (qual === "geral") renderQuadro(); // o quadro é remontado toda vez que aparece -> sempre atualizado
+      if (qual === "geral") renderQuadro();
     };
 
     function renderQuadro() {
       const cont = document.getElementById("tk-quadro");
-
-      // Uma coluna por categoria...
       let html = "";
-      TAGS.forEach(function (tg) { html += colunaHTML(tg.nome, tg.cor, true); });
 
-      // ...e a coluna "Sem categoria" só aparece se houver algo pendente lá
-      const temSem = TAREFAS.some(function (t) { return !t.tag && !t.concluida; });
-      if (temSem) html += colunaHTML("", "var(--text-muted)", false);
+      // uma seção por domínio, com uma coluna por categoria
+      TAXONOMIA.forEach(function (d) {
+        let cards = "";
+        d.cats.forEach(function (c) {
+          const pend = TAREFAS.filter(function (t) { return !t.concluida && t.catId === c.id; });
+          cards += cardHTML(c.nome, c.cor, pend, c.id);
+        });
+        html += '<section class="tk-dom"><h2 class="tk-dom__titulo">' + escapar(d.nome) + "</h2>" +
+                '<div class="tk-quadro">' + cards + "</div></section>";
+      });
+
+      // seção "Sem categoria" só se houver algo solto
+      const semCat = TAREFAS.filter(function (t) { return !t.catId && !t.concluida; });
+      if (semCat.length) {
+        html += '<section class="tk-dom"><h2 class="tk-dom__titulo">Sem categoria</h2>' +
+                '<div class="tk-quadro">' + cardHTML("Sem categoria", "var(--text-muted)", semCat, null) + "</div></section>";
+      }
 
       cont.innerHTML = html;
     }
 
-    // Desenha UMA coluna (card) do quadro
-    function colunaHTML(nomeCat, cor, comAdd) {
-      const rotulo = nomeCat || "Sem categoria";
-
-      // pendentes desta categoria
-      const pend = TAREFAS.filter(function (t) {
-        return !t.concluida && (nomeCat ? t.tag === nomeCat : !t.tag);
-      });
-
-      // a listinha de tarefas
+    // Desenha UM card do quadro. catIdAdd = null -> sem campo de adicionar.
+    function cardHTML(titulo, cor, pend, catIdAdd) {
       let itens = "";
       if (pend.length === 0) {
         itens = '<p class="tk-q-vazio">Nada pendente aqui.</p>';
       } else {
         pend.forEach(function (t) {
-          let prazo = "";
-          if (t.prazo) {
-            prazo = '<span class="tk-q-prazo' + (atrasada(t) ? " atrasada" : "") + '">' + fmtData(t.prazo) + "</span>";
-          }
-          itens += '<div class="tk-q-item" onclick="quadroAbrir(\'' + t.id + '\')">' +
+          const prazo = t.prazo ? '<span class="tk-q-prazo' + (atrasada(t) ? " atrasada" : "") + '">' + fmtData(t.prazo) + "</span>" : "";
+          const sub = t.subId ? '<span class="tk-q-sub">' + escapar(nomeSub(t.catId, t.subId)) + "</span>" : "";
+          itens += '<div class="tk-q-item prio-' + t.prioridade + '" onclick="quadroAbrir(\'' + t.id + '\')">' +
             '<div class="tk-q-check" onclick="event.stopPropagation(); quadroConcluir(\'' + t.id + '\')"><i class="fa-solid fa-check"></i></div>' +
-            '<span class="tk-q-titulo">' + escapar(t.titulo) + "</span>" +
+            '<span class="tk-q-titulo">' + escapar(t.titulo) + sub + "</span>" +
             prazo +
-            '<span class="tk-q-prio" style="background:' + COR_PRIO[t.prioridade] + '"></span>' +
           "</div>";
         });
       }
 
-      // campo de adicionar (só nas colunas de categoria)
       let add = "";
-      if (comAdd) {
-        add = '<form class="tk-q-add" data-cat="' + escapar(nomeCat) + '" onsubmit="event.preventDefault(); novaTarefaQuadro(this);">' +
-          '<input type="text" placeholder="+ Adicionar...">' +
-          '<button type="submit" aria-label="Adicionar"><i class="fa-solid fa-plus"></i></button>' +
+      if (catIdAdd !== null) {
+        add = '<form class="tk-q-add" data-catid="' + catIdAdd + '" onsubmit="event.preventDefault(); novaTarefaQuadro(this);">' +
+          '<input type="text" placeholder="+ Adicionar..."><button type="submit" aria-label="Adicionar"><i class="fa-solid fa-plus"></i></button>' +
         "</form>";
       }
 
       return '<div class="tk-col">' +
         '<div class="tk-col__head">' +
-          '<span class="tk-col__nome"><span class="ponto" style="background:' + cor + '"></span>' + escapar(rotulo) + "</span>" +
+          '<span class="tk-col__nome"><span class="ponto" style="background:' + cor + '"></span>' + escapar(titulo) + "</span>" +
           '<span class="tk-col__cont">' + pend.length + "</span>" +
         "</div>" +
-        '<div class="tk-col__itens">' + itens + "</div>" +
-        add +
+        '<div class="tk-col__itens">' + itens + "</div>" + add +
       "</div>";
     }
 
-    // Cria uma tarefa direto pela coluna (já com a categoria daquela coluna)
     window.novaTarefaQuadro = function (form) {
       const input = form.querySelector("input");
       const titulo = input.value.trim();
       if (!titulo) return;
-
-      TAREFAS.unshift({
-        id: "t" + Date.now(),
-        titulo: titulo,
-        prioridade: "media",
-        prazo: "",
-        tag: form.dataset.cat || "",  // a categoria vem do data-cat da coluna
-        plano: "",
-        subtarefas: [],
-        fechamento: "",
-        anexos: [],
-        concluida: false,
-        criadaEm: Date.now()
-      });
+      TAREFAS.unshift(tarefaNova(titulo, form.dataset.catid || ""));
       salvar();
       input.value = "";
       renderQuadro();
-      renderLista(); // mantém o modo Foco em dia também
+      renderLista();
     };
 
-    // Concluir (ou reabrir) direto pelo quadro
     window.quadroConcluir = function (id) {
       const t = acharTarefa(id);
       if (!t) return;
@@ -1391,122 +1822,180 @@
       renderLista();
     };
 
-    // Clicar numa tarefa do quadro abre ela no modo Foco pra detalhar
     window.quadroAbrir = function (id) {
       window.setAba("foco");
       window.abrirTarefa(id);
     };
 
     /* =================================================================
-       11. CATEGORIAS (TAGS) — modal de gerenciamento
+       15. EDITOR DE CATEGORIAS (árvore) — abrir/fechar e desenhar
        ================================================================= */
-    window.abrirTags = function () {
-      renderListaTags();
-      document.getElementById("modal-tags").classList.add("is-open");
-    };
-    window.fecharTags = function () {
-      document.getElementById("modal-tags").classList.remove("is-open");
-    };
+    window.abrirTags  = function () { renderArvore(); document.getElementById("modal-tags").classList.add("is-open"); };
+    window.fecharTags = function () { document.getElementById("modal-tags").classList.remove("is-open"); };
 
-    function renderListaTags() {
-      const cont = document.getElementById("tk-tag-lista");
-      if (TAGS.length === 0) {
-        cont.innerHTML = '<p class="tk-mini-vazio">Nenhuma categoria ainda. Crie a primeira abaixo.</p>';
-        return;
-      }
+    function renderArvore() {
+      const cont = document.getElementById("tk-arvore");
       let html = "";
-      TAGS.forEach(function (tg, i) {
-        // i = posição da categoria na lista. Passamos o índice (e não o nome)
-        // pros botões pra não quebrar caso o nome tenha aspas/acentos.
-        html += '<div class="tk-tag-linha">' +
-          '<input type="color" value="' + tg.cor + '" onchange="editarTagCor(' + i + ', this.value)" title="Mudar a cor">' +
-          '<input type="text" class="tk-tag-nome" value="' + escapar(tg.nome) + '" onchange="editarTagNome(' + i + ', this.value)" aria-label="Nome da categoria">' +
-          '<button class="del" onclick="excluirTagIdx(' + i + ')" aria-label="Excluir categoria"><i class="fa-solid fa-trash"></i></button>' +
-        "</div>";
+
+      TAXONOMIA.forEach(function (d) {
+        html += '<div class="tk-domed"><p class="tk-domed__cab">' + escapar(d.nome) + "</p>";
+
+        d.cats.forEach(function (c) {
+          const aberto = !!expandidas[c.id];
+          html += '<div class="tk-cated">' +
+            '<div class="tk-cated__head">' +
+              '<input type="color" value="' + c.cor + '" onchange="editarCatCor(\'' + c.id + '\', this.value)" title="Cor">' +
+              '<input type="text" class="tk-cated__nome" value="' + escapar(c.nome) + '" onchange="editarCatNome(\'' + c.id + '\', this.value)">' +
+              '<button class="tk-cated__exp" onclick="toggleSubs(\'' + c.id + '\')" title="Subcategorias">' +
+                '<i class="fa-solid fa-chevron-' + (aberto ? "up" : "down") + '"></i> ' + c.subs.length +
+              "</button>" +
+              '<button class="del" onclick="excluirCat(\'' + c.id + '\')" aria-label="Excluir categoria"><i class="fa-solid fa-trash"></i></button>' +
+            "</div>";
+
+          if (aberto) {
+            html += '<div class="tk-subed">';
+            c.subs.forEach(function (s) {
+              html += '<div class="tk-subed__linha"><i class="fa-solid fa-angle-right"></i>' +
+                '<input type="text" value="' + escapar(s.nome) + '" onchange="editarSubNome(\'' + c.id + '\', \'' + s.id + '\', this.value)">' +
+                '<button class="del" onclick="excluirSub(\'' + c.id + '\', \'' + s.id + '\')" aria-label="Excluir subcategoria"><i class="fa-solid fa-xmark"></i></button>' +
+              "</div>";
+            });
+            html += '<form class="tk-subed__add" data-catid="' + c.id + '" onsubmit="event.preventDefault(); novaSub(this);">' +
+              '<input type="text" placeholder="+ subcategoria"><button type="submit" aria-label="Adicionar subcategoria"><i class="fa-solid fa-plus"></i></button>' +
+            "</form>";
+            html += "</div>";
+          }
+
+          html += "</div>";
+        });
+
+        html += '<form class="tk-cated__add" data-domid="' + d.id + '" onsubmit="event.preventDefault(); novaCat(this);">' +
+          '<input type="text" placeholder="+ nova categoria em ' + escapar(d.nome) + '"><button type="submit" aria-label="Adicionar categoria"><i class="fa-solid fa-plus"></i></button>' +
+        "</form>";
+
+        html += "</div>";
       });
+
       cont.innerHTML = html;
     }
 
-    // Trocar a COR de uma categoria — reflete em todo lugar que usa a cor
-    window.editarTagCor = function (i, cor) {
-      const tg = TAGS[i];
-      if (!tg) return;
-      tg.cor = cor;
-      salvarTags();
+    window.toggleSubs = function (catId) { expandidas[catId] = !expandidas[catId]; renderArvore(); };
+
+    /* =================================================================
+       16. EDITOR DE CATEGORIAS — ações (criar/renomear/recolorir/excluir)
+       -----------------------------------------------------------------
+       Como as tarefas guardam o ID (não o nome), renomear/recolorir é
+       seguro: o vínculo não quebra. Só ao EXCLUIR é que precisamos
+       "soltar" as tarefas afetadas.
+       ================================================================= */
+    function corAleatoria() {
+      const p = ["#ef4444","#f59e0b","#22c55e","#14b8a6","#06b6d4","#3b82f6","#8b5cf6","#ec4899","#84cc16","#f43f5e","#0ea5e9","#d946ef"];
+      return p[Math.floor(Math.random() * p.length)];
+    }
+
+    function repintarTudo() {
+      renderArvore();
+      renderFiltros();
+      renderLista();
+      if (abaAtual === "geral") renderQuadro();
+      if (ativaId) { const t = acharTarefa(ativaId); preencherSelectsCategoria(t.catId, t.subId); }
+    }
+
+    window.editarCatCor = function (catId, cor) {
+      const c = acharCat(catId);
+      if (!c) return;
+      c.cor = cor;
+      salvarTax();
       renderFiltros();
       renderLista();
       if (abaAtual === "geral") renderQuadro();
     };
 
-    // Renomear uma categoria — e levar o novo nome a TODAS as tarefas que a usam
-    window.editarTagNome = function (i, novoBruto) {
-      const tg = TAGS[i];
-      if (!tg) return;
-      const antigo = tg.nome;
+    window.editarCatNome = function (catId, novoBruto) {
+      const c = acharCat(catId);
+      if (!c) return;
       const novo = (novoBruto || "").trim();
+      if (!novo) { renderArvore(); return; } // vazio: desfaz
+      c.nome = novo;
+      salvarTax();
+      repintarTudo();
+    };
 
-      if (!novo) { renderListaTags(); return; }   // vazio: desfaz (volta o nome antigo)
-      if (novo === antigo) return;                // não mudou nada
-      if (acharTag(novo)) {                        // já existe outra com esse nome
-        alert("Já existe uma categoria com esse nome.");
-        renderListaTags();
-        return;
-      }
-
-      tg.nome = novo;
-      // propaga: toda tarefa marcada com o nome antigo passa a usar o novo
-      TAREFAS.forEach(function (t) { if (t.tag === antigo) t.tag = novo; });
-      if (filtroTag === antigo) filtroTag = novo; // mantém o filtro coerente
-
-      salvarTags();
+    window.excluirCat = function (catId) {
+      const c = acharCat(catId);
+      if (!c) return;
+      if (!confirm('Excluir a categoria "' + c.nome + '" e suas subcategorias?\nAs tarefas dela ficam "Sem categoria".')) return;
+      const dom = acharDomDaCat(catId);
+      dom.cats = dom.cats.filter(function (x) { return x.id !== catId; });
+      // solta as tarefas que apontavam pra cá
+      TAREFAS.forEach(function (t) { if (t.catId === catId) { t.catId = ""; t.subId = ""; } });
+      if (filtroCat === catId) filtroCat = "";
+      salvarTax();
       salvar();
-      renderListaTags();
-      renderFiltros();
-      renderLista();
-      if (abaAtual === "geral") renderQuadro();
-      if (ativaId) preencherSelectTags(acharTarefa(ativaId).tag);
+      repintarTudo();
     };
 
-    // Excluir pela posição (reaproveita a lógica de excluirTag, que já cuida de tudo)
-    window.excluirTagIdx = function (i) {
-      const tg = TAGS[i];
-      if (tg) window.excluirTag(tg.nome);
-    };
-
-    window.criarTag = function () {
-      const nome = document.getElementById("tk-tag-nome").value.trim();
-      const cor = document.getElementById("tk-tag-cor").value;
+    window.novaCat = function (form) {
+      const input = form.querySelector("input");
+      const nome = input.value.trim();
       if (!nome) return;
-      if (acharTag(nome)) { alert("Já existe uma categoria com esse nome."); return; }
-
-      TAGS.push({ nome: nome, cor: cor });
-      salvarTags();
-      document.getElementById("tk-tag-nome").value = "";
-      renderListaTags();
-      renderFiltros();
-      if (abaAtual === "geral") renderQuadro();
-      if (ativaId) preencherSelectTags(acharTarefa(ativaId).tag);
+      const dom = TAXONOMIA.find(function (d) { return d.id === form.dataset.domid; });
+      if (!dom) return;
+      dom.cats.push({ id: uid("c"), nome: nome, cor: corAleatoria(), subs: [] });
+      salvarTax();
+      input.value = "";
+      repintarTudo();
     };
 
-    window.excluirTag = function (nome) {
-      if (!confirm('Excluir a categoria "' + nome + '"? As tarefas que a usam ficam "Sem categoria".')) return;
-      TAGS = TAGS.filter(function (tg) { return tg.nome !== nome; });
-      // tira a categoria das tarefas que a usavam
-      TAREFAS.forEach(function (t) { if (t.tag === nome) t.tag = ""; });
-      if (filtroTag === nome) filtroTag = "todas";
-      salvarTags();
-      salvar();
-      renderListaTags();
+    window.editarSubNome = function (catId, subId, novoBruto) {
+      const s = acharSub(acharCat(catId), subId);
+      if (!s) return;
+      const novo = (novoBruto || "").trim();
+      if (!novo) { renderArvore(); return; }
+      s.nome = novo;
+      salvarTax();
+      renderArvore();
       renderLista();
       if (abaAtual === "geral") renderQuadro();
-      if (ativaId) preencherSelectTags(acharTarefa(ativaId).tag);
+      if (ativaId) { const t = acharTarefa(ativaId); preencherSelectSub(t.catId, t.subId); }
+    };
+
+    window.excluirSub = function (catId, subId) {
+      const c = acharCat(catId);
+      const s = acharSub(c, subId);
+      if (!s) return;
+      if (!confirm('Excluir a subcategoria "' + s.nome + '"?\nAs tarefas dela ficam sem subcategoria.')) return;
+      c.subs = c.subs.filter(function (x) { return x.id !== subId; });
+      TAREFAS.forEach(function (t) { if (t.subId === subId) t.subId = ""; });
+      salvarTax();
+      salvar();
+      renderArvore();
+      renderLista();
+      if (abaAtual === "geral") renderQuadro();
+      if (ativaId) { const t = acharTarefa(ativaId); preencherSelectSub(t.catId, t.subId); }
+    };
+
+    window.novaSub = function (form) {
+      const c = acharCat(form.dataset.catid);
+      if (!c) return;
+      const input = form.querySelector("input");
+      const nome = input.value.trim();
+      if (!nome) return;
+      c.subs.push({ id: uid("s"), nome: nome });
+      expandidas[c.id] = true;
+      salvarTax();
+      input.value = "";
+      renderArvore();
+      renderLista();
+      if (abaAtual === "geral") renderQuadro();
+      if (ativaId) { const t = acharTarefa(ativaId); preencherSelectSub(t.catId, t.subId); }
     };
 
     /* =================================================================
-       12. PARTIDA — desenha a lista assim que a página carrega
+       17. PARTIDA
        ================================================================= */
     renderLista();
-    setAba(abaAtual); // restaura a aba (Foco ou Visão Geral) que você usou por último
+    setAba(abaAtual);
 
   })();
   </script>

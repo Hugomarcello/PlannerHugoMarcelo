@@ -295,22 +295,26 @@
     .pl-atalho span { font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: var(--text-strong); }
 
     /* ---------- GRADE SEMANAL ----------------------------------------- */
-    .pl-sem-grid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
+    .pl-sem-grid { display: grid; gap: 14px; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); }
     .pl-dia-card {
       background: var(--panel); border: 1px solid var(--border); border-radius: 16px;
-      display: flex; flex-direction: column; overflow: hidden; height: 380px;
+      display: flex; flex-direction: column; overflow: hidden; height: 360px;
+      transition: transform .15s, box-shadow .15s, border-color .15s;
     }
-    .pl-dia-card.foco  { border-top: 2px solid var(--verde); }
-    .pl-dia-card.dom   { border-top: 2px solid var(--vermelho); }
-    .pl-dia-card.comum { border-top: 2px solid var(--border); }
+    .pl-dia-card:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
+    .pl-dia-card.foco  { border-top: 3px solid var(--verde); }
+    .pl-dia-card.dom   { border-top: 3px solid var(--vermelho); }
+    .pl-dia-card.comum { border-top: 3px solid var(--azul); }
     .pl-dia-card__head {
       display: flex; align-items: center; justify-content: space-between;
       padding: 12px 14px; border-bottom: 1px solid var(--border); background: var(--bg-soft); flex-shrink: 0;
     }
     .pl-dia-card__head h4 { font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; color: var(--text-strong); }
-    .pl-dia-card__data { font-size: 10px; font-weight: 700; color: var(--text-strong); border: 1px solid var(--border); border-radius: 6px; padding: 3px 7px; }
-    .pl-dia-card__alerta { font-size: 10px; font-weight: 800; padding: 6px 14px; border-bottom: 1px solid var(--border); flex-shrink: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .pl-dia-card .pl-caderno { flex: 1; padding: 7px 14px 0; overflow-y: auto; }
+    .pl-dia-card.dom .pl-dia-card__head h4 { color: var(--vermelho); }
+    .pl-dia-card__data { font-size: 10px; font-weight: 800; color: var(--text-muted); background: var(--panel); border: 1px solid var(--border); border-radius: 99px; padding: 3px 10px; }
+    .pl-dia-card__alerta { font-size: 10px; font-weight: 800; padding: 6px 14px; border-bottom: 1px solid var(--border); flex-shrink: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center; gap: 6px; }
+    .pl-dia-card .pl-caderno { flex: 1; padding: 10px 14px; overflow-y: auto; background: var(--bg); border: none; border-radius: 0; font-size: 11px; line-height: 1.7; }
+    .pl-dia-card .pl-caderno:focus { background: var(--bg-soft); }
 
     /* ---------- MODAL SMART (mais largo que o padrão) ----------------- */
     .modal__box--lg { max-width: 680px; }
@@ -336,7 +340,222 @@
     .pl-cor.yellow { background: var(--ambar); }
     .pl-cor.purple { background: var(--roxo); }
 
-    /* Checkbox sempre na cor da marca */
+    /* ================================================================
+       DIÁRIA — GRID 3 colunas desktop · 1 coluna mobile
+       ================================================================ */
+    .pl-dia-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 16px;
+      align-items: start;          /* cards ocupam só o espaço necessário */
+    }
+    .pl-dia-col {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    /* Tablet: 2 colunas (col 3 desce) */
+    @media (max-width: 1100px) {
+      .pl-dia-grid { grid-template-columns: 1fr 1fr; }
+    }
+    /* Mobile: 1 coluna, ordem lógica manhã→tarde→noite */
+    @media (max-width: 700px) {
+      .pl-dia-grid { grid-template-columns: 1fr; }
+    }
+
+    /* ================================================================
+       LIST ITEM MODERNO — hábitos & rotinas (substitui .pl-hab antigo)
+       ================================================================ */
+    .pl-items { display: flex; flex-direction: column; gap: 6px; }
+
+    /* Cabeçalho de grupo (ex: Manhã, Tarde, Noite, Hábitos) */
+    .pl-item-grp {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 9px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--text-muted);
+      padding: 10px 2px 4px;
+    }
+    .pl-item-grp:first-child { padding-top: 0; }
+    .pl-item-grp::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* Item individual */
+    .pl-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 11px 14px;
+      background: var(--bg-soft);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background .15s, border-color .15s, transform .12s, box-shadow .12s;
+      position: relative;
+      overflow: hidden;
+    }
+    .pl-item::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 3px;
+      background: var(--border);
+      border-radius: 3px 0 0 3px;
+      transition: background .15s;
+    }
+    .pl-item:hover {
+      border-color: var(--accent);
+      background: var(--panel);
+      transform: translateX(2px);
+      box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    }
+    .pl-item:hover::before { background: var(--accent); }
+    .pl-item input[type=checkbox] {
+      flex-shrink: 0;
+      width: 16px;
+      height: 16px;
+      accent-color: var(--accent);
+      cursor: pointer;
+    }
+    .pl-item__txt {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-strong);
+      line-height: 1.3;
+      flex: 1;
+      transition: color .15s;
+    }
+    /* Estado marcado */
+    .pl-item.done {
+      background: var(--accent-soft);
+      border-color: transparent;
+    }
+    .pl-item.done::before { background: var(--accent); }
+    .pl-item.done .pl-item__txt {
+      text-decoration: line-through;
+      color: var(--text-muted);
+    }
+    .pl-item.done:hover { border-color: var(--accent); }
+    /* Ícone de check pra reforçar feedback */
+    .pl-item__check-ic {
+      font-size: 11px;
+      color: var(--accent);
+      opacity: 0;
+      transition: opacity .15s;
+      flex-shrink: 0;
+    }
+    .pl-item.done .pl-item__check-ic { opacity: 1; }
+    /* Estado falhou (✖ vermelho) */
+    .pl-item.fail { background: rgba(239,68,68,.07); border-color: rgba(239,68,68,.25); }
+    .pl-item.fail::before { background: var(--vermelho); }
+    .pl-item.fail .pl-item__txt { color: var(--text-muted); text-decoration: line-through; }
+    /* Ícone de estado (substitui checkbox) */
+    .pl-item__state { flex-shrink:0; width:18px; display:flex; align-items:center; justify-content:center; font-size:13px; }
+    .pl-item__circle { width:14px; height:14px; border-radius:50%; border:2px solid var(--border); display:block; transition:border-color .15s; }
+    .pl-item:hover .pl-item__circle { border-color: var(--accent); }
+    /* Checkbox dentro de .pl-item é só visual — o clique é gerenciado pelo div pai */
+    .pl-item input[type=checkbox] { pointer-events: none; }
+    /* Botão discreto de devolver tarefa ao backlog */
+    .pl-item-devolver {
+      opacity: 0; flex-shrink: 0; font-size: 12px; color: var(--text-muted);
+      background: none; border: none; cursor: pointer; padding: 2px 4px;
+      border-radius: 4px; transition: opacity .15s, color .15s;
+    }
+    .pl-item:hover .pl-item-devolver { opacity: 1; }
+    .pl-item-devolver:hover { color: var(--ambar); }
+
+    /* Label de expectativa do dia */
+    .pl-label-field {
+      font-size: 10px; font-weight: 900; text-transform: uppercase;
+      letter-spacing: 1px; color: var(--text-strong); display: block; margin-bottom: 8px;
+    }
+
+    /* ── Horários do Dia ───────────────────────────────────── */
+    .pl-horario-intencao {
+      display: flex; align-items: center; gap: 8px;
+      background: var(--accent-soft); border: 1px solid var(--accent);
+      border-radius: 10px; padding: 10px 14px; margin-bottom: 14px;
+    }
+    .pl-horario-intencao .pl-input {
+      background: transparent; border: none; padding: 0; margin: 0;
+      font-size: 13px; font-weight: 700;
+    }
+    .pl-horario-intencao .pl-input:focus { outline: none; }
+    /* ── Blocos do Dia (hora + atividade, estilo list-item) ─── */
+    .pl-bloco-row {
+      display: flex; align-items: center; gap: 8px;
+      padding: 6px 0; border-bottom: 1px solid var(--border);
+    }
+    .pl-bloco-row:last-child { border-bottom: none; }
+    .pl-bloco-hora {
+      width: 110px; flex-shrink: 0; background: var(--bg-soft);
+      border: 1px solid var(--border); border-radius: 8px;
+      padding: 6px 10px; font-size: 11px; font-weight: 800;
+      color: var(--verde); text-align: left; font-family: inherit;
+      outline: none; transition: border-color .15s;
+    }
+    .pl-bloco-hora:focus { border-color: var(--accent); }
+    .pl-bloco-txt {
+      flex: 1; background: transparent; border: none; border-bottom: 1px solid var(--border);
+      padding: 6px 4px; font-size: 12px; font-weight: 600; color: var(--text-strong);
+      font-family: inherit; outline: none; transition: border-color .15s;
+    }
+    .pl-bloco-txt:focus { border-color: var(--accent); }
+    .pl-bloco-txt::placeholder { color: var(--text-muted); font-weight: 400; }
+    .pl-bloco-del {
+      flex-shrink: 0; opacity: 0; font-size: 11px; color: var(--text-muted);
+      background: none; border: none; cursor: pointer; padding: 4px;
+      border-radius: 4px; transition: opacity .15s, color .15s;
+    }
+    .pl-bloco-row:hover .pl-bloco-del { opacity: 1; }
+    .pl-bloco-del:hover { color: var(--vermelho); }
+    .pl-bloco-add {
+      display: flex; align-items: center; gap: 6px; width: 100%;
+      margin-top: 8px; padding: 8px 12px; border-radius: 8px;
+      border: 1px dashed var(--border); background: transparent;
+      color: var(--text-muted); font-size: 11px; font-weight: 700;
+      cursor: pointer; transition: all .15s;
+    }
+    .pl-bloco-add:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* ── Revisão Noturna estruturada ───────────────────────── */
+    .pl-rev-tempo {
+      font-size: 9px; font-weight: 800; color: var(--text-muted);
+      background: var(--bg-soft); border: 1px solid var(--border);
+      border-radius: 99px; padding: 3px 10px; display: flex; align-items: center; gap: 4px;
+    }
+    .pl-rev-campos { display: flex; flex-direction: column; gap: 10px; }
+    .pl-rev-campo { display: flex; flex-direction: column; gap: 4px; }
+    .pl-rev-label {
+      font-size: 10px; font-weight: 800; color: var(--text-strong);
+      letter-spacing: .3px; line-height: 1.3;
+    }
+    .pl-rev-txt {
+      width: 100%; background: var(--bg-soft); border: 1px solid var(--border);
+      border-radius: 8px; padding: 8px 12px; color: var(--text-strong);
+      font-family: inherit; font-size: 12px; font-weight: 500; line-height: 1.6;
+      resize: none; outline: none; transition: border-color .15s, background .15s;
+    }
+    .pl-rev-txt:focus { border-color: var(--accent); background: var(--panel); }
+    .pl-rev-txt::placeholder { color: var(--text-muted); font-weight: 400; font-size: 11px; }
+    .pl-agua-barra-wrap { background: var(--bg-soft); border-radius: 99px; height: 8px; overflow: hidden; margin: 10px 0 4px; }
+    .pl-agua-barra { height: 100%; background: var(--azul); border-radius: 99px; transition: width .4s ease; }
+    .pl-agua-num { font-size: 11px; font-weight: 800; color: var(--azul); }
+    .pl-agua-btns { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
+    .pl-agua-btn { padding: 6px 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-soft); color: var(--text-strong); font-size: 11px; font-weight: 800; cursor: pointer; transition: all .12s; }
+    .pl-agua-btn:hover { border-color: var(--azul); color: var(--azul); background: var(--panel); }
+    .pl-agua-btn.minus { color: var(--text-muted); }
+    .pl-agua-btn.minus:hover { border-color: var(--vermelho); color: var(--vermelho); }
+
+    /* Checkbox global da página */
     #planejadores input[type=checkbox] { accent-color: var(--accent); cursor: pointer; width: 15px; height: 15px; flex-shrink: 0; }
 
     /* Detalhes (Arquivo de Vitórias) */
@@ -354,7 +573,9 @@
     .pl-nav__hoje:hover { color: var(--accent); border-color: var(--accent); }
 
     .cal-day.hoje { outline: 2px solid var(--accent); outline-offset: -2px; font-weight: 900; }
-    .pl-dia-card.hoje { border-color: var(--accent); box-shadow: var(--glow); }
+    .pl-dia-card.hoje { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent), var(--glow); }
+    .pl-dia-card.hoje .pl-dia-card__data { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .pl-dia-card.foco .pl-dia-card__head { background: linear-gradient(135deg, var(--accent-soft), var(--bg-soft)); }
 
     /* Coleções de longo prazo (cartão repaginado) */
     .pl-col { background: var(--bg-soft); border: 1px solid var(--border); border-top: 2px solid var(--verde); border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 10px; }
@@ -400,16 +621,48 @@
     .pl-dia-tarefas .pl-mini-t span { color: var(--text-strong); font-weight: 600; line-height: 1.2; }
     .pl-dia-tarefas .pl-mini-t span.feito { text-decoration: line-through; color: var(--text-muted); }
 
-    /* Grade semanal de hábitos (estilo planilha) */
-    .pl-hgrid-wrap { overflow-x: auto; }
-    .pl-hgrid { border-collapse: collapse; width: 100%; min-width: 440px; }
-    .pl-hgrid th, .pl-hgrid td { border: 1px solid var(--border); padding: 7px 4px; text-align: center; font-size: 11px; }
-    .pl-hgrid th { font-size: 10px; font-weight: 800; color: var(--text-muted); }
-    .pl-hgrid th:first-child, .pl-hgrid td:first-child { text-align: left; position: sticky; left: 0; background: var(--panel); min-width: 140px; font-weight: 600; color: var(--text-strong); }
-    .pl-hgrid .cel { cursor: pointer; color: var(--verde); transition: background .12s; }
-    .pl-hgrid .cel:hover { background: var(--bg-soft); }
-    .pl-hgrid .cel.on { background: var(--accent); color: #fff; }
-    .pl-hgrid tr.grp td { background: var(--bg-soft); text-align: left; font-size: 9px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); position: sticky; left: 0; }
+    /* Grade semanal de hábitos (estilo planilha repaginado) */
+    .pl-hgrid-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: 14px; background: var(--panel); }
+    .pl-hgrid { border-collapse: separate; border-spacing: 0; width: 100%; min-width: 460px; }
+    .pl-hgrid th, .pl-hgrid td { padding: 7px 5px; text-align: center; }
+    .pl-hgrid thead th { font-size: 10px; color: var(--text-muted); border-bottom: 1px solid var(--border); padding: 10px 5px; }
+    .pl-hgrid thead th .wd { display: block; font-size: 11px; font-weight: 900; color: var(--text-strong); }
+    .pl-hgrid thead th .dd { display: block; font-size: 9px; font-weight: 600; opacity: .55; margin-top: 1px; }
+    .pl-hgrid thead th.hoje .wd, .pl-hgrid thead th.hoje .dd { color: var(--accent); opacity: 1; }
+    .pl-hgrid tbody td { border-bottom: 1px solid var(--border); }
+    .pl-hgrid tbody tr:last-child td { border-bottom: none; }
+    .pl-hgrid th:first-child, .pl-hgrid td:first-child { text-align: left; position: sticky; left: 0; background: var(--panel); min-width: 150px; max-width: 170px; font-weight: 600; color: var(--text-strong); font-size: 11px; padding-left: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .pl-hgrid td.hoje-col { background: var(--accent-soft); }
+    .pl-hgrid .cel { cursor: pointer; }
+    .pl-hgrid .cel .dot { width: 26px; height: 26px; border-radius: 8px; margin: 0 auto; display: grid; place-items: center; background: var(--bg-soft); color: transparent; font-size: 11px; transition: all .12s; }
+    .pl-hgrid .cel:hover .dot { background: var(--border); transform: scale(1.08); }
+    .pl-hgrid .cel.on .dot { background: var(--accent); color: #fff; }
+    .pl-hgrid tr.grp td { background: var(--bg-soft); text-align: left; font-size: 9px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); position: sticky; left: 0; padding: 7px 12px; }
+
+    /* Refeições do dia */
+    .pl-ref-sem { font-size: 9px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; color: var(--ambar); margin-bottom: 10px; }
+    .pl-ref { display: flex; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--border); }
+    .pl-ref:last-child { border-bottom: none; }
+    .pl-ref__ic { font-size: 18px; flex-shrink: 0; line-height: 1.3; }
+    .pl-ref b { font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: .5px; color: var(--text-strong); }
+    .pl-ref p { font-size: 11px; color: var(--text-muted); line-height: 1.45; margin-top: 2px; }
+    .pl-ref p b { font-size: 11px; text-transform: none; letter-spacing: 0; color: var(--text-strong); }
+    .pl-ref-chk { flex-shrink: 0; width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--border); background: var(--bg-soft); color: var(--text-muted); cursor: pointer; align-self: flex-start; margin-top: 1px; transition: all .15s; }
+    .pl-ref-chk.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .pl-ref__titulo { font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: .5px; color: var(--text-strong); }
+    .pl-ref__sug { font-size: 11px; color: var(--text-muted); line-height: 1.5; margin: 4px 0 6px; }
+    .pl-ref__livre {
+      width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: 8px;
+      padding: 6px 10px; font-size: 11px; font-weight: 600; color: var(--text-strong);
+      font-family: inherit; outline: none; transition: border-color .15s;
+    }
+    .pl-ref__livre:focus { border-color: var(--accent); background: var(--panel); }
+    .pl-ref__livre::placeholder { color: var(--text-muted); font-weight: 400; }
+
+    /* Seletor de ficha de treino (chips) */
+    .pl-ex-pick { display: flex; flex-wrap: wrap; gap: 6px; margin: 12px 0 6px; }
+    .pl-ex-pchip { padding: 5px 12px; border-radius: 99px; border: 1px solid var(--border); background: var(--bg-soft); color: var(--text-muted); font-size: 11px; font-weight: 700; }
+    .pl-ex-pchip.on { background: var(--accent); border-color: var(--accent); color: #fff; }
   </style>
 </head>
 
@@ -677,10 +930,33 @@
           <button class="pl-btn-sm danger" onclick="Plan.limparPeriodo('dia')"><i class="fa-solid fa-eraser"></i> Limpar</button>
         </div>
 
-        <div class="pl-split">
-          <div class="pl-coluna">
+        <!-- ========= GRID DA DIÁRIA: 3 col desktop · 1 col mobile ========= -->
+        <div class="pl-dia-grid">
 
-            <!-- Tarefas de Hoje (lê/grava na página Tarefas: planner_tarefas) -->
+          <!-- ── COL 1: CORPO & MENTE ── -->
+          <div class="pl-dia-col">
+
+            <div class="card top-verde">
+              <div class="pl-head">
+                <h3><i class="fa-solid fa-fire ico-verde"></i> Hábitos</h3>
+                <a class="pl-add" href="habitos.html" title="Gerenciar hábitos"><i class="fa-solid fa-gear"></i></a>
+              </div>
+              <div id="dia-habitos"></div>
+            </div>
+
+            <div class="card top-verde">
+              <div class="pl-head">
+                <h3><i class="fa-solid fa-rotate ico-verde"></i> Rotinas</h3>
+                <a class="pl-add" href="habitos.html" title="Gerenciar rotinas"><i class="fa-solid fa-gear"></i></a>
+              </div>
+              <div id="dia-rotinas"></div>
+            </div>
+
+          </div>
+
+          <!-- ── COL 2: AGENDA & REFLEXÃO ── -->
+          <div class="pl-dia-col">
+
             <div class="card top-azul">
               <div class="pl-head">
                 <h3><i class="fa-solid fa-check-double ico-azul"></i> Tarefas de Hoje</h3>
@@ -697,44 +973,27 @@
               </details>
             </div>
 
-            <!-- Lembretes (vêm do Radar de datas) -->
             <div class="card top-ambar">
               <div class="pl-head">
-                <h3><i class="fa-solid fa-bell ico-ambar"></i> Lembretes de Hoje</h3>
+                <h3><i class="fa-solid fa-bell ico-ambar"></i> Lembretes</h3>
                 <button class="pl-add" onclick="Plan.abrirModalEvento(Plan.getIsoAtual())"><i class="fa-solid fa-plus"></i></button>
               </div>
               <div id="dia-lembretes"></div>
             </div>
 
-            <!-- Horários do dia -->
-            <div class="card top-verde" style="display:flex; flex-direction:column; min-height:420px;">
-              <div class="pl-head"><h3><i class="fa-solid fa-pen ico-verde"></i> Horários do Dia</h3></div>
-              <label style="font-size:10px; font-weight:900; text-transform:uppercase; letter-spacing:1px; color:var(--text-strong); display:block; margin-bottom:8px;">
-                <i class="fa-solid fa-star ico-verde"></i> O que espero do meu dia?
-              </label>
-              <input type="text" class="pl-input" id="dia-espera" onchange="Plan.salvarCampos()" placeholder="Minha principal expectativa para hoje..." style="margin-bottom:14px;">
-              <textarea class="pl-caderno" id="dia-caderno" spellcheck="false" onchange="Plan.salvarCampos()"
-                style="flex:1;" placeholder="06:00 -&#10;07:00 -&#10;08:00 -"></textarea>
-            </div>
-          </div>
-
-          <div class="pl-coluna">
-            <!-- Hábitos e Rotinas de Hoje (lê/grava na página Hábitos: planner_habitos) -->
             <div class="card top-verde">
               <div class="pl-head">
-                <h3><i class="fa-solid fa-rotate ico-verde"></i> Hábitos &amp; Rotinas</h3>
-                <a class="pl-add" href="habitos.html" title="Gerenciar hábitos"><i class="fa-solid fa-gear"></i></a>
+                <h3><i class="fa-solid fa-clock ico-verde"></i> Blocos do Dia</h3>
+                <button class="pl-add" onclick="Plan.addBloco()" title="Adicionar bloco"><i class="fa-solid fa-plus"></i></button>
               </div>
-              <div id="dia-habitos"></div>
-            </div>
-
-            <!-- Treino de Hoje (lê/grava no rastreador da página Saúde: saude_musc.radar) -->
-            <div class="card top-neutro">
-              <div class="pl-head">
-                <h3><i class="fa-solid fa-dumbbell ico-neutro"></i> Treino de Hoje</h3>
-                <a class="pl-add" href="saude.html" title="Abrir página Saúde"><i class="fa-solid fa-up-right-from-square"></i></a>
+              <!-- Intenção do dia -->
+              <div class="pl-horario-intencao">
+                <i class="fa-solid fa-star ico-verde" style="font-size:11px; flex-shrink:0;"></i>
+                <input type="text" class="pl-input" id="dia-espera" onchange="Plan.salvarCampos()"
+                  placeholder="Qual é a sua intenção para hoje?">
               </div>
-              <div id="dia-treino"></div>
+              <!-- Lista de blocos hora + atividade (renderDiaBlocos) -->
+              <div id="dia-blocos"></div>
             </div>
 
             <div class="card top-neutro">
@@ -743,11 +1002,71 @@
               <p class="pl-vazio" style="margin-top:10px;">1 clique marca, clicar de novo desmarca.</p>
             </div>
 
+            <!-- Revisão Noturna estruturada (< 2 minutos) -->
             <div class="card top-neutro">
-              <div class="pl-head"><h3><i class="fa-solid fa-moon ico-neutro"></i> Revisão Noturna</h3></div>
-              <textarea class="pl-textarea" id="dia-revisao" style="height:100px;" onchange="Plan.salvarCampos()"
-                placeholder="Como foi meu dia? O que aprendi?"></textarea>
+              <div class="pl-head">
+                <h3><i class="fa-solid fa-moon ico-neutro"></i> Revisão Noturna</h3>
+                <span class="pl-rev-tempo"><i class="fa-solid fa-clock"></i> ~2 min</span>
+              </div>
+              <div class="pl-rev-campos">
+
+                <div class="pl-rev-campo">
+                  <p class="pl-item-grp"><i class="fa-solid fa-calendar-day"></i> Acontecimentos</p>
+                  <textarea class="pl-rev-txt" id="rev-aconteceu" rows="2" onchange="Plan.salvarRevisao()" placeholder="Resuma o dia em 1 ou 2 frases…"></textarea>
+                </div>
+
+                <div class="pl-rev-campo">
+                  <p class="pl-item-grp"><i class="fa-solid fa-check ico-verde"></i> Deu certo</p>
+                  <textarea class="pl-rev-txt" id="rev-certo" rows="2" onchange="Plan.salvarRevisao()" placeholder="Vitórias do dia, por menores que sejam…"></textarea>
+                </div>
+
+                <div class="pl-rev-campo">
+                  <p class="pl-item-grp" style="color:var(--vermelho);"><i class="fa-solid fa-xmark"></i> Não saiu como esperado</p>
+                  <textarea class="pl-rev-txt" id="rev-errado" rows="2" onchange="Plan.salvarRevisao()" placeholder="Sem julgamento — só observação…"></textarea>
+                </div>
+
+                <div class="pl-rev-campo">
+                  <p class="pl-item-grp"><i class="fa-solid fa-lightbulb ico-ambar"></i> Aprendi</p>
+                  <textarea class="pl-rev-txt" id="rev-aprendi" rows="2" onchange="Plan.salvarRevisao()" placeholder="Uma ideia, uma lição, um insight…"></textarea>
+                </div>
+
+                <div class="pl-rev-campo">
+                  <p class="pl-item-grp"><i class="fa-solid fa-arrow-right ico-azul"></i> Continua amanhã</p>
+                  <textarea class="pl-rev-txt" id="rev-amanha" rows="2" onchange="Plan.salvarRevisao()" placeholder="Tarefas pendentes, compromissos, ideias…"></textarea>
+                </div>
+
+              </div>
             </div>
+
+          </div>
+
+          <!-- ── COL 3: SAÚDE ── -->
+          <div class="pl-dia-col">
+
+            <div class="card top-azul">
+              <div class="pl-head">
+                <h3><i class="fa-solid fa-dumbbell ico-azul"></i> Treino de Hoje</h3>
+                <a class="pl-add" href="saude.html" title="Abrir página Saúde"><i class="fa-solid fa-up-right-from-square"></i></a>
+              </div>
+              <div id="dia-treino"></div>
+            </div>
+
+            <div class="card top-ambar">
+              <div class="pl-head">
+                <h3><i class="fa-solid fa-utensils ico-ambar"></i> Refeições</h3>
+                <a class="pl-add" href="saude.html" title="Abrir plano alimentar"><i class="fa-solid fa-up-right-from-square"></i></a>
+              </div>
+              <div id="dia-refeicoes"></div>
+            </div>
+
+            <div class="card top-azul">
+              <div class="pl-head">
+                <h3><i class="fa-solid fa-droplet ico-azul"></i> Hidratação</h3>
+                <a class="pl-add" href="saude.html" title="Abrir página Saúde"><i class="fa-solid fa-up-right-from-square"></i></a>
+              </div>
+              <div id="dia-agua"></div>
+            </div>
+
           </div>
         </div>
       </section>
@@ -956,9 +1275,7 @@
         if (a === 'mensal')     { const e = byId('men-alinhamento'); if (e) this.initMen(this.chave('men')).align = e.value; }
         if (a === 'diario') {
           const d = this.initDia(this.chave('dia'));
-          const r = byId('dia-revisao'); if (r) d.review   = r.value;
-          const c = byId('dia-caderno'); if (c) d.notebook = c.value;
-          const x = byId('dia-espera');  if (x) d.expect   = x.value;
+          const x = byId('dia-espera'); if (x) d.expect = x.value;
         }
         this.persistir();
       },
@@ -1352,15 +1669,108 @@
           hc.innerHTML += `<button class="pl-mood ${sel?m.cls:''}" onclick="Plan.setMood(${sel?0:m.id})"><i class="fa-solid ${m.ic}"></i><span>${m.n}</span></button>`;
         });
 
-        byId('dia-espera').value = d.expect || '';
-        byId('dia-revisao').value = d.review || '';
-        byId('dia-caderno').value = d.notebook || '';
+        byId('dia-espera').value  = d.expect   || '';
+
+        // Blocos do dia — migra notebook (string antiga) pra array de blocos
+        if (!d.blocos || !Array.isArray(d.blocos)) {
+          d.blocos = [];
+          if (d.notebook) {
+            // converte cada linha "HH:MM - texto" ou "HH:MM texto" num bloco
+            d.notebook.split('\n').forEach(ln => {
+              const m = ln.match(/^(\d{1,2}:\d{2})\s*[·\-:–]?\s*(.*)/);
+              if (m) d.blocos.push({ h: m[1], t: m[2].trim() });
+              else if (ln.trim()) d.blocos.push({ h: '', t: ln.trim() });
+            });
+            d.notebook = '';
+          }
+          if (!d.blocos.length) {
+            // seed com horários padrão do dia
+            ['06:00','07:00','08:00','09:00','10:00','11:00','12:00',
+             '13:00','14:00','15:00','16:00','17:00','18:00','19:00','20:00','21:00','22:00']
+            .forEach(h => d.blocos.push({ h, t: '' }));
+          }
+        }
+        this.renderDiaBlocos(iso);
+
+        // Revisão Noturna estruturada — migra d.review (string antiga) pra d.rev automaticamente
+        d.rev = d.rev || {};
+        if (!d.rev.aconteceu && d.review) { d.rev.aconteceu = d.review; d.review = ''; }
+        byId('rev-aconteceu').value = d.rev.aconteceu || '';
+        byId('rev-certo').value     = d.rev.certo     || '';
+        byId('rev-errado').value    = d.rev.errado    || '';
+        byId('rev-aprendi').value   = d.rev.aprendi   || '';
+        byId('rev-amanha').value    = d.rev.amanha    || '';
 
         this.renderDiaTarefas(iso);
+        this.renderDiaRotinas(iso);
         this.renderDiaHabitos(iso);
         this.renderDiaTreino(iso);
+        this.renderDiaRefeicoes(iso);
+        this.renderDiaAgua(iso);
+        this.renderDiaBlocos(iso);
       },
-      setMood(v) { this.initDia(this.chave('dia')).mood = v; this.salvar(); },
+      salvarRevisao() {
+        // Grava os 5 campos da Revisão Noturna estruturada
+        const d = this.initDia(this.chave('dia'));
+        d.rev = d.rev || {};
+        const g = id => { const el = byId(id); return el ? el.value : ''; };
+        d.rev.aconteceu = g('rev-aconteceu');
+        d.rev.certo     = g('rev-certo');
+        d.rev.errado    = g('rev-errado');
+        d.rev.aprendi   = g('rev-aprendi');
+        d.rev.amanha    = g('rev-amanha');
+        this.persistir();
+      },
+      setMood(v) {
+        // v=0 desmarca, v=1/2/3 marca o humor do dia
+        this.initDia(this.chave('dia')).mood = v;
+        this.salvar();
+      },
+
+      // ── BLOCOS DO DIA (hora + atividade, persistidos em d.blocos[]) ──
+      renderDiaBlocos(iso) {
+        const d = this.initDia(iso);
+        const blocos = d.blocos || [];
+        if (!blocos.length) {
+          byId('dia-blocos').innerHTML = '<p class="pl-vazio">Nenhum bloco ainda. Use + para adicionar.</p>';
+          return;
+        }
+        byId('dia-blocos').innerHTML = blocos.map((b, i) => `
+          <div class="pl-bloco-row">
+            <input class="pl-bloco-hora" type="text" value="${esc(b.h)}" maxlength="14"
+              placeholder="00:00" onchange="Plan.salvarBloco('${iso}',${i},'h',this.value)">
+            <input class="pl-bloco-txt" type="text" value="${esc(b.t)}"
+              placeholder=""
+              onchange="Plan.salvarBloco('${iso}',${i},'t',this.value)">
+            <button class="pl-bloco-del" onclick="Plan.delBloco('${iso}',${i})" title="Remover bloco">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>`).join('');
+      },
+      salvarBloco(iso, i, campo, valor) {
+        const d = this.initDia(iso);
+        if (d.blocos && d.blocos[i]) { d.blocos[i][campo] = valor; this.persistir(); }
+      },
+      addBloco() {
+        const iso = this.chave('dia'); const d = this.initDia(iso);
+        d.blocos = d.blocos || [];
+        // sugere próximo horário redondo
+        const ultimo = d.blocos.length ? d.blocos[d.blocos.length - 1].h : '05:00';
+        const [hh, mm] = (ultimo || '05:00').split(':').map(Number);
+        const prox = `${String(hh + 1 < 24 ? hh + 1 : 0).padStart(2,'0')}:${String(mm||0).padStart(2,'0')}`;
+        d.blocos.push({ h: prox, t: '' });
+        this.persistir();
+        this.renderDiaBlocos(iso);
+        // foca no campo de texto do novo bloco
+        setTimeout(() => {
+          const rows = byId('dia-blocos').querySelectorAll('.pl-bloco-txt');
+          if (rows.length) rows[rows.length - 1].focus();
+        }, 50);
+      },
+      delBloco(iso, i) {
+        const d = this.initDia(iso);
+        if (d.blocos) { d.blocos.splice(i, 1); this.persistir(); this.renderDiaBlocos(iso); }
+      },
 
       /* ====================================================================
          PONTE COM AS PÁGINAS TAREFAS E HÁBITOS
@@ -1395,16 +1805,27 @@
         if (t) { t.prazo = this.chave('dia'); Store.salvar('tarefas', arr); }
         this.renderDia();
       },
+      devolverTarefa(id) {
+        const arr = this.lerTarefas(); const t = arr.find(x => x.id === id);
+        if (t) { t.prazo = ''; Store.salvar('tarefas', arr); }
+        this.renderDia();
+      },
       linhaTarefa(t) {
-        const flag = t.prioridade === 'alta' ? ' <i class="fa-solid fa-flag" style="color:var(--vermelho); font-size:10px;"></i>' : '';
-        return `<div class="pl-linha">
-          <input type="checkbox" ${t.concluida?'checked':''} onchange="Plan.toggleTarefa('${t.id}')">
-          <span class="${t.concluida?'feito':''}">${esc(t.titulo)}${flag}</span>
+        const flag = t.prioridade === 'alta'
+          ? ' <i class="fa-solid fa-flag" style="color:var(--vermelho); font-size:10px; margin-left:4px;"></i>' : '';
+        return `<div class="pl-item ${t.concluida?'done':''}" onclick="Plan.toggleTarefa('${t.id}')">
+          <input type="checkbox" ${t.concluida?'checked':''}>
+          <span class="pl-item__txt">${esc(t.titulo)}${flag}</span>
+          <i class="fa-solid fa-check pl-item__check-ic"></i>
+          <button class="pl-item-devolver" title="Devolver ao backlog" onclick="event.stopPropagation(); Plan.devolverTarefa('${t.id}')">↩</button>
         </div>`;
       },
 
       // ----- Hábitos / Rotinas (histórico por data: history[iso] = 1) -----
       toggleHabito(tipo, periodo, id, iso) {
+        // Ciclo 3 estados — igual à página Hábitos:
+        //   hábitos:  0→feito(1,+10XP) → falhou(-1,−10XP) → 0
+        //   rotinas:  absent→feito(1,+5XP) → falhou(-1,−5XP) → absent
         const h = Store.ler('habitos', null) || { xp:0, playbook:'', rotinas:{manha:[],tarde:[],noite:[]}, habitos:[] };
         h.rotinas = h.rotinas || { manha:[], tarde:[], noite:[] };
         ['manha','tarde','noite'].forEach(p => h.rotinas[p] = h.rotinas[p] || []);
@@ -1413,9 +1834,18 @@
         const it = lista.find(x => x.id == id);
         if (it) {
           it.history = it.history || {};
-          if (it.history[iso] === 1) delete it.history[iso];
-          else it.history[iso] = 1;
-          Store.salvar('habitos', h);   // grava o objeto inteiro (preserva XP/playbook)
+          const estado = it.history[iso] ?? 0;
+          const xpAdd  = tipo === 'rotina' ? 5 : 10;
+          if (estado === 0 || !estado) {
+            it.history[iso] = 1;          // vazio → feito
+            h.xp = Math.max(0, (h.xp||0) + xpAdd);
+          } else if (estado === 1 || estado === true) {
+            it.history[iso] = -1;         // feito → falhou
+            h.xp = Math.max(0, (h.xp||0) - xpAdd);
+          } else {
+            delete it.history[iso];       // falhou → vazio
+          }
+          Store.salvar('habitos', h);
         }
         this.renderAtiva();
       },
@@ -1424,68 +1854,330 @@
       renderDiaTarefas(iso) {
         const arr = this.lerTarefas();
         const doDia = arr.filter(t => t.prazo === iso);
-        const pend = doDia.filter(t => !t.concluida);
+        const pend  = doDia.filter(t => !t.concluida);
         const feitas = doDia.filter(t => t.concluida);
         byId('dia-tarefas').innerHTML = doDia.length === 0
           ? '<p class="pl-vazio">Nenhuma tarefa para hoje. Adicione acima ou puxe do backlog.</p>'
-          : pend.map(t => this.linhaTarefa(t)).join('') + feitas.map(t => this.linhaTarefa(t)).join('');
+          : `<div class="pl-items">${pend.map(t => this.linhaTarefa(t)).join('')}${feitas.map(t => this.linhaTarefa(t)).join('')}</div>`;
 
         const backlog = arr.filter(t => !t.prazo && !t.concluida);
         byId('dia-backlog').innerHTML = backlog.length === 0
-          ? '<p class="pl-vazio">Backlog vazio (tarefas sem data na página Tarefas).</p>'
-          : backlog.map(t => `<div class="pl-linha"><span style="flex:1; font-size:12px; font-weight:600; color:var(--text-strong);">${esc(t.titulo)}</span><button class="pl-add" title="Trazer para hoje" onclick="Plan.puxarTarefa('${t.id}')"><i class="fa-solid fa-arrow-down"></i></button></div>`).join('');
+          ? '<p class="pl-vazio">Backlog vazio.</p>'
+          : `<div class="pl-items">${backlog.map(t =>
+              `<div class="pl-item">
+                <span class="pl-item__txt" style="flex:1;">${esc(t.titulo)}</span>
+                <button class="pl-add" title="Trazer para hoje" onclick="Plan.puxarTarefa('${t.id}')"><i class="fa-solid fa-arrow-down"></i></button>
+              </div>`).join('')}</div>`;
       },
-      renderDiaHabitos(iso) {
+      // Helper: monta a lista de itens modernos pra um grupo
+      _montaItens(lista, tipo, periodo, iso) {
+        if (!lista.length) return '';
+        return lista.map(it => {
+          const estado = it.history ? (it.history[iso] ?? 0) : 0; // 1=feito, -1=falhou, 0=vazio
+          const feito  = estado === 1 || estado === true;
+          const falhou = estado === -1;
+          return `<div class="pl-item ${feito ? 'done' : falhou ? 'fail' : ''}"
+            onclick="Plan.toggleHabito('${tipo}','${periodo}',${it.id},'${iso}')">
+            <span class="pl-item__state">
+              ${feito  ? '<i class="fa-solid fa-check" style="color:var(--accent);"></i>'  : ''}
+              ${falhou ? '<i class="fa-solid fa-xmark" style="color:var(--vermelho);"></i>' : ''}
+              ${!feito && !falhou ? '<span class="pl-item__circle"></span>' : ''}
+            </span>
+            <span class="pl-item__txt">${esc(it.txt)}</span>
+          </div>`;
+        }).join('');
+      },
+
+      // Rotinas do dia (Manhã, Tarde, Noite) — card separado
+      renderDiaRotinas(iso) {
         const h = this.lerHabitos();
-        const grupos = [
-          ['Manhã',   h.rotinas.manha, 'rotina', 'manha'],
-          ['Tarde',   h.rotinas.tarde, 'rotina', 'tarde'],
-          ['Noite',   h.rotinas.noite, 'rotina', 'noite'],
-          ['Hábitos', h.habitos,       'habito', ''],
+        const periodos = [
+          ['Manhã', h.rotinas.manha, 'manha'],
+          ['Tarde', h.rotinas.tarde, 'tarde'],
+          ['Noite', h.rotinas.noite, 'noite'],
         ];
-        let html = ''; let tem = false;
-        grupos.forEach(([nome, lista, tipo, periodo]) => {
+        let html = '<div class="pl-items">';
+        let tem = false;
+        periodos.forEach(([nome, lista, periodo]) => {
           if (!lista.length) return;
           tem = true;
-          html += `<p class="pl-hab-grp">${nome}</p>`;
-          lista.forEach(it => {
-            const feito = it.history && it.history[iso] === 1;
-            html += `<label class="pl-hab">
-              <input type="checkbox" ${feito?'checked':''} onchange="Plan.toggleHabito('${tipo}','${periodo}',${it.id},'${iso}')">
-              <span class="${feito?'feito':''}">${esc(it.txt)}</span>
-            </label>`;
-          });
+          html += `<p class="pl-item-grp"><i class="fa-solid ${periodo==='manha'?'fa-sun':periodo==='tarde'?'fa-cloud-sun':'fa-moon'}"></i> ${nome}</p>`;
+          html += this._montaItens(lista, 'rotina', periodo, iso);
         });
-        byId('dia-habitos').innerHTML = tem ? html
-          : '<p class="pl-vazio">Cadastre seus hábitos e rotinas na página Hábitos (ícone ⚙ acima) para marcá-los aqui.</p>';
+        html += '</div>';
+        byId('dia-rotinas').innerHTML = tem ? html
+          : '<p class="pl-vazio">Cadastre suas rotinas na página Hábitos para marcá-las aqui.</p>';
       },
-      // ----- Treino do dia (lê/grava no rastreador da Saúde: saude_musc.radar) -----
-      renderDiaTreino(iso) {
-        const musc = Store.ler('saude_musc', null);
-        const feito = !!(musc && musc.radar && musc.radar[iso]);
-        byId('dia-treino').innerHTML = `<label class="pl-hab" style="border:none; padding:4px 0;">
-          <input type="checkbox" ${feito?'checked':''} onchange="Plan.toggleTreino('${iso}')">
-          <span class="${feito?'feito':''}">Marquei meu treino de hoje (+20 XP na Saúde)</span>
-        </label>`;
-      },
-      toggleTreino(iso) {
-        const musc = Store.ler('saude_musc', null) || { radar:{}, fichas:[], avaliacoes:[], macro:{} };
-        musc.radar = musc.radar || {};
-        if (musc.radar[iso]) {
-          delete musc.radar[iso];
+
+      // Hábitos do dia (lista de hábitos livre) — card separado
+      renderDiaHabitos(iso) {
+        const h = this.lerHabitos();
+        let html = '<div class="pl-items">';
+        if (h.habitos.length) {
+          html += this._montaItens(h.habitos, 'habito', '', iso);
+          html += '</div>';
+          byId('dia-habitos').innerHTML = html;
         } else {
-          musc.radar[iso] = true;
-          Store.salvar('saude_xp', Store.ler('saude_xp', 0) + 20);  // mesmo +20 XP da página Saúde
+          byId('dia-habitos').innerHTML = '<p class="pl-vazio">Cadastre seus hábitos na página Hábitos para marcá-los aqui.</p>';
         }
-        Store.salvar('saude_musc', musc);
-        this.renderAtiva();
+      },
+      // ===== TREINO DE HOJE — integra a página Saúde (Força v2 + Corrida) =====
+      // Sugestão automática pelo dia da semana (você pode trocar à vontade):
+      //   Seg=Força A · Qua=Força B · Sex=Força C · Qui/Sáb=Corrida · Ter/Dom=Descanso
+      treinoSugerido(iso) {
+        const dow = new Date(iso + 'T00:00:00').getDay(); // 0=Dom .. 6=Sáb
+        if (dow === 1) return { tipo:'forca', modo:'academia', treino:'A' };
+        if (dow === 3) return { tipo:'forca', modo:'academia', treino:'B' };
+        if (dow === 5) return { tipo:'forca', modo:'academia', treino:'C' };
+        if (dow === 4 || dow === 6) return { tipo:'corrida', modo:'academia', treino:'A' };
+        return { tipo:'descanso', modo:'academia', treino:'A' };
+      },
+      // Lê as fichas de força: academia → saude_musc_v2 · casa → saude_calistenia
+      lerForcaFichas(modo) {
+        const d = Store.ler(modo === 'casa' ? 'saude_calistenia' : 'saude_musc_v2', null);
+        return (d && Array.isArray(d.fichas)) ? d.fichas : [];
+      },
+      // Fase ativa do macrociclo (dá séries/reps/carga) → saude_periodizacao
+      faseAtivaSaude() {
+        const p = Store.ler('saude_periodizacao', null);
+        if (!p || !Array.isArray(p.fases) || !p.fases.length) return null;
+        return p.fases.find(f => f.id === p.faseAtivaId) || p.fases[0];
+      },
+      garantirTreino(iso) {
+        const d = this.initDia(iso);
+        if (!d.treino || !d.treino.tipo) d.treino = this.treinoSugerido(iso); // migra formato antigo
+        return d.treino;
+      },
+      setTreinoTipo(iso, tipo)  { const t = this.garantirTreino(iso); t.tipo = tipo;   this.persistir(); this.renderDia(); },
+      setTreinoModo(iso, modo)  { const t = this.garantirTreino(iso); t.modo = modo;   this.persistir(); this.renderDia(); },
+      setTreinoLetra(iso, L)    { const t = this.garantirTreino(iso); t.treino = L;    this.persistir(); this.renderDia(); },
+
+      renderDiaTreino(iso) {
+        const t = this.garantirTreino(iso);
+        let html = `<div class="pl-ex-pick">
+          <button class="pl-ex-pchip ${t.tipo==='forca'?'on':''}" onclick="Plan.setTreinoTipo('${iso}','forca')">💪 Força</button>
+          <button class="pl-ex-pchip ${t.tipo==='corrida'?'on':''}" onclick="Plan.setTreinoTipo('${iso}','corrida')">🏃 Corrida</button>
+          <button class="pl-ex-pchip ${t.tipo==='descanso'?'on':''}" onclick="Plan.setTreinoTipo('${iso}','descanso')">😴 Descanso</button>
+        </div>`;
+
+        if (t.tipo === 'forca') {
+          // toggle Academia / Casa
+          html += `<div class="pl-ex-pick">
+            <button class="pl-ex-pchip ${t.modo!=='casa'?'on':''}" onclick="Plan.setTreinoModo('${iso}','academia')">🏋️ Academia</button>
+            <button class="pl-ex-pchip ${t.modo==='casa'?'on':''}" onclick="Plan.setTreinoModo('${iso}','casa')">🏠 Casa</button>
+          </div>`;
+          const fichas = this.lerForcaFichas(t.modo);
+          if (!fichas.length) {
+            html += '<p class="pl-vazio" style="margin-top:8px;">Cadastre suas fichas de treino na página Saúde › Treino › Força.</p>';
+            byId('dia-treino').innerHTML = html; return;
+          }
+          // seletor A / B / C
+          html += `<div class="pl-ex-pick">`;
+          ['A','B','C'].forEach(L => {
+            const fi = fichas.find(f => f.treino === L);
+            html += `<button class="pl-ex-pchip ${t.treino===L?'on':''}" onclick="Plan.setTreinoLetra('${iso}','${L}')">${L}${fi?' · '+esc(fi.titulo):''}</button>`;
+          });
+          html += `</div>`;
+          // exercícios da ficha escolhida + checks sincronizados com a Saúde
+          const ficha = fichas.find(f => f.treino === t.treino) || fichas[0];
+          const exs = (ficha && Array.isArray(ficha.exs)) ? ficha.exs : [];
+          if (exs.length) {
+            const fase = this.faseAtivaSaude();
+            const fc = (Store.ler('saude_forca_check', {})[iso]) || {};
+            const feitos = exs.filter((e, i) => fc[t.modo+'_'+t.treino+'_'+i]).length;
+            html += `<p class="pl-ref-sem" style="color:var(--azul); margin:12px 0 8px;">${esc(ficha.emoji||'')} ${esc(ficha.titulo||'')}${ficha.sub?' · '+esc(ficha.sub):''} — <b>${feitos}/${exs.length}</b> feitos</p>`;
+            html += '<div class="pl-items">';
+            html += exs.map((e, i) => {
+              const on = !!fc[t.modo+'_'+t.treino+'_'+i];
+              const series = e.series || (fase ? fase.series : '');
+              const reps   = e.reps   || (fase ? (fase.repsMin+'–'+fase.repsMax) : '');
+              const meta   = (series||reps) ? `<span style="font-size:10px; font-weight:700; color:var(--text-muted); margin-left:auto; flex-shrink:0;">${esc(series||'?')}×${esc(reps||'?')}</span>` : '';
+              return `<div class="pl-item ${on?'done':''}" onclick="Plan.toggleExSaude('${iso}','${t.modo}','${t.treino}',${i})">
+                <input type="checkbox" ${on?'checked':''}>
+                <span class="pl-item__txt">${esc(e.nome||'Exercício')}</span>
+                ${meta}
+                <i class="fa-solid fa-check pl-item__check-ic"></i>
+              </div>`;
+            }).join('');
+            html += '</div>';
+          } else {
+            html += '<p class="pl-vazio">Essa ficha ainda não tem exercícios na Saúde.</p>';
+          }
+
+        } else if (t.tipo === 'corrida') {
+          const corr = Store.ler('saude_corrida_v3', null);
+          const tr = Store.ler('saude_treino_radar', {});
+          const feita = tr[iso] === 'corrida';
+          let info = 'Abra a página Saúde › Treino › Corrida para ver o treino do dia.';
+          if (corr && corr.planoAtivo) {
+            let semana = '';
+            if (corr.inicio) {
+              const ini = new Date(corr.inicio + 'T00:00:00');
+              const hoje = new Date(iso + 'T00:00:00');
+              semana = ' · Semana ' + (Math.floor((hoje - ini) / (7 * 86400000)) + 1);
+            }
+            info = `Plano ativo: <b>${esc(String(corr.planoAtivo).toUpperCase())}</b>${semana}. Treino detalhado na página Saúde.`;
+          }
+          html += `<p class="pl-ref-sem" style="color:var(--verde); margin-bottom:8px;">🏃 Dia de Corrida</p>
+            <p class="pl-vazio" style="margin:0 0 10px;">${info}</p>
+            <div class="pl-items">
+              <div class="pl-item ${feita?'done':''}" onclick="Plan.toggleCorrida('${iso}')">
+                <input type="checkbox" ${feita?'checked':''}>
+                <span class="pl-item__txt">Marquei a corrida de hoje</span>
+                <i class="fa-solid fa-check pl-item__check-ic"></i>
+              </div>
+            </div>`;
+
+        } else {
+          html += '<p class="pl-vazio" style="margin-top:8px;">Dia de descanso — recuperação faz parte do treino. 😴</p>';
+        }
+        byId('dia-treino').innerHTML = html;
+      },
+
+      // Marca/desmarca um exercício — grava no MESMO lugar da Saúde (saude_forca_check[data])
+      toggleExSaude(iso, modo, treino, idx) {
+        const fichas = this.lerForcaFichas(modo);
+        const ficha = fichas.find(f => f.treino === treino) || fichas[0];
+        const exs = (ficha && Array.isArray(ficha.exs)) ? ficha.exs : [];
+        const fc = Store.ler('saude_forca_check', {});
+        if (!fc[iso]) fc[iso] = {};
+        const k = modo + '_' + treino + '_' + idx;
+        if (fc[iso][k]) delete fc[iso][k]; else fc[iso][k] = true;
+        // se completou todos os exercícios → marca o dia no radar + 50 XP (igual à Saúde)
+        const doneFlag = '_done_' + modo + '_' + treino;
+        const todos = exs.length > 0 && exs.every((e, i) => !!fc[iso][modo+'_'+treino+'_'+i]);
+        if (todos && !fc[iso][doneFlag]) {
+          fc[iso][doneFlag] = true;
+          const tr = Store.ler('saude_treino_radar', {}); tr[iso] = 'musc'; Store.salvar('saude_treino_radar', tr);
+          Store.salvar('saude_xp', Store.ler('saude_xp', 0) + 50);
+        }
+        Store.salvar('saude_forca_check', fc);
+        this.renderDia();
+      },
+      toggleCorrida(iso) {
+        const tr = Store.ler('saude_treino_radar', {});
+        if (tr[iso] === 'corrida') delete tr[iso]; else tr[iso] = 'corrida';
+        Store.salvar('saude_treino_radar', tr);
+        this.renderDia();
+      },
+
+      // ===== REFEIÇÕES DE HOJE — plano de 12 semanas da Saúde + marcar "comi" + refeição livre =====
+      // Refeições: lê nu.crono (campo real no saude_nutri_v2), alterna A/B por dia
+      renderDiaRefeicoes(iso) {
+        const nu   = Store.ler('saude_nutri_v2', null);
+        const cont = byId('dia-refeicoes');
+        if (!nu || !Array.isArray(nu.crono) || !nu.crono.length) {
+          cont.innerHTML = '<p class="pl-vazio">Inicie seu plano alimentar na página Saúde › Alimentação · Fases para ver as refeições aqui.</p>';
+          return;
+        }
+        let semana = 1;
+        if (nu.inicio) {
+          const ini  = new Date(nu.inicio + 'T00:00:00');
+          const hoje = new Date(iso + 'T00:00:00');
+          semana = Math.min(Math.max(Math.floor((hoje - ini) / (7 * 86400000)) + 1, 1), 12);
+        }
+        const w = nu.crono[semana - 1] || {};
+        // Mesma lógica da Saúde: Seg(1)/Qua(3)/Sex(5)=A, Ter(2)/Qui(4)/Sáb(6)=B, Dom(0)=especial
+        const dow = new Date(iso + 'T00:00:00').getDay();
+        const opcaoA = (dow === 1 || dow === 3 || dow === 5);
+        const almoco = esc(opcaoA ? (w.almocoA||'—') : (w.almocoB||'—'));
+        const jantar = esc(opcaoA ? (w.jantarA||'—') : (w.jantarB||'—'));
+        const tagDia = dow === 0 ? 'Domingo' : opcaoA ? 'Opção A · Seg/Qua/Sex' : 'Opção B · Ter/Qui/Sáb';
+
+        const d = this.initDia(iso);
+        d.refeicoes       = d.refeicoes       || {};
+        d.refeicoes_livre = d.refeicoes_livre || {};
+
+        const bloco = (key, ic, titulo, sugestao) => {
+          const on    = !!d.refeicoes[key];
+          const livre = esc(d.refeicoes_livre[key] || '');
+          return `<div class="pl-ref">
+            <span class="pl-ref__ic">${ic}</span>
+            <div style="flex:1; min-width:0;">
+              <div style="display:flex; align-items:center; justify-content:space-between; gap:8px;">
+                <b class="pl-ref__titulo">${titulo}</b>
+                <button class="pl-ref-chk ${on?'on':''}" onclick="Plan.toggleRefeicao('${iso}','${key}')" title="${on?'Comi ✓':'Marcar como comi'}">
+                  <i class="fa-solid fa-check"></i>
+                </button>
+              </div>
+              <p class="pl-ref__sug">${sugestao}</p>
+              <input class="pl-ref__livre" type="text" value="${livre}"
+                placeholder="O que comi de verdade…"
+                onchange="Plan.salvarRefLivre('${iso}','${key}',this.value)">
+            </div>
+          </div>`;
+        };
+
+        cont.innerHTML =
+          `<p class="pl-ref-sem">Semana ${semana} de 12 · ${tagDia}</p>` +
+          bloco('cafe',   '🌅', 'Café da Manhã', esc(w.cafe  ||'—')) +
+          bloco('almoco', '🍽️', 'Almoço',         almoco)            +
+          bloco('jantar', '🌙', 'Jantar',          jantar)            +
+          bloco('lanche', '🍎', 'Lanche',          esc(w.lanche||'—'));
+      },
+      toggleRefeicao(iso, key) {
+        const d = this.initDia(iso);
+        d.refeicoes = d.refeicoes || {};
+        if (d.refeicoes[key]) delete d.refeicoes[key]; else d.refeicoes[key] = true;
+        this.persistir();
+        this.renderDiaRefeicoes(iso);
+      },
+      salvarRefLivre(iso, key, val) {
+        const d = this.initDia(iso);
+        d.refeicoes_livre = d.refeicoes_livre || {};
+        d.refeicoes_livre[key] = val;
+        this.persistir();
+      },
+
+      // ===== HIDRATAÇÃO — lê/grava em saude_agua (mesma fonte da página Saúde) =====
+      renderDiaAgua(iso) {
+        // saude_agua = { metaPadrao: 2500, diario: { 'AAAA-MM-DD': ml } }
+        const agua = Store.ler('saude_agua', { metaPadrao: 2500, diario: {} });
+        const ml   = agua.diario[iso] || 0;
+        const meta = agua.metaPadrao || 2500;
+        const pct  = Math.min(Math.round(ml / meta * 100), 100);
+        const cor  = pct >= 100 ? 'var(--verde)' : 'var(--azul)';
+        byId('dia-agua').innerHTML = `
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:2px;">
+            <span class="pl-agua-num">${ml} ml</span>
+            <span style="font-size:10px; color:var(--text-muted);">meta ${meta} ml · ${pct}%</span>
+          </div>
+          <div class="pl-agua-barra-wrap">
+            <div class="pl-agua-barra" style="width:${pct}%; background:${cor};"></div>
+          </div>
+          <div class="pl-agua-btns">
+            <button class="pl-agua-btn" onclick="Plan.addAgua('${iso}', 250)">+250 ml</button>
+            <button class="pl-agua-btn" onclick="Plan.addAgua('${iso}', 500)">+500 ml</button>
+            <button class="pl-agua-btn" onclick="Plan.addAgua('${iso}', 750)">+750 ml</button>
+            <button class="pl-agua-btn minus" onclick="Plan.addAgua('${iso}', -250)">−250 ml</button>
+            <button class="pl-agua-btn minus" onclick="Plan.resetAgua('${iso}')" title="Zerar hidratação de hoje" style="padding:6px 8px;">↺</button>
+          </div>
+          ${pct >= 100 ? '<p style="font-size:11px; color:var(--verde); font-weight:800; margin-top:8px;">💧 Meta batida! Ótimo trabalho.</p>' : ''}`;
+      },
+      addAgua(iso, delta) {
+        const agua = Store.ler('saude_agua', { metaPadrao: 2500, diario: {} });
+        agua.diario = agua.diario || {};
+        agua.diario[iso] = Math.max(0, (agua.diario[iso] || 0) + delta);
+        Store.salvar('saude_agua', agua);
+        this.renderDiaAgua(iso);
+      },
+      resetAgua(iso) {
+        const agua = Store.ler('saude_agua', { metaPadrao: 2500, diario: {} });
+        agua.diario = agua.diario || {};
+        delete agua.diario[iso];
+        Store.salvar('saude_agua', agua);
+        this.renderDiaAgua(iso);
       },
       // ----- render da Semana: grade de hábitos (estilo planilha) -----
       renderSemHabitos(datas) {
         const h = this.lerHabitos();
         const letras = ['D','S','T','Q','Q','S','S'];
+        const hojeIso = this.getISO(new Date());
         let head = '<tr><th>Hábito / Rotina</th>';
-        datas.forEach((iso, i) => head += `<th>${letras[i]}<br><span style="opacity:.6; font-weight:600;">${iso.split('-')[2]}</span></th>`);
+        datas.forEach((iso, i) => {
+          const ehHoje = iso === hojeIso;
+          head += `<th class="${ehHoje?'hoje':''}"><span class="wd">${letras[i]}</span><span class="dd">${iso.split('-')[2]}</span></th>`;
+        });
         head += '</tr>';
         const grupos = [
           ['Manhã',   h.rotinas.manha, 'rotina', 'manha'],
@@ -1499,16 +2191,17 @@
           tem = true;
           body += `<tr class="grp"><td colspan="8">${nome}</td></tr>`;
           lista.forEach(it => {
-            let row = `<tr><td>${esc(it.txt)}</td>`;
+            let row = `<tr><td title="${esc(it.txt)}">${esc(it.txt)}</td>`;
             datas.forEach(iso => {
               const on = it.history && it.history[iso] === 1;
-              row += `<td class="cel ${on?'on':''}" onclick="Plan.toggleHabito('${tipo}','${periodo}',${it.id},'${iso}')">${on?'<i class="fa-solid fa-check"></i>':''}</td>`;
+              const ehHoje = iso === hojeIso;
+              row += `<td class="cel ${on?'on':''} ${ehHoje?'hoje-col':''}" onclick="Plan.toggleHabito('${tipo}','${periodo}',${it.id},'${iso}')"><span class="dot">${on?'<i class="fa-solid fa-check"></i>':''}</span></td>`;
             });
             body += row + '</tr>';
           });
         });
         byId('sem-habitos').innerHTML = tem
-          ? `<div class="pl-hgrid-wrap"><table class="pl-hgrid">${head}${body}</table></div>`
+          ? `<div class="pl-hgrid-wrap"><table class="pl-hgrid"><thead>${head}</thead><tbody>${body}</tbody></table></div>`
           : '<p class="pl-vazio">Cadastre seus hábitos na página Hábitos para vê-los aqui em grade.</p>';
       },
 
