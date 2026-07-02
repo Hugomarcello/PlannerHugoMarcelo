@@ -1,0 +1,2275 @@
+<!DOCTYPE html>
+<html lang="pt-br" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Planner Hugo Marcelo | Casa</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+
+  <style>
+    /* ── Variáveis em :root para que os modais (fora do .container) as enxerguem ── */
+    :root {
+      --ca-ok:    #10b981;
+      --ca-medio: #f59e0b;
+      --ca-ruim:  #ef4444;
+      --ca-azul:  #3b82f6;
+      --ca-p-alta:  #ef4444;
+      --ca-p-media: #f59e0b;
+      --ca-p-baixa: #10b981;
+    }
+
+    /* ═══════════ 1. ABAS ═══════════ */
+    .ca-tabs {
+      display: flex; gap: 6px; flex-wrap: wrap;
+      margin-bottom: 24px; padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    .ca-tab {
+      display: inline-flex; align-items: center; gap: 7px;
+      padding: 9px 16px; border-radius: 99px;
+      border: 1px solid var(--border); background: var(--panel);
+      color: var(--text-muted); font-size: 11px; font-weight: 800;
+      text-transform: uppercase; letter-spacing: 1px;
+      cursor: pointer; transition: all .15s;
+    }
+    .ca-tab i { font-size: 12px; }
+    .ca-tab:hover { color: var(--accent); border-color: var(--accent); }
+    .ca-tab.ativa { background: var(--accent); color: #fff; border-color: var(--accent); box-shadow: var(--glow); }
+    .ca-painel { display: none; }
+    .ca-painel.ativo { display: block; }
+
+    /* ═══════════ 2. DASHBOARD KPIs ═══════════ */
+    .ca-kpis {
+      display: grid; grid-template-columns: repeat(2,1fr); gap: 14px; margin-bottom: 24px;
+    }
+    @media(min-width:700px)  { .ca-kpis { grid-template-columns: repeat(3,1fr); } }
+    @media(min-width:1000px) { .ca-kpis { grid-template-columns: repeat(6,1fr); } }
+    .ca-kpi {
+      background: var(--panel); border: 1px solid var(--border); border-radius: 14px;
+      padding: 16px; display: flex; flex-direction: column; gap: 6px;
+      position: relative; overflow: hidden; transition: border-color .15s;
+    }
+    .ca-kpi:hover { border-color: var(--accent); }
+    .ca-kpi__icon { font-size: 20px; color: var(--accent); }
+    .ca-kpi__val  { font-size: 28px; font-weight: 900; letter-spacing: -1px; line-height: 1; }
+    .ca-kpi__label { font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-muted); }
+    .ca-kpi::after {
+      content:""; position:absolute; right:-12px; bottom:-12px;
+      width:60px; height:60px; border-radius:50%; background: var(--accent-soft);
+    }
+
+    /* ═══════════ 3. INTEGRIDADE ═══════════ */
+    .ca-integridade {
+      background: var(--panel); border: 1px solid var(--border); border-radius: 16px;
+      padding: 20px 22px; margin-bottom: 24px;
+      display: flex; align-items: center; gap: 20px; flex-wrap: wrap;
+    }
+    .ca-int-icone { width:56px; height:56px; border-radius:14px; background:var(--accent-soft); display:grid; place-items:center; font-size:26px; flex-shrink:0; }
+    .ca-int-info  { flex:1; min-width:160px; }
+    .ca-int-titulo { font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:1.5px; color:var(--text-muted); margin-bottom:6px; }
+    .ca-int-bar-wrap { height:10px; border-radius:99px; background:var(--bg-soft); overflow:hidden; margin-bottom:6px; }
+    .ca-int-bar { height:100%; border-radius:99px; background:linear-gradient(90deg,var(--accent),#34d399); transition:width .6s cubic-bezier(.4,0,.2,1); }
+    .ca-int-legenda { display:flex; justify-content:space-between; font-size:10px; color:var(--text-muted); font-weight:700; }
+    .ca-int-pct    { font-size:32px; font-weight:900; letter-spacing:-1px; color:var(--accent); flex-shrink:0; }
+    .ca-int-status { font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:1.5px; color:var(--text-muted); }
+
+    /* ═══════════ 4. NAVEGAÇÃO TEMPORAL (seta esq/dir + título de período) ═══════════ */
+    .ca-nav-periodo {
+      display: flex; align-items: center; gap: 10px;
+      background: var(--panel); border: 1px solid var(--border);
+      border-radius: 12px; padding: 10px 14px; margin-bottom: 18px;
+    }
+    .ca-nav-btn {
+      width: 34px; height: 34px; border-radius: 9px; flex-shrink: 0;
+      border: 1px solid var(--border); background: var(--bg-soft);
+      color: var(--text-muted); font-size: 14px; cursor: pointer;
+      display: grid; place-items: center; transition: all .15s;
+    }
+    .ca-nav-btn:hover { color: var(--accent); border-color: var(--accent); }
+    .ca-nav-label {
+      flex: 1; text-align: center;
+      font-size: 14px; font-weight: 900; letter-spacing: -.3px;
+    }
+    .ca-nav-hoje {
+      font-size: 9px; font-weight: 800; text-transform: uppercase;
+      letter-spacing: 1.5px; padding: 4px 10px; border-radius: 99px;
+      background: var(--accent-soft); border: 1px solid var(--accent);
+      color: var(--accent); cursor: pointer; white-space: nowrap;
+    }
+
+    /* ═══════════ 5. RASTREADOR RECOLHÍVEL ═══════════ */
+    .ca-rastreador-toggle {
+      width: 100%; padding: 9px 14px; margin-bottom: 4px;
+      border: 1px dashed var(--border); border-radius: 10px;
+      background: transparent; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      font-size: 10px; font-weight: 800; text-transform: uppercase;
+      letter-spacing: 1px; color: var(--text-muted); transition: all .15s;
+    }
+    .ca-rastreador-toggle:hover { border-color: var(--accent); color: var(--accent); }
+    .ca-rastreador-toggle .ca-rt-chevron { transition: transform .2s; font-size: 10px; }
+    .ca-rastreador-toggle.aberto .ca-rt-chevron { transform: rotate(180deg); }
+
+    .ca-rastreador-corpo { display: none; margin-bottom: 20px; }
+    .ca-rastreador-corpo.aberto { display: block; }
+
+    /* Grade de células do rastreador (dias da semana, semanas do mês, meses do ano) */
+    .ca-tracker-grid {
+      display: grid; gap: 6px;
+      margin-top: 12px;
+    }
+    /* Dia: 7 colunas */
+    .ca-tracker-grid.dias   { grid-template-columns: repeat(7,1fr); }
+    /* Semana: 4–5 colunas */
+    .ca-tracker-grid.semanas { grid-template-columns: repeat(5,1fr); }
+    /* Mês: 12 colunas */
+    .ca-tracker-grid.meses  { grid-template-columns: repeat(6,1fr); }
+    @media(min-width:600px) { .ca-tracker-grid.meses { grid-template-columns: repeat(12,1fr); } }
+
+    .ca-tracker-celula {
+      border-radius: 8px; padding: 6px 4px;
+      display: flex; flex-direction: column; align-items: center; gap: 3px;
+      border: 1px solid var(--border); background: var(--bg-soft);
+    }
+    .ca-tracker-celula .ca-tc-label {
+      font-size: 8px; font-weight: 800; text-transform: uppercase;
+      letter-spacing: 1px; color: var(--text-muted);
+    }
+    .ca-tracker-celula .ca-tc-pct {
+      font-size: 11px; font-weight: 900; color: var(--text-strong);
+    }
+    .ca-tracker-celula .ca-tc-bar {
+      width: 100%; height: 4px; border-radius: 99px;
+      background: var(--border); overflow: hidden;
+    }
+    .ca-tracker-celula .ca-tc-fill {
+      height: 100%; border-radius: 99px; transition: width .4s;
+    }
+    /* Células destacadas (período atual) */
+    .ca-tracker-celula.atual { border-color: var(--accent); background: var(--accent-soft); }
+    .ca-tracker-celula.atual .ca-tc-label { color: var(--accent); }
+
+    /* ═══════════ 6. TOGGLE DE VISUALIZAÇÃO (freq / cômodo) ═══════════ */
+    .ca-view-toggle { display:flex; gap:6px; margin-bottom:20px; }
+    .ca-view-btn {
+      padding:7px 14px; border-radius:8px; font-size:10px; font-weight:800;
+      text-transform:uppercase; letter-spacing:1px;
+      border:1px solid var(--border); background:var(--panel);
+      color:var(--text-muted); cursor:pointer; transition:all .15s;
+    }
+    .ca-view-btn.ativo { background:var(--accent-soft); border-color:var(--accent); color:var(--accent); }
+
+    /* ═══════════ 7. SEÇÃO DE ROTINAS ═══════════ */
+    .ca-secao { margin-bottom: 28px; }
+    .ca-secao-titulo {
+      font-size:10px; font-weight:900; text-transform:uppercase;
+      letter-spacing:2px; color:var(--text-muted);
+      margin-bottom:12px; display:flex; align-items:center; gap:8px;
+    }
+    .ca-secao-titulo::after { content:""; flex:1; height:1px; background:var(--border); }
+
+    .ca-rotina-item {
+      display:flex; align-items:center; gap:12px;
+      padding:10px 14px; border-radius:11px;
+      background:var(--bg-soft); border:1px solid var(--border);
+      margin-bottom:6px; cursor:pointer;
+      transition:all .15s; user-select:none;
+    }
+    .ca-rotina-item:hover { background:var(--panel); }
+    .ca-rotina-check {
+      width:26px; height:26px; border-radius:50%; flex-shrink:0;
+      border:2px solid var(--border);
+      display:grid; place-items:center; font-size:12px; transition:all .2s;
+    }
+    .ca-rotina-item[data-estado="feito"]  .ca-rotina-check { background:var(--ca-ok);  border-color:var(--ca-ok);  color:#fff; }
+    .ca-rotina-item[data-estado="falhou"] .ca-rotina-check { background:var(--ca-ruim); border-color:var(--ca-ruim); color:#fff; }
+    .ca-rotina-nome { flex:1; font-size:13px; font-weight:600; }
+    .ca-rotina-item[data-estado="feito"]  .ca-rotina-nome { text-decoration:line-through; color:var(--text-muted); }
+    .ca-rotina-item[data-estado="falhou"] .ca-rotina-nome { color:var(--text-muted); }
+    .ca-rotina-tag {
+      font-size:9px; font-weight:800; text-transform:uppercase;
+      letter-spacing:1px; padding:3px 8px; border-radius:99px;
+      background:var(--bg); border:1px solid var(--border); color:var(--text-muted);
+    }
+
+    /* ═══════════ 8. MANUTENÇÃO ═══════════ */
+    .ca-manut-grid { display:grid; gap:12px; grid-template-columns:1fr; }
+    @media(min-width:700px) { .ca-manut-grid { grid-template-columns:repeat(2,1fr); } }
+    .ca-manut-card {
+      background:var(--panel); border:1px solid var(--border); border-radius:13px;
+      padding:14px 16px; display:flex; flex-direction:column; gap:8px; transition:border-color .15s;
+    }
+    .ca-manut-card:hover { border-color:var(--accent); }
+    .ca-manut-head  { display:flex; align-items:flex-start; gap:10px; }
+    .ca-manut-semaforo { width:10px; height:10px; border-radius:50%; flex-shrink:0; margin-top:4px; }
+    .ca-manut-nome  { flex:1; font-size:13px; font-weight:700; }
+    .ca-manut-acoes { display:flex; gap:6px; }
+    .ca-manut-btn {
+      width:28px; height:28px; border-radius:8px; display:grid; place-items:center;
+      background:var(--bg-soft); border:1px solid var(--border);
+      color:var(--text-muted); font-size:11px; cursor:pointer; transition:all .15s;
+    }
+    .ca-manut-btn:hover { color:var(--accent); border-color:var(--accent); }
+    .ca-manut-btn.concluir:hover { color:var(--ca-ok);  border-color:var(--ca-ok);  }
+    .ca-manut-btn.excluir:hover  { color:var(--ca-ruim); border-color:var(--ca-ruim); }
+    .ca-manut-meta  { display:flex; gap:10px; flex-wrap:wrap; }
+    .ca-manut-pill  {
+      font-size:9px; font-weight:800; text-transform:uppercase;
+      letter-spacing:1px; padding:3px 9px; border-radius:99px;
+      background:var(--bg-soft); border:1px solid var(--border); color:var(--text-muted);
+    }
+    .ca-manut-proxima { font-size:11px; color:var(--text-muted); font-weight:600; }
+    .ca-manut-proxima b { color:var(--text-strong); }
+
+    /* ═══════════ 9. LISTA DE COMPRAS ═══════════ */
+    .ca-compras-head { display:flex; gap:10px; margin-bottom:18px; flex-wrap:wrap; align-items:center; justify-content:space-between; }
+    .ca-compras-filtro { display:flex; gap:6px; flex-wrap:wrap; }
+    .ca-cat-pill {
+      padding:6px 12px; border-radius:99px; font-size:10px; font-weight:800;
+      text-transform:uppercase; letter-spacing:1px;
+      border:1px solid var(--border); background:var(--panel);
+      color:var(--text-muted); cursor:pointer; transition:all .15s;
+    }
+    .ca-cat-pill.ativo, .ca-cat-pill:hover { border-color:var(--accent); color:var(--accent); background:var(--accent-soft); }
+    .ca-compra-item {
+      display:flex; align-items:center; gap:12px;
+      padding:10px 14px; border-radius:11px;
+      background:var(--bg-soft); border:1px solid var(--border);
+      margin-bottom:6px; transition:all .15s;
+    }
+    .ca-compra-check {
+      width:22px; height:22px; border-radius:6px; flex-shrink:0;
+      border:2px solid var(--border); display:grid; place-items:center;
+      cursor:pointer; transition:all .15s;
+    }
+    .ca-compra-item.comprado .ca-compra-check { background:var(--ca-ok); border-color:var(--ca-ok); color:#fff; }
+    .ca-compra-item.comprado .ca-compra-nome  { text-decoration:line-through; color:var(--text-muted); }
+    .ca-compra-nome { flex:1; font-size:13px; font-weight:600; }
+    .ca-compra-qtd  { font-size:10px; font-weight:800; color:var(--text-muted); background:var(--bg); border:1px solid var(--border); padding:2px 8px; border-radius:6px; }
+    .ca-compra-del  { width:22px; height:22px; border-radius:6px; border:none; background:transparent; color:var(--text-muted); font-size:11px; cursor:pointer; transition:color .15s; display:grid; place-items:center; }
+    .ca-compra-del:hover { color:var(--ca-ruim); }
+    .ca-comprados-toggle {
+      width:100%; padding:10px; text-align:center;
+      border:1px dashed var(--border); border-radius:10px;
+      background:transparent; cursor:pointer; margin:12px 0 4px;
+      font-size:10px; font-weight:800; text-transform:uppercase;
+      letter-spacing:1px; color:var(--text-muted); transition:all .15s;
+    }
+    .ca-comprados-toggle:hover { color:var(--ca-ok); border-color:var(--ca-ok); }
+    .ca-comprados-lista { display:none; }
+    .ca-comprados-lista.aberto { display:block; }
+    .ca-prog-wrap { background:var(--panel); border:1px solid var(--border); border-radius:12px; padding:14px 16px; margin-bottom:18px; }
+    .ca-prog-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; font-size:11px; font-weight:800; }
+    .ca-prog-bar-wrap { height:8px; border-radius:99px; background:var(--bg-soft); overflow:hidden; }
+    .ca-prog-bar { height:100%; border-radius:99px; background:linear-gradient(90deg,var(--ca-ok),#34d399); transition:width .4s ease; }
+
+    /* ═══════════ 10. FINANÇAS ═══════════ */
+    .ca-fin-total {
+      display:flex; align-items:center; justify-content:space-between;
+      padding:18px 20px;
+      background:linear-gradient(135deg,var(--accent-soft),transparent);
+      border:1px solid var(--accent); border-radius:14px; margin-bottom:20px;
+    }
+    .ca-fin-total-label { font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:1.5px; color:var(--text-muted); }
+    .ca-fin-total-valor { font-size:32px; font-weight:900; letter-spacing:-1px; color:var(--accent); }
+    .ca-fin-item {
+      display:flex; align-items:center; gap:12px;
+      padding:11px 14px; border-radius:11px;
+      background:var(--bg-soft); border:1px solid var(--border); margin-bottom:6px;
+    }
+    .ca-fin-icone { width:34px; height:34px; border-radius:9px; flex-shrink:0; background:var(--accent-soft); display:grid; place-items:center; font-size:14px; color:var(--accent); }
+    .ca-fin-nome  { flex:1; font-size:13px; font-weight:600; }
+    .ca-fin-valor { font-size:14px; font-weight:800; }
+    .ca-fin-acoes { display:flex; gap:4px; }
+    .ca-fin-btn   { width:26px; height:26px; border-radius:7px; background:var(--bg); border:1px solid var(--border); color:var(--text-muted); font-size:10px; cursor:pointer; display:grid; place-items:center; transition:all .15s; }
+    .ca-fin-btn:hover { color:var(--ca-ruim); border-color:var(--ca-ruim); }
+
+    /* Barra resumo anual no modal relatório */
+    .ca-rel-row {
+      display:flex; align-items:center; gap:10px; margin-bottom:8px;
+    }
+    .ca-rel-label { width:40px; font-size:10px; font-weight:800; color:var(--text-muted); }
+    .ca-rel-bar-wrap { flex:1; height:6px; border-radius:99px; background:var(--bg-soft); overflow:hidden; }
+    .ca-rel-bar-fill { height:100%; border-radius:99px; background:var(--accent); }
+    .ca-rel-val { font-size:11px; font-weight:800; min-width:80px; text-align:right; }
+
+    /* ═══════════ 11. INVENTÁRIO ═══════════ */
+    .ca-inv-comodo { background:var(--panel); border:1px solid var(--border); border-radius:14px; padding:16px 18px; margin-bottom:14px; }
+    .ca-inv-comodo-head { display:flex; align-items:center; gap:10px; margin-bottom:14px; }
+    .ca-inv-comodo-icone { width:36px; height:36px; border-radius:10px; flex-shrink:0; background:var(--accent-soft); display:grid; place-items:center; font-size:16px; color:var(--accent); }
+    .ca-inv-comodo-nome { font-size:14px; font-weight:800; flex:1; }
+    .ca-inv-cols { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+    @media(max-width:600px) { .ca-inv-cols { grid-template-columns:1fr; } }
+    .ca-inv-sub  { font-size:9px; font-weight:900; text-transform:uppercase; letter-spacing:2px; color:var(--text-muted); margin-bottom:8px; }
+    .ca-inv-item { display:flex; align-items:center; gap:8px; padding:7px 10px; border-radius:8px; background:var(--bg-soft); margin-bottom:4px; font-size:12px; font-weight:600; }
+    .ca-inv-item span { flex:1; }
+    .ca-inv-del  { background:none; border:none; color:var(--text-muted); font-size:10px; cursor:pointer; padding:0; transition:color .15s; }
+    .ca-inv-del:hover { color:var(--ca-ruim); }
+
+    /* ═══════════ 12. PROBLEMAS ═══════════ */
+    .ca-prob-item {
+      background:var(--panel); border:1px solid var(--border); border-radius:13px;
+      padding:14px 16px; margin-bottom:10px; display:flex; flex-direction:column;
+      gap:8px; transition:border-color .15s;
+    }
+    .ca-prob-item:hover { border-color:var(--accent); }
+    .ca-prob-head     { display:flex; align-items:flex-start; gap:10px; }
+    .ca-prob-prioridade { width:8px; height:8px; border-radius:50%; flex-shrink:0; margin-top:5px; }
+    .ca-prob-titulo   { flex:1; font-size:14px; font-weight:700; }
+    .ca-prob-status   { font-size:9px; font-weight:900; text-transform:uppercase; letter-spacing:1px; padding:3px 10px; border-radius:99px; }
+    .ca-prob-status.aberto    { background:rgba(239,68,68,.12); color:var(--ca-ruim); border:1px solid var(--ca-ruim); }
+    .ca-prob-status.resolvido { background:var(--accent-soft); color:var(--ca-ok); border:1px solid var(--ca-ok); }
+    .ca-prob-meta  { display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+    .ca-prob-pill  { font-size:9px; font-weight:800; text-transform:uppercase; letter-spacing:1px; padding:3px 9px; border-radius:99px; background:var(--bg-soft); border:1px solid var(--border); color:var(--text-muted); }
+    .ca-prob-acoes { display:flex; gap:6px; margin-left:auto; }
+    .ca-prob-btn   { padding:5px 10px; border-radius:7px; font-size:10px; font-weight:800; background:var(--bg-soft); border:1px solid var(--border); color:var(--text-muted); cursor:pointer; transition:all .15s; }
+    .ca-prob-btn.resolver:hover { background:var(--accent-soft); color:var(--accent); border-color:var(--accent); }
+    .ca-prob-btn.excluir:hover  { background:rgba(239,68,68,.1); color:var(--ca-ruim); border-color:var(--ca-ruim); }
+    .ca-prob-obs       { font-size:12px; color:var(--text-muted); line-height:1.5; padding:8px 10px; background:var(--bg-soft); border-radius:8px; white-space:pre-wrap; }
+    .ca-prob-resolucao { font-size:12px; color:var(--ca-azul); line-height:1.5; padding:8px 10px; background:rgba(59,130,246,.07); border:1px solid rgba(59,130,246,.2); border-radius:8px; white-space:pre-wrap; }
+    .ca-prob-resolucao-label { font-size:9px; font-weight:900; text-transform:uppercase; letter-spacing:1.5px; color:var(--ca-azul); margin-bottom:3px; }
+
+    /* ═══════════ 13. CARD DE FOCO (próximas tarefas — drag & drop) ═══════════ */
+    .ca-foco-add {
+      display: flex; gap: 8px; margin-bottom: 14px;
+    }
+    .ca-foco-add input {
+      flex: 1; background: var(--bg-soft); border: 1px solid var(--border);
+      border-radius: 10px; padding: 9px 12px; color: var(--text-strong);
+      font-family: inherit; font-size: 13px; font-weight: 600;
+      transition: border-color .15s;
+    }
+    .ca-foco-add input:focus { outline: none; border-color: var(--accent); }
+
+    /* Lista de itens arrastáveis */
+    #foco-lista { min-height: 40px; }
+
+    .ca-foco-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 12px; border-radius: 11px;
+      background: var(--bg-soft); border: 1px solid var(--border);
+      margin-bottom: 6px; transition: all .15s;
+      cursor: grab;
+      /* Será o primeiro item destacado (destaque do "agora") */
+    }
+    .ca-foco-item:first-child {
+      background: var(--accent-soft);
+      border-color: var(--accent);
+    }
+    .ca-foco-item:first-child .ca-foco-num { background: var(--accent); color: #fff; }
+
+    /* Enquanto arrasta */
+    .ca-foco-item.dragging {
+      opacity: .4; cursor: grabbing;
+    }
+    /* Zona de drop iluminada */
+    .ca-foco-item.drag-over {
+      border-color: var(--accent);
+      background: var(--accent-soft);
+    }
+
+    .ca-foco-num {
+      width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0;
+      background: var(--bg); border: 1px solid var(--border);
+      display: grid; place-items: center;
+      font-size: 10px; font-weight: 900; color: var(--text-muted);
+      transition: all .2s;
+    }
+    .ca-foco-handle {
+      color: var(--text-muted); font-size: 12px; cursor: grab; padding: 0 2px; flex-shrink: 0;
+    }
+    .ca-foco-texto { flex: 1; font-size: 13px; font-weight: 600; }
+    .ca-foco-del {
+      width: 22px; height: 22px; border-radius: 6px; border: none;
+      background: transparent; color: var(--text-muted); font-size: 11px;
+      cursor: pointer; display: grid; place-items: center; transition: color .15s; flex-shrink: 0;
+    }
+    .ca-foco-del:hover { color: var(--ca-ruim); }
+
+    /* Dica vazia */
+    .ca-foco-vazio {
+      text-align: center; padding: 20px;
+      color: var(--text-muted); font-size: 12px; font-weight: 600;
+    }
+    .ca-foco-vazio i { display: block; font-size: 24px; margin-bottom: 8px; opacity: .35; }
+
+    /* ═══════════ 14. MODAL GENÉRICO ═══════════ */
+    .ca-modal { position:fixed; inset:0; z-index:200; display:none; align-items:center; justify-content:center; padding:16px; background:rgba(0,0,0,.72); backdrop-filter:blur(6px); }
+    .ca-modal.aberto { display:flex; }
+    .ca-modal-box { background:var(--bg); border:1px solid var(--border); border-radius:20px; width:100%; max-width:480px; box-shadow:var(--shadow); overflow:hidden; animation:pop .22s ease; max-height:90dvh; overflow-y:auto; }
+    .ca-modal-box.largo { max-width:560px; }
+    .ca-modal-head { display:flex; align-items:center; justify-content:space-between; padding:16px 20px; border-bottom:1px solid var(--border); background:var(--panel); position:sticky; top:0; z-index:1; }
+    .ca-modal-head h3 { font-size:12px; font-weight:900; text-transform:uppercase; letter-spacing:1.5px; }
+    .ca-modal-close { font-size:18px; color:var(--text-muted); cursor:pointer; transition:color .15s; }
+    .ca-modal-close:hover { color:var(--ca-ruim); }
+    .ca-modal-body { padding:20px; display:flex; flex-direction:column; gap:14px; }
+    .ca-campo       { display:flex; flex-direction:column; gap:5px; }
+    .ca-campo label { font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:1.5px; color:var(--text-muted); }
+    .ca-campo input,
+    .ca-campo select,
+    .ca-campo textarea {
+      background:var(--bg-soft); border:1px solid var(--border); border-radius:10px;
+      padding:10px 12px; color:var(--text-strong); font-family:inherit;
+      font-size:13px; font-weight:600; width:100%; transition:border-color .15s; resize:vertical;
+    }
+    .ca-campo input:focus,
+    .ca-campo select:focus,
+    .ca-campo textarea:focus { outline:none; border-color:var(--accent); }
+    .ca-campo-row    { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+    .ca-modal-footer { padding:14px 20px; border-top:1px solid var(--border); display:flex; gap:10px; justify-content:flex-end; background:var(--panel); }
+
+    /* ═══════════ 14. ESTADO VAZIO ═══════════ */
+    .ca-vazio { text-align:center; padding:40px 20px; color:var(--text-muted); }
+    .ca-vazio i { font-size:36px; margin-bottom:12px; display:block; opacity:.4; }
+    .ca-vazio p { font-size:12px; font-weight:600; }
+
+    /* ═══════════ 15. XP TOAST ═══════════ */
+    .ca-xp-toast {
+      position:fixed; top:80px; right:20px; z-index:9999;
+      background:var(--accent); color:#fff;
+      padding:10px 18px; border-radius:99px; font-size:12px; font-weight:900;
+      box-shadow:var(--glow); pointer-events:none;
+      animation:caToastIn .3s ease, caToastOut .3s ease 1.4s forwards;
+    }
+    @keyframes caToastIn  { from{opacity:0;transform:translateY(-10px)} to{opacity:1;transform:translateY(0)} }
+    @keyframes caToastOut { from{opacity:1} to{opacity:0} }
+
+    /* ═══════════ 16. MODAL RELATÓRIO ANUAL ═══════════ */
+    .ca-relatorio-resumo {
+      display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:16px;
+    }
+    .ca-rel-stat {
+      background:var(--bg-soft); border:1px solid var(--border); border-radius:10px;
+      padding:12px; text-align:center;
+    }
+    .ca-rel-stat-val   { font-size:22px; font-weight:900; letter-spacing:-1px; color:var(--accent); }
+    .ca-rel-stat-label { font-size:9px; font-weight:800; text-transform:uppercase; letter-spacing:1.5px; color:var(--text-muted); }
+    .ca-rel-divider    { font-size:10px; font-weight:900; text-transform:uppercase; letter-spacing:2px; color:var(--text-muted); margin:12px 0 8px; }
+  </style>
+</head>
+
+<body class="app" data-page="casa">
+  <div id="sidebar-container"></div>
+  <div id="overlay" class="overlay" onclick="fecharMenu()"></div>
+
+  <main class="main">
+    <header class="header">
+      <div class="header__left">
+        <button class="btn btn--icon btn--menu" onclick="abrirMenu()" aria-label="Abrir menu">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+        <div>
+          <h1 class="header__title">🏠 Casa</h1>
+          <p class="header__subtitle">Centro de Operações Domésticas</p>
+        </div>
+      </div>
+      <div class="header__actions">
+        <button class="btn" onclick="abrirSync()">
+          <i class="fa-solid fa-cloud-arrow-up" style="color:var(--accent)"></i>
+          <span>Backup</span>
+        </button>
+        <button class="btn btn--icon" id="btn-tema" onclick="Tema.alternar()" aria-label="Trocar tema">
+          <i class="fa-solid fa-moon"></i>
+        </button>
+      </div>
+    </header>
+
+    <div class="container fade-up">
+
+      <!-- ══════════════ ABAS ══════════════ -->
+      <nav class="ca-tabs" role="tablist">
+        <button class="ca-tab ativa" onclick="trocarAba('dashboard')"  data-aba="dashboard"><i class="fa-solid fa-gauge-high"></i> Dashboard</button>
+        <button class="ca-tab"       onclick="trocarAba('rotinas')"    data-aba="rotinas"><i class="fa-solid fa-rotate"></i> Rotinas</button>
+        <button class="ca-tab"       onclick="trocarAba('manutencao')" data-aba="manutencao"><i class="fa-solid fa-screwdriver-wrench"></i> Manutenção</button>
+        <button class="ca-tab"       onclick="trocarAba('compras')"    data-aba="compras"><i class="fa-solid fa-cart-shopping"></i> Compras</button>
+        <button class="ca-tab"       onclick="trocarAba('financas')"   data-aba="financas"><i class="fa-solid fa-wallet"></i> Finanças</button>
+        <button class="ca-tab"       onclick="trocarAba('inventario')" data-aba="inventario"><i class="fa-solid fa-boxes-stacked"></i> Inventário</button>
+        <button class="ca-tab"       onclick="trocarAba('problemas')"  data-aba="problemas"><i class="fa-solid fa-triangle-exclamation"></i> Problemas</button>
+      </nav>
+
+      <!-- ══════════════ DASHBOARD ══════════════ -->
+      <section class="ca-painel ativo" id="painel-dashboard">
+        <div class="ca-integridade">
+          <div class="ca-int-icone">🏠</div>
+          <div class="ca-int-info">
+            <div class="ca-int-titulo">Integridade da Casa</div>
+            <div class="ca-int-bar-wrap"><div class="ca-int-bar" id="ca-int-bar" style="width:0%"></div></div>
+            <div class="ca-int-legenda">
+              <span id="ca-int-label">Calculando…</span>
+              <span id="ca-xp-label">0 XP</span>
+            </div>
+          </div>
+          <div style="text-align:right;flex-shrink:0;">
+            <div class="ca-int-pct"    id="ca-int-pct">0%</div>
+            <div class="ca-int-status" id="ca-int-status">—</div>
+          </div>
+        </div>
+
+        <div class="ca-kpis">
+          <div class="ca-kpi"><div class="ca-kpi__icon"><i class="fa-solid fa-check"></i></div><div class="ca-kpi__val" id="kpi-rotinas-feitas">0</div><div class="ca-kpi__label">Rotinas hoje</div></div>
+          <div class="ca-kpi"><div class="ca-kpi__icon"><i class="fa-solid fa-screwdriver-wrench"></i></div><div class="ca-kpi__val" id="kpi-manut-pendentes">0</div><div class="ca-kpi__label">Manutenções vencidas</div></div>
+          <div class="ca-kpi"><div class="ca-kpi__icon"><i class="fa-solid fa-cart-shopping"></i></div><div class="ca-kpi__val" id="kpi-compras">0</div><div class="ca-kpi__label">Itens p/ comprar</div></div>
+          <div class="ca-kpi"><div class="ca-kpi__icon"><i class="fa-solid fa-triangle-exclamation"></i></div><div class="ca-kpi__val" id="kpi-problemas">0</div><div class="ca-kpi__label">Problemas abertos</div></div>
+          <div class="ca-kpi"><div class="ca-kpi__icon"><i class="fa-solid fa-wallet"></i></div><div class="ca-kpi__val" id="kpi-gasto" style="font-size:18px">R$ 0</div><div class="ca-kpi__label">Custo mensal</div></div>
+          <div class="ca-kpi"><div class="ca-kpi__icon"><i class="fa-solid fa-bolt"></i></div><div class="ca-kpi__val" id="kpi-xp">0</div><div class="ca-kpi__label">XP total</div></div>
+        </div>
+
+        <!-- Card de Foco — próximas tarefas em ordem de prioridade, arrastáveis -->
+        <div class="card" style="margin-bottom:20px;">
+          <div class="card__title" style="justify-content:space-between;">
+            <span><i class="fa-solid fa-crosshairs"></i> Foco Agora</span>
+            <span style="font-size:9px;font-weight:700;color:var(--text-muted);text-transform:none;letter-spacing:0;">Arraste para reordenar · 1º = próxima</span>
+          </div>
+          <div class="ca-foco-add">
+            <input type="text" id="foco-input" placeholder="Adicionar tarefa ao foco…" onkeydown="if(event.key==='Enter')adicionarFoco()">
+            <button class="btn btn--primary" onclick="adicionarFoco()" style="padding:9px 14px;"><i class="fa-solid fa-plus"></i></button>
+          </div>
+          <div id="foco-lista"></div>
+        </div>
+
+        <div class="card">
+          <div class="card__title"><i class="fa-solid fa-screwdriver-wrench"></i> Próximas Manutenções</div>
+          <div id="dash-proximas-manut"><div class="ca-vazio"><i class="fa-solid fa-screwdriver-wrench"></i><p>Nenhuma manutenção cadastrada</p></div></div>
+        </div>
+
+        <!-- Reset de XP — discreto, no rodapé do dashboard -->
+        <div style="text-align:center;margin-top:24px;">
+          <button class="btn" onclick="resetarXP()" style="font-size:9px;color:var(--text-muted);border-color:var(--border);padding:6px 12px;">
+            <i class="fa-solid fa-rotate-left"></i> Resetar XP
+          </button>
+        </div>
+      </section>
+
+      <!-- ══════════════ ROTINAS ══════════════ -->
+      <section class="ca-painel" id="painel-rotinas">
+
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:18px;">
+          <div class="ca-view-toggle">
+            <button class="ca-view-btn ativo" id="vbtn-frequencia" onclick="trocarViewRotinas('frequencia')"><i class="fa-solid fa-clock"></i> Frequência</button>
+            <button class="ca-view-btn"       id="vbtn-comodo"     onclick="trocarViewRotinas('comodo')"><i class="fa-solid fa-door-open"></i> Cômodo</button>
+          </div>
+          <button class="btn btn--primary" onclick="abrirModalRotina()"><i class="fa-solid fa-plus"></i> Nova Rotina</button>
+        </div>
+
+        <!-- Vista por frequência -->
+        <div id="rotinas-frequencia">
+
+          <!-- DIÁRIAS: navegação por DIA -->
+          <div class="ca-secao">
+            <div class="ca-secao-titulo"><i class="fa-solid fa-sun" style="color:#f59e0b"></i> Diárias</div>
+            <div class="ca-nav-periodo">
+              <button class="ca-nav-btn" onclick="navDia(-1)"><i class="fa-solid fa-chevron-left"></i></button>
+              <span class="ca-nav-label" id="nav-dia-label">—</span>
+              <button class="ca-nav-hoje" onclick="navDiaHoje()">Hoje</button>
+              <button class="ca-nav-btn" onclick="navDia(+1)"><i class="fa-solid fa-chevron-right"></i></button>
+            </div>
+            <!-- Rastreador semanal recolhível -->
+            <button class="ca-rastreador-toggle" id="rt-diario-toggle" onclick="toggleRastreador('rt-diario')">
+              <i class="fa-solid fa-chart-simple"></i> Desempenho da Semana
+              <i class="fa-solid fa-chevron-down ca-rt-chevron"></i>
+            </button>
+            <div class="ca-rastreador-corpo" id="rt-diario">
+              <div class="ca-tracker-grid dias" id="tracker-dias"></div>
+            </div>
+            <div id="lista-rotinas-diaria"></div>
+          </div>
+
+          <!-- SEMANAIS: navegação por SEMANA -->
+          <div class="ca-secao">
+            <div class="ca-secao-titulo"><i class="fa-solid fa-calendar-week" style="color:#3b82f6"></i> Semanais</div>
+            <div class="ca-nav-periodo">
+              <button class="ca-nav-btn" onclick="navSemana(-1)"><i class="fa-solid fa-chevron-left"></i></button>
+              <span class="ca-nav-label" id="nav-semana-label">—</span>
+              <button class="ca-nav-hoje" onclick="navSemanaAtual()">Esta Semana</button>
+              <button class="ca-nav-btn" onclick="navSemana(+1)"><i class="fa-solid fa-chevron-right"></i></button>
+            </div>
+            <!-- Rastreador mensal recolhível -->
+            <button class="ca-rastreador-toggle" id="rt-semanal-toggle" onclick="toggleRastreador('rt-semanal')">
+              <i class="fa-solid fa-chart-simple"></i> Desempenho do Mês
+              <i class="fa-solid fa-chevron-down ca-rt-chevron"></i>
+            </button>
+            <div class="ca-rastreador-corpo" id="rt-semanal">
+              <div class="ca-tracker-grid semanas" id="tracker-semanas"></div>
+            </div>
+            <div id="lista-rotinas-semanal"></div>
+          </div>
+
+          <!-- MENSAIS: navegação por MÊS -->
+          <div class="ca-secao">
+            <div class="ca-secao-titulo"><i class="fa-solid fa-calendar" style="color:#8b5cf6"></i> Mensais</div>
+            <div class="ca-nav-periodo">
+              <button class="ca-nav-btn" onclick="navMes(-1)"><i class="fa-solid fa-chevron-left"></i></button>
+              <span class="ca-nav-label" id="nav-mes-label">—</span>
+              <button class="ca-nav-hoje" onclick="navMesAtual()">Este Mês</button>
+              <button class="ca-nav-btn" onclick="navMes(+1)"><i class="fa-solid fa-chevron-right"></i></button>
+            </div>
+            <!-- Rastreador anual recolhível -->
+            <button class="ca-rastreador-toggle" id="rt-mensal-toggle" onclick="toggleRastreador('rt-mensal')">
+              <i class="fa-solid fa-chart-simple"></i> Desempenho do Ano
+              <i class="fa-solid fa-chevron-down ca-rt-chevron"></i>
+            </button>
+            <div class="ca-rastreador-corpo" id="rt-mensal">
+              <div class="ca-tracker-grid meses" id="tracker-meses"></div>
+            </div>
+            <div id="lista-rotinas-mensal"></div>
+          </div>
+
+        </div><!-- /rotinas-frequencia -->
+
+        <!-- Vista por cômodo -->
+        <div id="rotinas-comodo" style="display:none"></div>
+
+      </section>
+
+      <!-- ══════════════ MANUTENÇÃO ══════════════ -->
+      <section class="ca-painel" id="painel-manutencao">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:18px;">
+          <p style="font-size:12px;color:var(--text-muted);font-weight:600;">Acompanhe inspeções, limpezas e trocas periódicas da casa.</p>
+          <button class="btn btn--primary" onclick="abrirModalManut()"><i class="fa-solid fa-plus"></i> Nova Manutenção</button>
+        </div>
+        <div class="ca-manut-grid" id="lista-manutencao">
+          <div class="ca-vazio" style="grid-column:1/-1"><i class="fa-solid fa-screwdriver-wrench"></i><p>Nenhuma manutenção cadastrada</p></div>
+        </div>
+      </section>
+
+      <!-- ══════════════ COMPRAS ══════════════ -->
+      <section class="ca-painel" id="painel-compras">
+        <div class="ca-prog-wrap">
+          <div class="ca-prog-header">
+            <span>Progresso das Compras</span>
+            <span id="compras-prog-texto">0 de 0 itens</span>
+          </div>
+          <div class="ca-prog-bar-wrap"><div class="ca-prog-bar" id="compras-prog-bar" style="width:0%"></div></div>
+        </div>
+        <div class="ca-compras-head">
+          <div class="ca-compras-filtro" id="filtros-compra">
+            <button class="ca-cat-pill ativo" onclick="filtrarCompras('todos')" data-cat="todos">Todos</button>
+          </div>
+          <button class="btn btn--primary" onclick="abrirModalCompra()"><i class="fa-solid fa-plus"></i> Adicionar Item</button>
+        </div>
+        <div id="lista-compras-pendentes"></div>
+        <button class="ca-comprados-toggle" id="btn-comprados-toggle" onclick="toggleComprados()" style="display:none">
+          <i class="fa-solid fa-check-circle" style="color:var(--ca-ok)"></i> Comprados Hoje (<span id="qtd-comprados">0</span>)
+        </button>
+        <div class="ca-comprados-lista" id="lista-comprados"></div>
+      </section>
+
+      <!-- ══════════════ FINANÇAS ══════════════ -->
+      <section class="ca-painel" id="painel-financas">
+
+        <!-- Navegação por mês -->
+        <div class="ca-nav-periodo" style="margin-bottom:16px;">
+          <button class="ca-nav-btn" onclick="navFinMes(-1)"><i class="fa-solid fa-chevron-left"></i></button>
+          <span class="ca-nav-label" id="nav-fin-label">—</span>
+          <button class="ca-nav-hoje" onclick="navFinMesAtual()">Este Mês</button>
+          <button class="ca-nav-btn" onclick="navFinMes(+1)"><i class="fa-solid fa-chevron-right"></i></button>
+        </div>
+
+        <!-- Rastreador anual de gastos recolhível -->
+        <button class="ca-rastreador-toggle" id="rt-fin-toggle" onclick="toggleRastreador('rt-fin')">
+          <i class="fa-solid fa-chart-bar"></i> Ver Gastos do Ano
+          <i class="fa-solid fa-chevron-down ca-rt-chevron"></i>
+        </button>
+        <div class="ca-rastreador-corpo" id="rt-fin">
+          <div class="ca-tracker-grid meses" id="tracker-fin-meses"></div>
+        </div>
+
+        <div class="ca-fin-total">
+          <div>
+            <div class="ca-fin-total-label">Custo Fixo — <span id="fin-mes-nome">—</span></div>
+            <div class="ca-fin-total-valor" id="fin-total-valor">R$ 0,00</div>
+          </div>
+          <i class="fa-solid fa-house-circle-check" style="font-size:36px;color:var(--accent);opacity:.5"></i>
+        </div>
+
+        <div style="display:flex;gap:8px;justify-content:flex-end;margin-bottom:16px;flex-wrap:wrap;">
+          <button class="btn" onclick="copiarMesAnterior()"><i class="fa-solid fa-copy"></i> Copiar Mês Anterior</button>
+          <button class="btn btn--primary" onclick="abrirModalFinanca()"><i class="fa-solid fa-plus"></i> Nova Despesa</button>
+        </div>
+
+        <div id="lista-financas"></div>
+      </section>
+
+      <!-- ══════════════ INVENTÁRIO ══════════════ -->
+      <section class="ca-painel" id="painel-inventario">
+        <div style="display:flex;justify-content:flex-end;margin-bottom:16px;">
+          <button class="btn btn--primary" onclick="abrirModalInventario()"><i class="fa-solid fa-plus"></i> Adicionar Item</button>
+        </div>
+        <div id="lista-inventario"></div>
+      </section>
+
+      <!-- ══════════════ PROBLEMAS ══════════════ -->
+      <section class="ca-painel" id="painel-problemas">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:18px;">
+          <p style="font-size:12px;color:var(--text-muted);font-weight:600;">Registre consertos, melhorias e pendências da casa.</p>
+          <button class="btn btn--primary" onclick="abrirModalProblema()"><i class="fa-solid fa-plus"></i> Novo Problema</button>
+        </div>
+        <div id="lista-problemas"></div>
+      </section>
+
+    </div><!-- /container -->
+    <div id="footer-container"></div>
+  </main>
+
+  <!-- ══════════════════════════════════════
+       MODAIS
+  ══════════════════════════════════════ -->
+
+  <!-- Backup padrão -->
+  <div id="modal-sync" class="modal">
+    <div class="modal__box">
+      <div class="modal__head">
+        <h3><i class="fa-solid fa-cloud-arrow-up" style="color:var(--accent)"></i> Backup & Transferência</h3>
+        <button class="modal__close" onclick="fecharSync()"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal__body">
+        <p>Sem nuvem por enquanto: use isto pra levar seus dados entre celular e computador.</p>
+        <button class="btn" onclick="exportarBackup()" style="width:100%;justify-content:center;"><i class="fa-solid fa-download"></i> Exportar</button>
+        <input type="file" id="input-import" accept=".json" onchange="importarBackup(event)" style="display:none;">
+        <button class="btn btn--primary" onclick="document.getElementById('input-import').click()" style="width:100%;justify-content:center;"><i class="fa-solid fa-upload"></i> Importar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Nova Rotina -->
+  <!-- Nova / Editar Rotina -->
+  <div class="ca-modal" id="modal-rotina">
+    <div class="ca-modal-box">
+      <div class="ca-modal-head">
+        <h3><i class="fa-solid fa-rotate" style="color:var(--accent)"></i> <span id="rot-modal-titulo">Nova Rotina</span></h3>
+        <button class="ca-modal-close" onclick="fecharModal('modal-rotina')"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="ca-modal-body">
+        <!-- Campo oculto: vazio = criação, preenchido = edição -->
+        <input type="hidden" id="r-id">
+        <div class="ca-campo"><label>Nome *</label><input type="text" id="r-nome" placeholder="Ex: Arrumar a cama"></div>
+        <div class="ca-campo-row">
+          <div class="ca-campo"><label>Frequência *</label>
+            <select id="r-freq">
+              <option value="diaria">Diária</option>
+              <option value="semanal">Semanal</option>
+              <option value="mensal">Mensal</option>
+            </select>
+          </div>
+          <div class="ca-campo"><label>Cômodo</label>
+            <select id="r-comodo">
+              <option value="">— Nenhum —</option>
+              <option>Cozinha</option><option>Banheiro</option><option>Quarto</option>
+              <option>Sala</option><option>Escritório</option><option>Área Privativa</option>
+              <option>Lavanderia</option><option>Geral</option>
+            </select>
+          </div>
+        </div>
+        <div class="ca-campo"><label>Dia da semana (só semanais)</label>
+          <select id="r-dia">
+            <option value="">— Qualquer —</option>
+            <option>Segunda</option><option>Terça</option><option>Quarta</option>
+            <option>Quinta</option><option>Sexta</option><option>Sábado</option><option>Domingo</option>
+          </select>
+        </div>
+      </div>
+      <div class="ca-modal-footer">
+        <button class="btn" onclick="fecharModal('modal-rotina')">Cancelar</button>
+        <button class="btn btn--primary" onclick="salvarRotina()"><i class="fa-solid fa-check"></i> Salvar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Nova Manutenção -->
+  <div class="ca-modal" id="modal-manut">
+    <div class="ca-modal-box">
+      <div class="ca-modal-head"><h3><i class="fa-solid fa-screwdriver-wrench" style="color:var(--accent)"></i> Nova Manutenção</h3><button class="ca-modal-close" onclick="fecharModal('modal-manut')"><i class="fa-solid fa-xmark"></i></button></div>
+      <div class="ca-modal-body">
+        <div class="ca-campo"><label>Nome *</label><input type="text" id="m-nome" placeholder="Ex: Limpar filtro do ar-condicionado"></div>
+        <div class="ca-campo-row">
+          <div class="ca-campo"><label>Categoria</label><select id="m-cat"><option>Climatização</option><option>Elétrica</option><option>Hidráulica</option><option>Cozinha</option><option>Banheiros</option><option>Área Externa</option><option>Segurança</option><option>Geral</option></select></div>
+          <div class="ca-campo"><label>Frequência (dias) *</label><input type="number" id="m-freq" placeholder="Ex: 30" min="1"></div>
+        </div>
+        <div class="ca-campo"><label>Última realização</label><input type="date" id="m-ultima"></div>
+      </div>
+      <div class="ca-modal-footer"><button class="btn" onclick="fecharModal('modal-manut')">Cancelar</button><button class="btn btn--primary" onclick="salvarManut()"><i class="fa-solid fa-check"></i> Salvar</button></div>
+    </div>
+  </div>
+
+  <!-- Nova Compra -->
+  <div class="ca-modal" id="modal-compra">
+    <div class="ca-modal-box">
+      <div class="ca-modal-head"><h3><i class="fa-solid fa-cart-plus" style="color:var(--accent)"></i> Adicionar à Lista</h3><button class="ca-modal-close" onclick="fecharModal('modal-compra')"><i class="fa-solid fa-xmark"></i></button></div>
+      <div class="ca-modal-body">
+        <div class="ca-campo"><label>Item *</label><input type="text" id="c-nome" placeholder="Ex: Sabão em pó"></div>
+        <div class="ca-campo-row">
+          <div class="ca-campo"><label>Quantidade</label><input type="text" id="c-qtd" placeholder="Ex: 2 kg"></div>
+          <div class="ca-campo"><label>Categoria</label><select id="c-cat"><option>🛒 Supermercado</option><option>🍎 Hortifruti</option><option>🥩 Açougue</option><option>💊 Farmácia</option><option>🧹 Limpeza</option><option>🧻 Higiene</option><option>🛠 Ferramentas</option><option>🍽 Utensílios</option><option>🛋 Decoração</option><option>💡 Iluminação</option><option>🐶 Pets</option><option>📦 Outros</option></select></div>
+        </div>
+        <div class="ca-campo"><label>Observações</label><input type="text" id="c-obs" placeholder="Marca, loja, detalhes…"></div>
+      </div>
+      <div class="ca-modal-footer"><button class="btn" onclick="fecharModal('modal-compra')">Cancelar</button><button class="btn btn--primary" onclick="salvarCompra()"><i class="fa-solid fa-check"></i> Adicionar</button></div>
+    </div>
+  </div>
+
+  <!-- Nova Despesa Fixa -->
+  <div class="ca-modal" id="modal-financa">
+    <div class="ca-modal-box">
+      <div class="ca-modal-head"><h3><i class="fa-solid fa-wallet" style="color:var(--accent)"></i> Nova Despesa Fixa</h3><button class="ca-modal-close" onclick="fecharModal('modal-financa')"><i class="fa-solid fa-xmark"></i></button></div>
+      <div class="ca-modal-body">
+        <div class="ca-campo"><label>Nome *</label><input type="text" id="f-nome" placeholder="Ex: Aluguel"></div>
+        <div class="ca-campo-row">
+          <div class="ca-campo"><label>Valor (R$) *</label><input type="number" id="f-valor" placeholder="0,00" min="0" step="0.01"></div>
+          <div class="ca-campo"><label>Categoria</label><select id="f-cat"><option>Moradia</option><option>Energia</option><option>Água</option><option>Internet</option><option>Gás</option><option>Condomínio</option><option>Seguro</option><option>Manutenção</option><option>Outros</option></select></div>
+        </div>
+      </div>
+      <div class="ca-modal-footer"><button class="btn" onclick="fecharModal('modal-financa')">Cancelar</button><button class="btn btn--primary" onclick="salvarFinanca()"><i class="fa-solid fa-check"></i> Salvar</button></div>
+    </div>
+  </div>
+
+  <!-- Relatório Anual de Finanças -->
+  <div class="ca-modal" id="modal-relatorio">
+    <div class="ca-modal-box largo">
+      <div class="ca-modal-head"><h3><i class="fa-solid fa-chart-bar" style="color:var(--accent)"></i> Relatório Anual — <span id="rel-ano-titulo">2026</span></h3><button class="ca-modal-close" onclick="fecharModal('modal-relatorio')"><i class="fa-solid fa-xmark"></i></button></div>
+      <div class="ca-modal-body" id="rel-body"><!-- preenchido dinamicamente --></div>
+      <div class="ca-modal-footer"><button class="btn" onclick="fecharModal('modal-relatorio')">Fechar</button></div>
+    </div>
+  </div>
+
+  <!-- Item de Inventário -->
+  <div class="ca-modal" id="modal-inventario">
+    <div class="ca-modal-box">
+      <div class="ca-modal-head"><h3><i class="fa-solid fa-boxes-stacked" style="color:var(--accent)"></i> Item de Inventário</h3><button class="ca-modal-close" onclick="fecharModal('modal-inventario')"><i class="fa-solid fa-xmark"></i></button></div>
+      <div class="ca-modal-body">
+        <div class="ca-campo"><label>Nome *</label><input type="text" id="i-nome" placeholder="Ex: Fogão 4 bocas"></div>
+        <div class="ca-campo-row">
+          <div class="ca-campo"><label>Cômodo</label><select id="i-comodo"><option>Cozinha</option><option>Sala</option><option>Quarto</option><option>Banheiro</option><option>Área de Serviço</option><option>Área Externa</option><option>Escritório</option></select></div>
+          <div class="ca-campo"><label>Tipo</label><select id="i-tipo"><option value="tenho">✅ Tenho</option><option value="quero">🛒 Quero Comprar</option></select></div>
+        </div>
+        <div class="ca-campo"><label>Observações</label><input type="text" id="i-obs" placeholder="Marca, modelo, estado…"></div>
+      </div>
+      <div class="ca-modal-footer"><button class="btn" onclick="fecharModal('modal-inventario')">Cancelar</button><button class="btn btn--primary" onclick="salvarInventario()"><i class="fa-solid fa-check"></i> Salvar</button></div>
+    </div>
+  </div>
+
+  <!-- Novo / Editar Problema -->
+  <div class="ca-modal" id="modal-problema">
+    <div class="ca-modal-box">
+      <div class="ca-modal-head">
+        <h3><i class="fa-solid fa-triangle-exclamation" style="color:var(--accent)"></i> <span id="prob-modal-titulo">Novo Problema</span></h3>
+        <button class="ca-modal-close" onclick="fecharModal('modal-problema')"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="ca-modal-body">
+        <!-- Campo oculto guarda o ID quando estamos editando (vazio = novo) -->
+        <input type="hidden" id="p-id">
+        <div class="ca-campo"><label>Título *</label><input type="text" id="p-titulo" placeholder="Ex: Vazamento na cozinha"></div>
+        <div class="ca-campo-row">
+          <div class="ca-campo"><label>Prioridade</label><select id="p-prioridade"><option value="alta">🔴 Alta</option><option value="media">🟡 Média</option><option value="baixa">🟢 Baixa</option></select></div>
+          <div class="ca-campo"><label>Cômodo</label><select id="p-comodo"><option>Cozinha</option><option>Banheiro</option><option>Quarto</option><option>Sala</option><option>Lavanderia</option><option>Área Externa</option><option>Geral</option></select></div>
+        </div>
+        <div class="ca-campo"><label>Descrição do problema</label><textarea id="p-obs" rows="2" placeholder="Descreva o que está acontecendo…"></textarea></div>
+        <div class="ca-campo"><label>Como pretendo resolver</label><textarea id="p-resolucao" rows="2" placeholder="Ex: Chamar encanador, comprar vedante, verificar ralos…"></textarea></div>
+      </div>
+      <div class="ca-modal-footer">
+        <button class="btn" onclick="fecharModal('modal-problema')">Cancelar</button>
+        <button class="btn btn--primary" onclick="salvarProblema()"><i class="fa-solid fa-check"></i> Salvar</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+  /* =====================================================================
+     CASA.JS  —  Centro de Operações da Casa  (v2)
+     ─────────────────────────────────────────────────────────────────────
+     Organização:
+       1. Estado global (CA)
+       2. Utilitários de data
+       3. Controles de abas e modais
+       4. Rastreadores (toggle + renderização)
+       5. Navegação temporal: dia / semana / mês
+       6. Rotinas (renderização + clique)
+       7. Manutenção preventiva
+       8. Lista de compras
+       9. Finanças com navegação mensal
+      10. Inventário
+      11. Problemas
+      12. Dashboard
+      13. Dados iniciais (seed)
+      14. Init
+   ===================================================================== */
+
+  /* ─────────────── 1. ESTADO GLOBAL ─────────────── */
+  const CA = {
+    /* Chaves do Store — cada uma é um "gaveta" no localStorage */
+    CHAVES: {
+      rotinas:    "casa_rotinas",
+      /* Marcações: { "AAAA-MM-DD":{"id":"feito"}, "2026-W27":{"id":"feito"}, "2026-07":{"id":"feito"} }
+         Usamos uma ÚNICA chave mas subdividida por chave de período.
+         Isso permite rastrear dias, semanas e meses no mesmo objeto. */
+      marcacoes:  "casa_marcacoes",
+      manutencoes:"casa_manutencoes",
+      compras:    "lista_compras",   /* compartilhada com tarefas.html no futuro */
+      /* Finanças por mês: chave dinâmica "casa_fin_AAAA-MM" */
+      inventario: "casa_inventario",
+      problemas:  "casa_problemas",
+      xp:         "casa_xp",
+      foco:       "casa_foco",       /* lista de tarefas do card Foco Agora */
+    },
+
+    /* Período atualmente exibido em cada seção de rotinas */
+    diaAtual:    null,   /* "AAAA-MM-DD" */
+    semanaAtual: null,   /* "AAAA-Www" ex: "2026-W27" */
+    mesAtual:    null,   /* "AAAA-MM"  */
+
+    /* Mês exibido na aba de finanças */
+    finMes: null,        /* "AAAA-MM" */
+
+    /* Vista de rotinas: "frequencia" ou "comodo" */
+    viewRotinas: "frequencia",
+    filtroCompras: "todos",
+
+    /* Cômodos e ícones */
+    COMODOS: [
+      { nome:"Cozinha",         icone:"fa-utensils"  },
+      { nome:"Sala",            icone:"fa-couch"     },
+      { nome:"Quarto",          icone:"fa-bed"       },
+      { nome:"Banheiro",        icone:"fa-shower"    },
+      { nome:"Lavanderia",      icone:"fa-shirt"     },
+      { nome:"Área Externa",    icone:"fa-tree"      },
+      { nome:"Área de Serviço", icone:"fa-broom"     },
+      { nome:"Escritório",      icone:"fa-laptop"    },
+    ],
+    FIN_ICONES: {
+      Moradia:"fa-house", Energia:"fa-bolt", "Água":"fa-droplet",
+      Internet:"fa-wifi", "Gás":"fa-fire", "Condomínio":"fa-building",
+      Seguro:"fa-shield", "Manutenção":"fa-screwdriver-wrench", Outros:"fa-ellipsis",
+    },
+    MESES_NOME: ["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"],
+    DIAS_SEMANA: ["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"],
+  };
+
+  /* ─────────────── 2. UTILITÁRIOS DE DATA ─────────────── */
+
+  /** Data de hoje como "AAAA-MM-DD" usando getters locais (evita bug UTC-3) */
+  function hojeStr() {
+    const d = new Date();
+    return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+  }
+
+  /** Padding com zero: 5 → "05" */
+  function pad(n) { return String(n).padStart(2,"0"); }
+
+  /** Converte "AAAA-MM-DD" para Date sem risco de fuso horário */
+  function strParaData(s) {
+    if (!s) return null;
+    const [a,m,d] = s.split("-").map(Number);
+    return new Date(a, m-1, d);
+  }
+
+  /** "AAAA-MM-DD" → "27/06/2026" */
+  function formatarData(s) {
+    if (!s) return "—";
+    const [a,m,d] = s.split("-");
+    return `${d}/${m}/${a}`;
+  }
+
+  /** Soma N dias a uma data no formato "AAAA-MM-DD" */
+  function somaDias(s, n) {
+    const d = strParaData(s);
+    if (!d) return null;
+    d.setDate(d.getDate() + n);
+    return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+  }
+
+  /** Diferença em dias entre hoje e uma data alvo */
+  function diasAte(s) {
+    const hoje = strParaData(hojeStr());
+    const alvo = strParaData(s);
+    if (!hoje || !alvo) return null;
+    return Math.round((alvo - hoje) / 86400000);
+  }
+
+  /**
+   * Número da semana ISO a partir de uma data.
+   * Ex: new Date(2026,6,1) → "2026-W27"
+   */
+  function chaveSemanaDaData(d) {
+    const tmp = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+    tmp.setUTCDate(tmp.getUTCDate() + 4 - (tmp.getUTCDay() || 7));
+    const anoISO = tmp.getUTCFullYear();
+    const sem = Math.ceil((((tmp - Date.UTC(anoISO,0,1))/86400000)+1)/7);
+    return `${anoISO}-W${pad(sem)}`;
+  }
+
+  /** Segunda-feira da semana que contém a data informada */
+  function segundaDaSemana(d) {
+    const tmp = new Date(d);
+    const dia = tmp.getDay(); // 0=Dom, 1=Seg…
+    const diff = (dia === 0) ? -6 : 1 - dia; // recua para segunda
+    tmp.setDate(tmp.getDate() + diff);
+    return tmp;
+  }
+
+  /** Gera a chave de semana a partir de "AAAA-Www" deslocada em N semanas */
+  function deslocarSemana(chave, n) {
+    // Parseia "AAAA-Www" → data da segunda + N*7 dias
+    const [ano, sw] = chave.split("-W");
+    // Primeiro dia da semana ISO 1 do ano
+    const jan4 = new Date(parseInt(ano), 0, 4);
+    const seg1 = segundaDaSemana(jan4);
+    seg1.setDate(seg1.getDate() + (parseInt(sw)-1)*7 + n*7);
+    return chaveSemanaDaData(seg1);
+  }
+
+  /** Rótulo legível da semana: "05 – 11 Jul" */
+  function labelSemana(chave) {
+    const [ano, sw] = chave.split("-W");
+    const jan4 = new Date(parseInt(ano), 0, 4);
+    const seg = segundaDaSemana(jan4);
+    seg.setDate(seg.getDate() + (parseInt(sw)-1)*7);
+    const dom = new Date(seg); dom.setDate(dom.getDate()+6);
+    const mesNome = CA.MESES_NOME[dom.getMonth()];
+    return `${pad(seg.getDate())} – ${pad(dom.getDate())} ${mesNome}`;
+  }
+
+  /** Chave do mês: "AAAA-MM" */
+  function chaveMes(d) { return `${d.getFullYear()}-${pad(d.getMonth()+1)}`; }
+
+  /** Desloca "AAAA-MM" em N meses */
+  function deslocarMes(chave, n) {
+    const [a, m] = chave.split("-").map(Number);
+    const d = new Date(a, m-1+n, 1);
+    return chaveMes(d);
+  }
+
+  /** "AAAA-MM" → "Julho 2026" */
+  function labelMes(chave) {
+    const [a, m] = chave.split("-").map(Number);
+    const nomes = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
+    return `${nomes[m-1]} ${a}`;
+  }
+
+  /** Gerador de ID único */
+  function gerarId() { return "ca_" + Date.now() + "_" + Math.floor(Math.random()*9999); }
+
+  /** Toast de XP */
+  function mostrarXP(pts) {
+    const el = document.createElement("div");
+    el.className = "ca-xp-toast";
+    el.innerHTML = `<i class="fa-solid fa-bolt"></i> +${pts} XP`;
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 1800);
+  }
+  function ganharXP(pts) {
+    Store.salvar(CA.CHAVES.xp, Store.ler(CA.CHAVES.xp,0) + pts);
+    mostrarXP(pts);
+    atualizarDashboard();
+  }
+
+  /* ─────────────── 3. ABAS E MODAIS ─────────────── */
+
+  function trocarAba(id) {
+    document.querySelectorAll(".ca-painel").forEach(p => p.classList.remove("ativo"));
+    document.querySelectorAll(".ca-tab").forEach(t => t.classList.remove("ativa"));
+    document.getElementById("painel-"+id)?.classList.add("ativo");
+    document.querySelector(`[data-aba="${id}"]`)?.classList.add("ativa");
+    if (id === "dashboard") atualizarDashboard();
+  }
+
+  function abrirModal(id)  { document.getElementById(id)?.classList.add("aberto"); }
+  function fecharModal(id) { document.getElementById(id)?.classList.remove("aberto"); }
+
+  document.querySelectorAll(".ca-modal").forEach(m => {
+    m.addEventListener("click", e => { if (e.target === m) m.classList.remove("aberto"); });
+  });
+
+  /* ─────────────── 4. RASTREADORES ─────────────── */
+
+  function toggleRastreador(id) {
+    const btn   = document.getElementById(id + "-toggle");
+    const corpo = document.getElementById(id);
+    btn?.classList.toggle("aberto");
+    corpo?.classList.toggle("aberto");
+    // Renderiza só quando abre (lazy)
+    if (corpo?.classList.contains("aberto")) {
+      if (id === "rt-diario")  renderTrackerDias();
+      if (id === "rt-semanal") renderTrackerSemanas();
+      if (id === "rt-mensal")  renderTrackerMeses();
+      if (id === "rt-fin")     renderTrackerFinMeses();
+    }
+  }
+
+  /**
+   * Cor da barra do rastreador baseada na porcentagem.
+   * 0–39% → vermelho | 40–74% → âmbar | 75–100% → verde
+   */
+  function corTracker(pct) {
+    if (pct >= 75) return "var(--ca-ok)";
+    if (pct >= 40) return "var(--ca-medio)";
+    return "var(--ca-ruim)";
+  }
+
+  /** Calcula % de rotinas feitas num período (chave no formato "AAAA-MM-DD", "AAAA-Www" ou "AAAA-MM") */
+  function pctRotinas(freq, chavePeriodo) {
+    const rotinas   = Store.ler(CA.CHAVES.rotinas, []).filter(r => r.freq === freq);
+    const marcacoes = Store.ler(CA.CHAVES.marcacoes, {});
+    const marc      = marcacoes[chavePeriodo] || {};
+    if (rotinas.length === 0) return null;
+    const feitas = rotinas.filter(r => marc[r.id] === "feito").length;
+    return Math.round((feitas / rotinas.length) * 100);
+  }
+
+  /** Rastreador semanal para rotinas DIÁRIAS (7 células = Dom a Sáb da semana atual) */
+  function renderTrackerDias() {
+    const el = document.getElementById("tracker-dias");
+    if (!el) return;
+    // Determina segunda da semana do dia exibido
+    const ref = strParaData(CA.diaAtual) || new Date();
+    const seg = segundaDaSemana(ref);
+    let html = "";
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(seg); d.setDate(seg.getDate() + i);
+      const chave = `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+      const isHoje = chave === hojeStr();
+      const isAtual = chave === CA.diaAtual;
+      const pct = pctRotinas("diaria", chave);
+      const classe = isAtual ? "ca-tracker-celula atual" : "ca-tracker-celula";
+      const cor = pct !== null ? corTracker(pct) : "var(--border)";
+      html += `<div class="${classe}">
+        <span class="ca-tc-label">${CA.DIAS_SEMANA[d.getDay()]}${isHoje ? " 📍" : ""}</span>
+        <span class="ca-tc-pct">${pct !== null ? pct+"%" : "—"}</span>
+        <div class="ca-tc-bar"><div class="ca-tc-fill" style="width:${pct||0}%;background:${cor}"></div></div>
+      </div>`;
+    }
+    el.innerHTML = html;
+  }
+
+  /** Rastreador mensal para rotinas SEMANAIS (semanas do mês do período exibido) */
+  function renderTrackerSemanas() {
+    const el = document.getElementById("tracker-semanas");
+    if (!el) return;
+    // Pega todas as semanas do mês atual
+    const [ano, sw] = CA.semanaAtual.split("-W").map(n => parseInt(n));
+    const jan4 = new Date(ano, 0, 4);
+    const seg1 = segundaDaSemana(jan4);
+    seg1.setDate(seg1.getDate() + (sw-1)*7);
+    // Mês de referência = mês da segunda da semana atual
+    const mesRef = seg1.getMonth();
+    const anoRef = seg1.getFullYear();
+    // Percorre os 5 slots de semana do mês
+    let html = "";
+    for (let s = 0; s < 5; s++) {
+      const segS = new Date(anoRef, mesRef, 1);
+      // Primeira segunda do mês
+      const dia1 = segS.getDay();
+      const primSeg = dia1 === 0 ? 1 : dia1 === 1 ? 1 : 8 - dia1 + 1;
+      segS.setDate(primSeg + s*7);
+      if (segS.getMonth() !== mesRef) break;
+      const chave = chaveSemanaDaData(segS);
+      const isAtual = chave === CA.semanaAtual;
+      const pct = pctRotinas("semanal", chave);
+      const classe = isAtual ? "ca-tracker-celula atual" : "ca-tracker-celula";
+      const cor = pct !== null ? corTracker(pct) : "var(--border)";
+      html += `<div class="${classe}">
+        <span class="ca-tc-label">Sem ${s+1}</span>
+        <span class="ca-tc-pct">${pct !== null ? pct+"%" : "—"}</span>
+        <div class="ca-tc-bar"><div class="ca-tc-fill" style="width:${pct||0}%;background:${cor}"></div></div>
+      </div>`;
+    }
+    el.innerHTML = html || '<div style="color:var(--text-muted);font-size:12px;">Sem dados.</div>';
+  }
+
+  /** Rastreador anual para rotinas MENSAIS (12 células) */
+  function renderTrackerMeses() {
+    const el = document.getElementById("tracker-meses");
+    if (!el) return;
+    const [anoAtual] = CA.mesAtual.split("-").map(Number);
+    let html = "";
+    for (let m = 1; m <= 12; m++) {
+      const chave = `${anoAtual}-${pad(m)}`;
+      const isAtual = chave === CA.mesAtual;
+      const pct = pctRotinas("mensal", chave);
+      const classe = isAtual ? "ca-tracker-celula atual" : "ca-tracker-celula";
+      const cor = pct !== null ? corTracker(pct) : "var(--border)";
+      html += `<div class="${classe}">
+        <span class="ca-tc-label">${CA.MESES_NOME[m-1]}</span>
+        <span class="ca-tc-pct">${pct !== null ? pct+"%" : "—"}</span>
+        <div class="ca-tc-bar"><div class="ca-tc-fill" style="width:${pct||0}%;background:${cor}"></div></div>
+      </div>`;
+    }
+    el.innerHTML = html;
+  }
+
+  /** Rastreador anual de gastos mensais */
+  function renderTrackerFinMeses() {
+    const el = document.getElementById("tracker-fin-meses");
+    if (!el) return;
+    const [anoAtual] = CA.finMes.split("-").map(Number);
+    // Coleta totais de todos os meses do ano
+    const totais = [];
+    for (let m = 1; m <= 12; m++) {
+      const chave = `${anoAtual}-${pad(m)}`;
+      const lista = Store.ler("casa_fin_"+chave, []);
+      totais.push(lista.reduce((s,f) => s + Number(f.valor), 0));
+    }
+    const maxTotal = Math.max(...totais, 1);
+    let html = "";
+    for (let m = 0; m < 12; m++) {
+      const chave = `${anoAtual}-${pad(m+1)}`;
+      const isAtual = chave === CA.finMes;
+      const classe = isAtual ? "ca-tracker-celula atual" : "ca-tracker-celula";
+      const pct = Math.round((totais[m]/maxTotal)*100);
+      const cor = totais[m] > 0 ? "var(--ca-azul)" : "var(--border)";
+      const valStr = totais[m] > 0
+        ? totais[m].toLocaleString("pt-BR",{style:"currency",currency:"BRL",maximumFractionDigits:0})
+        : "—";
+      html += `<div class="${classe}" title="${labelMes(chave)}: ${valStr}">
+        <span class="ca-tc-label">${CA.MESES_NOME[m]}</span>
+        <span class="ca-tc-pct" style="font-size:9px">${valStr}</span>
+        <div class="ca-tc-bar"><div class="ca-tc-fill" style="width:${pct}%;background:${cor}"></div></div>
+      </div>`;
+    }
+    el.innerHTML = html;
+  }
+
+  /* ─────────────── 5. NAVEGAÇÃO TEMPORAL ─────────────── */
+
+  /* ── Dia ── */
+  function navDia(delta) {
+    CA.diaAtual = somaDias(CA.diaAtual, delta);
+    atualizarNavDia();
+    renderRotinas();
+  }
+  function navDiaHoje() { CA.diaAtual = hojeStr(); atualizarNavDia(); renderRotinas(); }
+  function atualizarNavDia() {
+    const d = strParaData(CA.diaAtual);
+    const hoje = hojeStr();
+    let label;
+    if (CA.diaAtual === hoje) label = "Hoje — " + formatarData(hoje);
+    else if (CA.diaAtual === somaDias(hoje, -1)) label = "Ontem — " + formatarData(CA.diaAtual);
+    else if (CA.diaAtual === somaDias(hoje, +1)) label = "Amanhã — " + formatarData(CA.diaAtual);
+    else label = CA.DIAS_SEMANA[d.getDay()] + " — " + formatarData(CA.diaAtual);
+    document.getElementById("nav-dia-label").textContent = label;
+    // Atualiza rastreador se estiver aberto
+    if (document.getElementById("rt-diario")?.classList.contains("aberto")) renderTrackerDias();
+  }
+
+  /* ── Semana ── */
+  function navSemana(delta) {
+    CA.semanaAtual = deslocarSemana(CA.semanaAtual, delta);
+    atualizarNavSemana();
+    renderRotinas();
+  }
+  function navSemanaAtual() {
+    CA.semanaAtual = chaveSemanaDaData(new Date());
+    atualizarNavSemana(); renderRotinas();
+  }
+  function atualizarNavSemana() {
+    document.getElementById("nav-semana-label").textContent = labelSemana(CA.semanaAtual);
+    if (document.getElementById("rt-semanal")?.classList.contains("aberto")) renderTrackerSemanas();
+  }
+
+  /* ── Mês (rotinas mensais) ── */
+  function navMes(delta) {
+    CA.mesAtual = deslocarMes(CA.mesAtual, delta);
+    atualizarNavMes(); renderRotinas();
+  }
+  function navMesAtual() {
+    CA.mesAtual = chaveMes(new Date());
+    atualizarNavMes(); renderRotinas();
+  }
+  function atualizarNavMes() {
+    document.getElementById("nav-mes-label").textContent = labelMes(CA.mesAtual);
+    if (document.getElementById("rt-mensal")?.classList.contains("aberto")) renderTrackerMeses();
+  }
+
+  /* ── Mês (finanças) ── */
+  function navFinMes(delta) {
+    const novo = deslocarMes(CA.finMes, delta);
+    const [anoNovo] = novo.split("-").map(Number);
+    const [anoAtual] = CA.finMes.split("-").map(Number);
+    // Se passou de Dezembro para o ano seguinte: mostra relatório do ano que fechou
+    if (anoNovo > anoAtual && delta > 0) {
+      abrirRelatorioAnual(anoAtual);
+    }
+    CA.finMes = novo;
+    atualizarNavFinMes();
+    renderFinancas();
+  }
+  function navFinMesAtual() {
+    CA.finMes = chaveMes(new Date());
+    atualizarNavFinMes(); renderFinancas();
+  }
+  function atualizarNavFinMes() {
+    document.getElementById("nav-fin-label").textContent = labelMes(CA.finMes);
+    document.getElementById("fin-mes-nome").textContent  = labelMes(CA.finMes);
+    if (document.getElementById("rt-fin")?.classList.contains("aberto")) renderTrackerFinMeses();
+  }
+
+  /* ─────────────── 6. ROTINAS ─────────────── */
+
+  /**
+   * Lê as marcações do período atual.
+   * A chave de período pode ser "AAAA-MM-DD", "AAAA-Www" ou "AAAA-MM".
+   */
+  function lerMarcacoes(chavePeriodo) {
+    const todas = Store.ler(CA.CHAVES.marcacoes, {});
+    return todas[chavePeriodo] || {};
+  }
+
+  function salvarMarcacao(chavePeriodo, idRotina, estado) {
+    const todas = Store.ler(CA.CHAVES.marcacoes, {});
+    if (!todas[chavePeriodo]) todas[chavePeriodo] = {};
+    todas[chavePeriodo][idRotina] = estado;
+    // Mantém apenas os últimos 90 períodos para não inflar o storage
+    const chaves = Object.keys(todas).sort().reverse();
+    if (chaves.length > 90) chaves.slice(90).forEach(k => delete todas[k]);
+    Store.salvar(CA.CHAVES.marcacoes, todas);
+  }
+
+  /**
+   * Retorna a chave de período correta para uma rotina de acordo com a frequência.
+   * Diária → "AAAA-MM-DD" (CA.diaAtual)
+   * Semanal → "AAAA-Www"   (CA.semanaAtual)
+   * Mensal  → "AAAA-MM"    (CA.mesAtual)
+   */
+  function chavePeriodoPorFreq(freq) {
+    if (freq === "diaria")  return CA.diaAtual;
+    if (freq === "semanal") return CA.semanaAtual;
+    return CA.mesAtual;
+  }
+
+  /** Ciclo de clique: neutro → feito (+XP) → falhou → neutro */
+  function clicarRotina(id, freq) {
+    const chave = chavePeriodoPorFreq(freq);
+    const marc  = lerMarcacoes(chave);
+    const atual = marc[id] || "neutro";
+    let proximo;
+    if (atual === "neutro") { proximo = "feito"; ganharXP(5); }
+    else if (atual === "feito")  proximo = "falhou";
+    else                         proximo = "neutro";
+    salvarMarcacao(chave, id, proximo);
+    renderRotinas();
+    atualizarDashboard();
+  }
+
+  function excluirRotina(id) {
+    Store.salvar(CA.CHAVES.rotinas, Store.ler(CA.CHAVES.rotinas,[]).filter(r => r.id !== id));
+    renderRotinas(); atualizarDashboard();
+  }
+
+  /** Abre modal para EDITAR uma rotina existente — preenche todos os campos */
+  function editarRotina(id) {
+    const r = Store.ler(CA.CHAVES.rotinas, []).find(r => r.id === id);
+    if (!r) return;
+    document.getElementById("r-id").value    = r.id;
+    document.getElementById("r-nome").value  = r.nome;
+    document.getElementById("r-freq").value  = r.freq;
+    document.getElementById("r-comodo").value = r.comodo || "";
+    document.getElementById("r-dia").value   = r.dia || "";
+    document.getElementById("rot-modal-titulo").textContent = "Editar Rotina";
+    abrirModal("modal-rotina");
+  }
+
+  function htmlRotina(r, marcacoes) {
+    const estado = marcacoes[r.id] || "neutro";
+    const icone  = estado === "feito" ? "fa-check" : estado === "falhou" ? "fa-xmark" : "";
+    const tagC   = r.comodo ? `<span class="ca-rotina-tag">${r.comodo}</span>` : "";
+    const tagD   = r.dia    ? `<span class="ca-rotina-tag">${r.dia}</span>`    : "";
+    return `
+      <div class="ca-rotina-item" data-estado="${estado}" onclick="clicarRotina('${r.id}','${r.freq}')">
+        <div class="ca-rotina-check">${icone ? `<i class="fa-solid ${icone}"></i>` : ""}</div>
+        <span class="ca-rotina-nome">${r.nome}</span>
+        ${tagD}${tagC}
+        <button class="btn btn--icon" style="width:28px;height:28px;padding:0;font-size:11px;flex-shrink:0;"
+          onclick="event.stopPropagation();editarRotina('${r.id}')" title="Editar">
+          <i class="fa-solid fa-pen" style="color:var(--text-muted)"></i>
+        </button>
+        <button class="btn btn--icon" style="width:28px;height:28px;padding:0;font-size:11px;flex-shrink:0;"
+          onclick="event.stopPropagation();excluirRotina('${r.id}')" title="Remover">
+          <i class="fa-solid fa-trash" style="color:var(--text-muted)"></i>
+        </button>
+      </div>`;
+  }
+
+  function renderRotinasPorFreq(rotinas) {
+    ["diaria","semanal","mensal"].forEach(freq => {
+      const chave = chavePeriodoPorFreq(freq);
+      const marc  = lerMarcacoes(chave);
+      const lista = rotinas.filter(r => r.freq === freq);
+      const el    = document.getElementById("lista-rotinas-"+freq);
+      if (!el) return;
+      el.innerHTML = lista.length === 0
+        ? `<p style="font-size:12px;color:var(--text-muted);padding:8px 0;">Nenhuma rotina cadastrada.</p>`
+        : lista.map(r => htmlRotina(r, marc)).join("");
+    });
+  }
+
+  function renderRotinasPorComodo(rotinas) {
+    const wrapper = document.getElementById("rotinas-comodo");
+    if (!wrapper) return;
+    // Para a vista de cômodo usamos as marcações de hoje
+    const marc = lerMarcacoes(CA.diaAtual);
+    const grupos = {};
+    rotinas.forEach(r => {
+      const c = r.comodo || "Geral";
+      if (!grupos[c]) grupos[c] = [];
+      grupos[c].push(r);
+    });
+    if (!Object.keys(grupos).length) {
+      wrapper.innerHTML = `<div class="ca-vazio"><i class="fa-solid fa-door-open"></i><p>Nenhuma rotina com cômodo definido.</p></div>`;
+      return;
+    }
+    wrapper.innerHTML = Object.entries(grupos).map(([comodo, lista]) => {
+      const info = CA.COMODOS.find(c => c.nome === comodo) || { icone:"fa-house" };
+      return `<div class="ca-secao">
+        <div class="ca-secao-titulo"><i class="fa-solid ${info.icone}" style="color:var(--accent)"></i> ${comodo}</div>
+        ${lista.map(r => htmlRotina(r, marc)).join("")}
+      </div>`;
+    }).join("");
+  }
+
+  function renderRotinas() {
+    const rotinas = Store.ler(CA.CHAVES.rotinas, []);
+    atualizarNavDia();
+    atualizarNavSemana();
+    atualizarNavMes();
+    renderRotinasPorFreq(rotinas);
+    renderRotinasPorComodo(rotinas);
+  }
+
+  function trocarViewRotinas(vista) {
+    CA.viewRotinas = vista;
+    document.getElementById("rotinas-frequencia").style.display = vista==="frequencia" ? "block" : "none";
+    document.getElementById("rotinas-comodo").style.display     = vista==="comodo"     ? "block" : "none";
+    document.getElementById("vbtn-frequencia").classList.toggle("ativo", vista==="frequencia");
+    document.getElementById("vbtn-comodo").classList.toggle("ativo",     vista==="comodo");
+  }
+
+  /** Abre modal para CRIAR nova rotina — limpa todos os campos */
+  function abrirModalRotina() {
+    document.getElementById("r-id").value    = "";
+    document.getElementById("r-nome").value  = "";
+    document.getElementById("r-freq").value  = "diaria";
+    document.getElementById("r-comodo").value = "";
+    document.getElementById("r-dia").value   = "";
+    document.getElementById("rot-modal-titulo").textContent = "Nova Rotina";
+    abrirModal("modal-rotina");
+  }
+
+  /**
+   * Salva rotina: cria nova se #r-id vazio, atualiza existente se preenchido.
+   * Mesma lógica do salvarProblema — um campo hidden decide o caminho.
+   */
+  function salvarRotina() {
+    const nome = document.getElementById("r-nome").value.trim();
+    if (!nome) { alert("Informe o nome da rotina."); return; }
+    const idExistente = document.getElementById("r-id").value.trim();
+    const rotinas = Store.ler(CA.CHAVES.rotinas, []);
+
+    if (idExistente) {
+      /* EDIÇÃO */
+      const idx = rotinas.findIndex(r => r.id === idExistente);
+      if (idx !== -1) {
+        rotinas[idx].nome   = nome;
+        rotinas[idx].freq   = document.getElementById("r-freq").value;
+        rotinas[idx].comodo = document.getElementById("r-comodo").value;
+        rotinas[idx].dia    = document.getElementById("r-dia").value;
+      }
+    } else {
+      /* CRIAÇÃO */
+      rotinas.push({
+        id:     gerarId(),
+        nome,
+        freq:   document.getElementById("r-freq").value,
+        comodo: document.getElementById("r-comodo").value,
+        dia:    document.getElementById("r-dia").value,
+      });
+    }
+
+    Store.salvar(CA.CHAVES.rotinas, rotinas);
+    fecharModal("modal-rotina");
+    renderRotinas(); atualizarDashboard();
+  }
+
+  /* ─────────────── 7. MANUTENÇÃO ─────────────── */
+
+  function statusManut(m) {
+    if (!m.proxima) return "medio";
+    const d = diasAte(m.proxima);
+    if (d === null) return "medio";
+    if (d < 0) return "ruim";
+    if (d <= 7) return "medio";
+    return "ok";
+  }
+  function corSemaforo(st) {
+    return st==="ok" ? "var(--ca-ok)" : st==="medio" ? "var(--ca-medio)" : "var(--ca-ruim)";
+  }
+
+  function renderManutencoes() {
+    const lista = Store.ler(CA.CHAVES.manutencoes, []);
+    const el    = document.getElementById("lista-manutencao");
+    if (!el) return;
+    if (!lista.length) {
+      el.innerHTML = `<div class="ca-vazio" style="grid-column:1/-1"><i class="fa-solid fa-screwdriver-wrench"></i><p>Nenhuma manutenção cadastrada.</p></div>`;
+      return;
+    }
+    const ord = [...lista].sort((a,b) => (a.proxima||"9999").localeCompare(b.proxima||"9999"));
+    el.innerHTML = ord.map(m => {
+      const st  = statusManut(m);
+      const cor = corSemaforo(st);
+      const dr  = m.proxima ? diasAte(m.proxima) : null;
+      const txt = !m.proxima ? "Não definida"
+                : dr < 0    ? `Vencida há ${Math.abs(dr)} dia(s)`
+                : dr === 0  ? "Vence hoje"
+                : `Próxima: <b>${formatarData(m.proxima)}</b> (${dr} dias)`;
+      return `<div class="ca-manut-card">
+        <div class="ca-manut-head">
+          <div class="ca-manut-semaforo" style="background:${cor}"></div>
+          <div class="ca-manut-nome">${m.nome}</div>
+          <div class="ca-manut-acoes">
+            <button class="ca-manut-btn concluir" title="Concluir hoje" onclick="concluirManut('${m.id}')"><i class="fa-solid fa-check"></i></button>
+            <button class="ca-manut-btn excluir"  title="Excluir"       onclick="excluirManut('${m.id}')"><i class="fa-solid fa-trash"></i></button>
+          </div>
+        </div>
+        <div class="ca-manut-meta">
+          <span class="ca-manut-pill">${m.cat}</span>
+          <span class="ca-manut-pill">A cada ${m.freq} dias</span>
+          ${m.ultima ? `<span class="ca-manut-pill">Última: ${formatarData(m.ultima)}</span>` : ""}
+        </div>
+        <div class="ca-manut-proxima">${txt}</div>
+      </div>`;
+    }).join("");
+  }
+
+  function concluirManut(id) {
+    const lista = Store.ler(CA.CHAVES.manutencoes, []);
+    const idx = lista.findIndex(m => m.id === id);
+    if (idx === -1) return;
+    lista[idx].ultima  = hojeStr();
+    lista[idx].proxima = somaDias(hojeStr(), Number(lista[idx].freq));
+    Store.salvar(CA.CHAVES.manutencoes, lista);
+    ganharXP(20); renderManutencoes(); atualizarDashboard(); renderDashProximasManut();
+  }
+  function excluirManut(id) {
+    Store.salvar(CA.CHAVES.manutencoes, Store.ler(CA.CHAVES.manutencoes,[]).filter(m => m.id !== id));
+    renderManutencoes(); atualizarDashboard(); renderDashProximasManut();
+  }
+  function abrirModalManut() { abrirModal("modal-manut"); }
+  function salvarManut() {
+    const nome = document.getElementById("m-nome").value.trim();
+    const freq = Number(document.getElementById("m-freq").value);
+    if (!nome || !freq) { alert("Preencha o nome e a frequência."); return; }
+    const ultima  = document.getElementById("m-ultima").value || null;
+    const proxima = ultima ? somaDias(ultima, freq) : null;
+    const lista   = Store.ler(CA.CHAVES.manutencoes, []);
+    lista.push({ id:gerarId(), nome, cat:document.getElementById("m-cat").value, freq, ultima, proxima });
+    Store.salvar(CA.CHAVES.manutencoes, lista);
+    fecharModal("modal-manut");
+    document.getElementById("m-nome").value  = "";
+    document.getElementById("m-freq").value  = "";
+    document.getElementById("m-ultima").value = "";
+    renderManutencoes(); atualizarDashboard(); renderDashProximasManut();
+  }
+
+  /* ─────────────── 8. COMPRAS ─────────────── */
+
+  function renderCompras() {
+    const todos    = Store.ler(CA.CHAVES.compras, []);
+    const cat      = CA.filtroCompras;
+    const pendentes = todos.filter(i => !i.comprado && (cat==="todos" || i.cat===cat));
+    const comprados = todos.filter(i =>  i.comprado);
+    const total    = todos.length;
+    const pct      = total===0 ? 0 : Math.round((comprados.length/total)*100);
+
+    document.getElementById("compras-prog-bar").style.width      = pct + "%";
+    document.getElementById("compras-prog-texto").textContent    = `${comprados.length} de ${total} itens`;
+
+    const elPend = document.getElementById("lista-compras-pendentes");
+    if (!pendentes.length) {
+      elPend.innerHTML = `<div class="ca-vazio"><i class="fa-solid fa-cart-shopping"></i>
+        <p>${comprados.length?"Todos os itens foram comprados! 🎉":"Lista vazia. Adicione itens acima."}</p></div>`;
+    } else {
+      const grupos = {};
+      pendentes.forEach(i => { if (!grupos[i.cat]) grupos[i.cat]=[]; grupos[i.cat].push(i); });
+      elPend.innerHTML = Object.entries(grupos).map(([c,its]) => `
+        <div style="margin-bottom:16px">
+          <div style="font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:1.5px;color:var(--text-muted);margin-bottom:8px">${c}</div>
+          ${its.map(i => `
+            <div class="ca-compra-item">
+              <div class="ca-compra-check" onclick="marcarComprado('${i.id}')"></div>
+              <span class="ca-compra-nome">${i.nome}</span>
+              ${i.qtd ? `<span class="ca-compra-qtd">${i.qtd}</span>` : ""}
+              ${i.obs ? `<span style="font-size:10px;color:var(--text-muted)" title="${i.obs}"><i class="fa-solid fa-note-sticky"></i></span>` : ""}
+              <button class="ca-compra-del" onclick="excluirCompra('${i.id}')"><i class="fa-solid fa-xmark"></i></button>
+            </div>`).join("")}
+        </div>`).join("");
+    }
+
+    const btn = document.getElementById("btn-comprados-toggle");
+    document.getElementById("qtd-comprados").textContent = comprados.length;
+    btn.style.display = comprados.length ? "block" : "none";
+    document.getElementById("lista-comprados").innerHTML = comprados.map(i => `
+      <div class="ca-compra-item comprado">
+        <div class="ca-compra-check"><i class="fa-solid fa-check" style="font-size:10px"></i></div>
+        <span class="ca-compra-nome">${i.nome}</span>
+        <span class="ca-compra-qtd">${i.cat}</span>
+        <button class="ca-compra-del" onclick="excluirCompra('${i.id}')"><i class="fa-solid fa-xmark"></i></button>
+      </div>`).join("");
+
+    renderFiltrosCompra(todos);
+  }
+
+  function renderFiltrosCompra(todos) {
+    const cats = [...new Set(todos.map(i => i.cat))];
+    const el = document.getElementById("filtros-compra");
+    el.innerHTML = `<button class="ca-cat-pill ${CA.filtroCompras==="todos"?"ativo":""}" onclick="filtrarCompras('todos')">Todos</button>`;
+    cats.forEach(c => {
+      el.innerHTML += `<button class="ca-cat-pill ${CA.filtroCompras===c?"ativo":""}" onclick="filtrarCompras('${c}')">${c}</button>`;
+    });
+  }
+
+  function filtrarCompras(cat) { CA.filtroCompras = cat; renderCompras(); }
+  function marcarComprado(id) {
+    const todos = Store.ler(CA.CHAVES.compras, []);
+    const idx = todos.findIndex(i => i.id===id);
+    if (idx===-1) return;
+    todos[idx].comprado = true;
+    Store.salvar(CA.CHAVES.compras, todos);
+    renderCompras(); atualizarDashboard();
+  }
+  function excluirCompra(id) {
+    Store.salvar(CA.CHAVES.compras, Store.ler(CA.CHAVES.compras,[]).filter(i => i.id!==id));
+    renderCompras(); atualizarDashboard();
+  }
+  function toggleComprados() { document.getElementById("lista-comprados").classList.toggle("aberto"); }
+  function abrirModalCompra() { abrirModal("modal-compra"); }
+  function salvarCompra() {
+    const nome = document.getElementById("c-nome").value.trim();
+    if (!nome) { alert("Informe o nome do item."); return; }
+    const todos = Store.ler(CA.CHAVES.compras, []);
+    todos.push({ id:gerarId(), nome, qtd:document.getElementById("c-qtd").value.trim(), cat:document.getElementById("c-cat").value, obs:document.getElementById("c-obs").value.trim(), comprado:false });
+    Store.salvar(CA.CHAVES.compras, todos);
+    fecharModal("modal-compra");
+    document.getElementById("c-nome").value = "";
+    document.getElementById("c-qtd").value  = "";
+    document.getElementById("c-obs").value  = "";
+    renderCompras(); atualizarDashboard();
+  }
+
+  /* ─────────────── 9. FINANÇAS ─────────────── */
+
+  /** Chave do Store para o mês atual das finanças */
+  function chaveFinMes(mes) { return "casa_fin_" + mes; }
+
+  function renderFinancas() {
+    const lista = Store.ler(chaveFinMes(CA.finMes), []);
+    const el    = document.getElementById("lista-financas");
+    if (!el) return;
+    const total = lista.reduce((s,f) => s + Number(f.valor), 0);
+    document.getElementById("fin-total-valor").textContent =
+      total.toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
+
+    if (!lista.length) {
+      el.innerHTML = `<div class="ca-vazio"><i class="fa-solid fa-wallet"></i><p>Nenhuma despesa cadastrada para este mês.</p></div>`;
+      return;
+    }
+    el.innerHTML = lista.map(f => {
+      const icone = CA.FIN_ICONES[f.cat] || "fa-ellipsis";
+      return `<div class="ca-fin-item">
+        <div class="ca-fin-icone"><i class="fa-solid ${icone}"></i></div>
+        <span class="ca-fin-nome">${f.nome} <small style="color:var(--text-muted);font-size:10px">${f.cat}</small></span>
+        <span class="ca-fin-valor">${Number(f.valor).toLocaleString("pt-BR",{style:"currency",currency:"BRL"})}</span>
+        <div class="ca-fin-acoes">
+          <button class="ca-fin-btn" onclick="excluirFinanca('${f.id}')" title="Excluir"><i class="fa-solid fa-trash"></i></button>
+        </div>
+      </div>`;
+    }).join("");
+  }
+
+  function excluirFinanca(id) {
+    const lista = Store.ler(chaveFinMes(CA.finMes), []);
+    Store.salvar(chaveFinMes(CA.finMes), lista.filter(f => f.id!==id));
+    renderFinancas(); atualizarDashboard();
+  }
+  function abrirModalFinanca() { abrirModal("modal-financa"); }
+  function salvarFinanca() {
+    const nome  = document.getElementById("f-nome").value.trim();
+    const valor = Number(document.getElementById("f-valor").value);
+    if (!nome || !valor) { alert("Preencha o nome e o valor."); return; }
+    const lista = Store.ler(chaveFinMes(CA.finMes), []);
+    lista.push({ id:gerarId(), nome, valor, cat:document.getElementById("f-cat").value });
+    Store.salvar(chaveFinMes(CA.finMes), lista);
+    fecharModal("modal-financa");
+    document.getElementById("f-nome").value  = "";
+    document.getElementById("f-valor").value = "";
+    renderFinancas(); atualizarDashboard();
+  }
+
+  /**
+   * Copia as despesas do mês anterior para o mês atual.
+   * Alerta o usuário se já houver dados no mês atual.
+   */
+  function copiarMesAnterior() {
+    const mesAnterior = deslocarMes(CA.finMes, -1);
+    const origem = Store.ler(chaveFinMes(mesAnterior), []);
+    if (!origem.length) {
+      alert(`O mês anterior (${labelMes(mesAnterior)}) não tem despesas cadastradas.`);
+      return;
+    }
+    const destino = Store.ler(chaveFinMes(CA.finMes), []);
+    if (destino.length > 0) {
+      if (!confirm(`O mês atual (${labelMes(CA.finMes)}) já tem ${destino.length} despesa(s). Deseja substituir tudo com os dados de ${labelMes(mesAnterior)}?`)) return;
+    }
+    // Copia com novos IDs para não ter colisão
+    const copia = origem.map(f => ({ ...f, id: gerarId() }));
+    Store.salvar(chaveFinMes(CA.finMes), copia);
+    renderFinancas(); atualizarDashboard();
+    if (document.getElementById("rt-fin")?.classList.contains("aberto")) renderTrackerFinMeses();
+  }
+
+  /** Relatório anual: abre modal com análise completa do ano informado */
+  function abrirRelatorioAnual(ano) {
+    document.getElementById("rel-ano-titulo").textContent = ano;
+    const totaisMes = [];
+    const catMap    = {}; // { "Energia": total_anual }
+    let totalAnual  = 0;
+
+    for (let m = 1; m <= 12; m++) {
+      const chave = `${ano}-${pad(m)}`;
+      const lista = Store.ler(chaveFinMes(chave), []);
+      const total = lista.reduce((s,f) => s + Number(f.valor), 0);
+      totaisMes.push({ mes: CA.MESES_NOME[m-1], total });
+      totalAnual += total;
+      lista.forEach(f => { catMap[f.cat] = (catMap[f.cat]||0) + Number(f.valor); });
+    }
+
+    const mesesComDados = totaisMes.filter(m => m.total > 0);
+    const mediaMensal   = mesesComDados.length ? totalAnual / mesesComDados.length : 0;
+    const maxMes        = Math.max(...totaisMes.map(m => m.total), 1);
+
+    // Categorias ordenadas por valor
+    const cats = Object.entries(catMap).sort((a,b) => b[1]-a[1]);
+
+    const body = document.getElementById("rel-body");
+    body.innerHTML = `
+      <!-- Resumo em 2 stats -->
+      <div class="ca-relatorio-resumo">
+        <div class="ca-rel-stat">
+          <div class="ca-rel-stat-val">${totalAnual.toLocaleString("pt-BR",{style:"currency",currency:"BRL",maximumFractionDigits:0})}</div>
+          <div class="ca-rel-stat-label">Total ${ano}</div>
+        </div>
+        <div class="ca-rel-stat">
+          <div class="ca-rel-stat-val">${mediaMensal.toLocaleString("pt-BR",{style:"currency",currency:"BRL",maximumFractionDigits:0})}</div>
+          <div class="ca-rel-stat-label">Média Mensal</div>
+        </div>
+      </div>
+
+      <!-- Gasto por mês -->
+      <div class="ca-rel-divider"><i class="fa-solid fa-calendar" style="color:var(--accent)"></i> Gasto por Mês</div>
+      ${totaisMes.map(m => `
+        <div class="ca-rel-row">
+          <span class="ca-rel-label">${m.mes}</span>
+          <div class="ca-rel-bar-wrap">
+            <div class="ca-rel-bar-fill" style="width:${Math.round((m.total/maxMes)*100)}%"></div>
+          </div>
+          <span class="ca-rel-val">${m.total > 0 ? m.total.toLocaleString("pt-BR",{style:"currency",currency:"BRL"}) : "—"}</span>
+        </div>`).join("")}
+
+      <!-- Gasto por categoria -->
+      <div class="ca-rel-divider" style="margin-top:16px"><i class="fa-solid fa-tag" style="color:var(--accent)"></i> Gasto por Categoria</div>
+      ${cats.length ? cats.map(([cat,val]) => `
+        <div class="ca-rel-row">
+          <span class="ca-rel-label" style="width:80px;font-size:9px">${cat}</span>
+          <div class="ca-rel-bar-wrap">
+            <div class="ca-rel-bar-fill" style="width:${Math.round((val/totalAnual)*100)}%;background:var(--ca-azul)"></div>
+          </div>
+          <span class="ca-rel-val">${val.toLocaleString("pt-BR",{style:"currency",currency:"BRL"})}</span>
+        </div>`).join("")
+      : '<p style="font-size:12px;color:var(--text-muted);">Sem dados de categoria.</p>'}
+    `;
+    abrirModal("modal-relatorio");
+  }
+
+  /* ─────────────── 10. INVENTÁRIO ─────────────── */
+
+  function renderInventario() {
+    const lista = Store.ler(CA.CHAVES.inventario, []);
+    const el    = document.getElementById("lista-inventario");
+    if (!el) return;
+    if (!lista.length) {
+      el.innerHTML = `<div class="ca-vazio"><i class="fa-solid fa-boxes-stacked"></i><p>Inventário vazio.</p></div>`;
+      return;
+    }
+    const grupos = {};
+    lista.forEach(i => { if (!grupos[i.comodo]) grupos[i.comodo]=[]; grupos[i.comodo].push(i); });
+    el.innerHTML = Object.entries(grupos).map(([comodo,itens]) => {
+      const info  = CA.COMODOS.find(c => c.nome===comodo) || { icone:"fa-house" };
+      const tenho = itens.filter(i => i.tipo==="tenho");
+      const quero = itens.filter(i => i.tipo==="quero");
+      const linha = (arr, tipo) => arr.length ? arr.map(i =>
+        `<div class="ca-inv-item">
+          <i class="fa-solid ${tipo==="tenho"?"fa-check-circle":"fa-cart-plus"}"
+             style="font-size:10px;color:${tipo==="tenho"?"var(--ca-ok)":"var(--ca-medio)"}"></i>
+          <span title="${i.obs||""}">${i.nome}${i.obs?` <small style="color:var(--text-muted)">(${i.obs})</small>`:""}</span>
+          <button class="ca-inv-del" onclick="excluirInventario('${i.id}')"><i class="fa-solid fa-xmark"></i></button>
+        </div>`).join("")
+        : `<div style="font-size:11px;color:var(--text-muted)">Nenhum item.</div>`;
+      return `<div class="ca-inv-comodo">
+        <div class="ca-inv-comodo-head">
+          <div class="ca-inv-comodo-icone"><i class="fa-solid ${info.icone}"></i></div>
+          <div class="ca-inv-comodo-nome">${comodo}</div>
+          <span style="font-size:10px;color:var(--text-muted)">${itens.length} item(s)</span>
+        </div>
+        <div class="ca-inv-cols">
+          <div><div class="ca-inv-sub">✅ Tenho</div>${linha(tenho,"tenho")}</div>
+          <div><div class="ca-inv-sub">🛒 Quero Comprar</div>${linha(quero,"quero")}</div>
+        </div>
+      </div>`;
+    }).join("");
+  }
+
+  function excluirInventario(id) {
+    Store.salvar(CA.CHAVES.inventario, Store.ler(CA.CHAVES.inventario,[]).filter(i => i.id!==id));
+    renderInventario();
+  }
+  function abrirModalInventario() { abrirModal("modal-inventario"); }
+  function salvarInventario() {
+    const nome = document.getElementById("i-nome").value.trim();
+    if (!nome) { alert("Informe o nome."); return; }
+    const lista = Store.ler(CA.CHAVES.inventario, []);
+    lista.push({ id:gerarId(), nome, comodo:document.getElementById("i-comodo").value, tipo:document.getElementById("i-tipo").value, obs:document.getElementById("i-obs").value.trim() });
+    Store.salvar(CA.CHAVES.inventario, lista);
+    fecharModal("modal-inventario");
+    document.getElementById("i-nome").value = "";
+    document.getElementById("i-obs").value  = "";
+    renderInventario();
+  }
+
+  /* ─────────────── 11. PROBLEMAS ─────────────── */
+
+  function renderProblemas() {
+    const lista = Store.ler(CA.CHAVES.problemas, []);
+    const el    = document.getElementById("lista-problemas");
+    if (!el) return;
+    if (!lista.length) {
+      el.innerHTML = `<div class="ca-vazio"><i class="fa-solid fa-triangle-exclamation"></i><p>Nenhum problema registrado. Ótimo sinal!</p></div>`;
+      return;
+    }
+    const ordem = { alta:0, media:1, baixa:2 };
+    const ord   = [...lista].sort((a,b) => {
+      if (a.resolvido !== b.resolvido) return a.resolvido ? 1 : -1;
+      return (ordem[a.prioridade]||2) - (ordem[b.prioridade]||2);
+    });
+    const corP = { alta:"var(--ca-p-alta)", media:"var(--ca-p-media)", baixa:"var(--ca-p-baixa)" };
+    el.innerHTML = ord.map(p => `
+      <div class="ca-prob-item">
+        <div class="ca-prob-head">
+          <div class="ca-prob-prioridade" style="background:${corP[p.prioridade]||"var(--text-muted)"}"></div>
+          <div class="ca-prob-titulo">${p.titulo}</div>
+          <span class="ca-prob-status ${p.resolvido?"resolvido":"aberto"}">${p.resolvido?"✅ Resolvido":"⚠️ Aberto"}</span>
+        </div>
+        <div class="ca-prob-meta">
+          <span class="ca-prob-pill">${p.comodo}</span>
+          <span class="ca-prob-pill">${p.prioridade.charAt(0).toUpperCase()+p.prioridade.slice(1)}</span>
+          <span class="ca-prob-pill">${formatarData(p.data)}</span>
+          <div class="ca-prob-acoes">
+            <button class="ca-prob-btn" onclick="editarProblema('${p.id}')" title="Editar">
+              <i class="fa-solid fa-pen"></i>
+            </button>
+            ${!p.resolvido ? `<button class="ca-prob-btn resolver" onclick="resolverProblema('${p.id}')">✅ Resolver</button>` : ""}
+            <button class="ca-prob-btn excluir" onclick="excluirProblema('${p.id}')">Excluir</button>
+          </div>
+        </div>
+        ${p.obs ? `<div class="ca-prob-obs"><span style="font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:1.5px;color:var(--text-muted);display:block;margin-bottom:3px">Descrição</span>${p.obs}</div>` : ""}
+        ${p.resolucao ? `<div class="ca-prob-resolucao"><div class="ca-prob-resolucao-label"><i class="fa-solid fa-lightbulb"></i> Como resolver</div>${p.resolucao}</div>` : ""}
+      </div>`).join("");
+  }
+
+  function resolverProblema(id) {
+    const lista = Store.ler(CA.CHAVES.problemas, []);
+    const idx   = lista.findIndex(p => p.id===id);
+    if (idx===-1) return;
+    lista[idx].resolvido = true;
+    Store.salvar(CA.CHAVES.problemas, lista);
+    ganharXP(15); renderProblemas(); atualizarDashboard();
+  }
+  function excluirProblema(id) {
+    Store.salvar(CA.CHAVES.problemas, Store.ler(CA.CHAVES.problemas,[]).filter(p => p.id!==id));
+    renderProblemas(); atualizarDashboard();
+  }
+
+  /** Abre o modal de problema para criar um novo (limpa os campos) */
+  function abrirModalProblema() {
+    document.getElementById("p-id").value        = "";
+    document.getElementById("p-titulo").value    = "";
+    document.getElementById("p-obs").value       = "";
+    document.getElementById("p-resolucao").value = "";
+    document.getElementById("p-prioridade").value = "alta";
+    document.getElementById("p-comodo").value    = "Cozinha";
+    document.getElementById("prob-modal-titulo").textContent = "Novo Problema";
+    abrirModal("modal-problema");
+  }
+
+  /** Preenche o modal com os dados do problema existente para edição */
+  function editarProblema(id) {
+    const lista = Store.ler(CA.CHAVES.problemas, []);
+    const p     = lista.find(p => p.id === id);
+    if (!p) return;
+    document.getElementById("p-id").value           = p.id;
+    document.getElementById("p-titulo").value       = p.titulo;
+    document.getElementById("p-prioridade").value   = p.prioridade;
+    document.getElementById("p-comodo").value       = p.comodo;
+    document.getElementById("p-obs").value          = p.obs || "";
+    document.getElementById("p-resolucao").value    = p.resolucao || "";
+    document.getElementById("prob-modal-titulo").textContent = "Editar Problema";
+    abrirModal("modal-problema");
+  }
+
+  /**
+   * Salva um problema novo OU atualiza um existente.
+   * A presença de valor em #p-id decide qual caminho tomar.
+   */
+  function salvarProblema() {
+    const titulo = document.getElementById("p-titulo").value.trim();
+    if (!titulo) { alert("Informe o título do problema."); return; }
+    const idExistente = document.getElementById("p-id").value.trim();
+    const lista = Store.ler(CA.CHAVES.problemas, []);
+
+    if (idExistente) {
+      /* EDIÇÃO — atualiza o objeto que já existe na lista */
+      const idx = lista.findIndex(p => p.id === idExistente);
+      if (idx !== -1) {
+        lista[idx].titulo     = titulo;
+        lista[idx].prioridade = document.getElementById("p-prioridade").value;
+        lista[idx].comodo     = document.getElementById("p-comodo").value;
+        lista[idx].obs        = document.getElementById("p-obs").value.trim();
+        lista[idx].resolucao  = document.getElementById("p-resolucao").value.trim();
+      }
+    } else {
+      /* CRIAÇÃO — insere um problema novo */
+      lista.push({
+        id:         gerarId(),
+        titulo,
+        prioridade: document.getElementById("p-prioridade").value,
+        comodo:     document.getElementById("p-comodo").value,
+        obs:        document.getElementById("p-obs").value.trim(),
+        resolucao:  document.getElementById("p-resolucao").value.trim(),
+        data:       hojeStr(),
+        resolvido:  false,
+      });
+    }
+
+    Store.salvar(CA.CHAVES.problemas, lista);
+    fecharModal("modal-problema");
+    renderProblemas(); atualizarDashboard();
+  }
+
+  /* ─────────────── 11b. FOCO AGORA (card do dashboard) ─────────────── */
+
+  /**
+   * Renderiza a lista de foco com suporte a drag-and-drop nativo do HTML5.
+   * Cada item tem: alça de arraste (⠿), número de ordem, texto, botão excluir.
+   * O primeiro item recebe destaque visual — é o "agora".
+   */
+  function renderFoco() {
+    const lista = Store.ler(CA.CHAVES.foco, []);
+    const el    = document.getElementById("foco-lista");
+    if (!el) return;
+
+    if (!lista.length) {
+      el.innerHTML = `<div class="ca-foco-vazio"><i class="fa-solid fa-crosshairs"></i>Liste aqui o que vai fazer agora, na ordem de prioridade.</div>`;
+      return;
+    }
+
+    el.innerHTML = lista.map((item, idx) => `
+      <div class="ca-foco-item" draggable="true" data-idx="${idx}"
+           ondragstart="focoDragStart(event,${idx})"
+           ondragover="focoDragOver(event)"
+           ondragleave="focoDragLeave(event)"
+           ondrop="focoDrop(event,${idx})">
+        <i class="fa-solid fa-grip-vertical ca-foco-handle"></i>
+        <div class="ca-foco-num">${idx + 1}</div>
+        <span class="ca-foco-texto">${item}</span>
+        <button class="ca-foco-del" onclick="excluirFoco(${idx})" title="Remover">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>`).join("");
+  }
+
+  function adicionarFoco() {
+    const input = document.getElementById("foco-input");
+    const texto = input.value.trim();
+    if (!texto) return;
+    const lista = Store.ler(CA.CHAVES.foco, []);
+    lista.push(texto);
+    Store.salvar(CA.CHAVES.foco, lista);
+    input.value = "";
+    renderFoco();
+  }
+
+  function excluirFoco(idx) {
+    const lista = Store.ler(CA.CHAVES.foco, []);
+    lista.splice(idx, 1);
+    Store.salvar(CA.CHAVES.foco, lista);
+    renderFoco();
+  }
+
+  /* ── Drag-and-drop para reordenar o foco ──
+     Usamos a API nativa HTML5 (draggable="true") sem biblioteca externa.
+     O índice de origem fica numa variável de estado simples. */
+  let _focoDragIdx = null;
+
+  function focoDragStart(event, idx) {
+    _focoDragIdx = idx;
+    event.currentTarget.classList.add("dragging");
+    /* Necessário para Firefox funcionar corretamente */
+    event.dataTransfer.effectAllowed = "move";
+    event.dataTransfer.setData("text/plain", idx);
+  }
+
+  function focoDragOver(event) {
+    event.preventDefault();
+    event.dataTransfer.dropEffect = "move";
+    event.currentTarget.classList.add("drag-over");
+  }
+
+  function focoDragLeave(event) {
+    event.currentTarget.classList.remove("drag-over");
+  }
+
+  function focoDrop(event, idxDestino) {
+    event.preventDefault();
+    event.currentTarget.classList.remove("drag-over");
+    if (_focoDragIdx === null || _focoDragIdx === idxDestino) return;
+
+    const lista = Store.ler(CA.CHAVES.foco, []);
+    /* Remove o item de origem e insere na posição de destino */
+    const [movido] = lista.splice(_focoDragIdx, 1);
+    lista.splice(idxDestino, 0, movido);
+    Store.salvar(CA.CHAVES.foco, lista);
+    _focoDragIdx = null;
+    renderFoco();
+  }
+
+  /* ─────────────── 11c. RESET DE XP ─────────────── */
+
+  /**
+   * Zera o XP e força o dashboard a redesenhar imediatamente.
+   * Antes, o reset gravava 0 mas a barra ficava com o valor antigo
+   * porque atualizarDashboard() lê o Store — agora chama direto.
+   */
+  function resetarXP() {
+    if (!confirm("Tem certeza que quer zerar o XP da Casa? Essa ação não pode ser desfeita.")) return;
+    Store.salvar(CA.CHAVES.xp, 0);
+    /* Atualiza na tela sem esperar nenhum outro evento */
+    document.getElementById("kpi-xp").textContent      = "0";
+    document.getElementById("ca-xp-label").textContent = "0 XP";
+    /* Recalcula integridade (o XP não entra no cálculo, mas atualiza tudo junto) */
+    atualizarDashboard();
+  }
+
+  /* ─────────────── 12. DASHBOARD ─────────────── */
+
+  function statusManutDash(m) { return statusManut(m); }
+
+  function calcularIntegridade() {
+    const rotinas = Store.ler(CA.CHAVES.rotinas, []);
+    const marc    = lerMarcacoes(CA.diaAtual);
+    const manut   = Store.ler(CA.CHAVES.manutencoes, []);
+    const probs   = Store.ler(CA.CHAVES.problemas, []);
+    const fins    = Store.ler(chaveFinMes(CA.finMes), []);
+
+    const rDiarias = rotinas.filter(r => r.freq==="diaria");
+    const rFeitas  = rDiarias.filter(r => marc[r.id]==="feito");
+    const fR = rDiarias.length ? rFeitas.length / rDiarias.length : 0.5;
+
+    const mOk = manut.filter(m => statusManut(m) !== "ruim").length;
+    const fM  = manut.length ? mOk / manut.length : 0.5;
+
+    const pAb = probs.filter(p => !p.resolvido).length;
+    const fP  = probs.length ? Math.max(0, 1-(pAb/probs.length)) : 1;
+
+    const fF  = fins.length ? 1 : 0;
+    return Math.min(100, Math.max(0, Math.round(fR*40 + fM*30 + fP*20 + fF*10)));
+  }
+
+  function labelIntegridade(pct) {
+    if (pct>=90) return "🏆 Excelente";
+    if (pct>=75) return "✨ Muito boa";
+    if (pct>=55) return "👍 Boa";
+    if (pct>=35) return "⚠️ Atenção";
+    return "🔴 Crítica";
+  }
+
+  function renderDashProximasManut() {
+    const manut = Store.ler(CA.CHAVES.manutencoes, []);
+    const el    = document.getElementById("dash-proximas-manut");
+    if (!el) return;
+    const prox = [...manut].filter(m => m.proxima).sort((a,b) => a.proxima.localeCompare(b.proxima)).slice(0,4);
+    if (!prox.length) {
+      el.innerHTML = `<div class="ca-vazio" style="padding:20px"><i class="fa-solid fa-screwdriver-wrench"></i><p>Nenhuma manutenção cadastrada.</p></div>`;
+      return;
+    }
+    const cor = { ok:"var(--ca-ok)", medio:"var(--ca-medio)", ruim:"var(--ca-ruim)" };
+    el.innerHTML = prox.map(m => {
+      const st = statusManut(m);
+      const d  = diasAte(m.proxima);
+      const t  = d < 0 ? `Vencida há ${Math.abs(d)}d` : d===0 ? "Hoje!" : `Em ${d} dia(s)`;
+      return `<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
+        <div style="width:8px;height:8px;border-radius:50%;background:${cor[st]};flex-shrink:0"></div>
+        <span style="flex:1;font-size:13px;font-weight:600">${m.nome}</span>
+        <span style="font-size:10px;font-weight:800;color:${cor[st]}">${t}</span>
+      </div>`;
+    }).join("");
+  }
+
+  function atualizarDashboard() {
+    const rotinas = Store.ler(CA.CHAVES.rotinas, []);
+    const marc    = lerMarcacoes(CA.diaAtual);
+    const manut   = Store.ler(CA.CHAVES.manutencoes, []);
+    const compras = Store.ler(CA.CHAVES.compras, []);
+    const probs   = Store.ler(CA.CHAVES.problemas, []);
+    const fins    = Store.ler(chaveFinMes(CA.finMes), []);
+    const xp      = Store.ler(CA.CHAVES.xp, 0);
+
+    const rDiarias = rotinas.filter(r => r.freq==="diaria");
+    const rFeitas  = rDiarias.filter(r => marc[r.id]==="feito");
+    document.getElementById("kpi-rotinas-feitas").textContent  = `${rFeitas.length}/${rDiarias.length}`;
+    document.getElementById("kpi-manut-pendentes").textContent = manut.filter(m => statusManut(m)==="ruim").length;
+    document.getElementById("kpi-compras").textContent         = compras.filter(i => !i.comprado).length;
+    document.getElementById("kpi-problemas").textContent       = probs.filter(p => !p.resolvido).length;
+    document.getElementById("kpi-xp").textContent             = xp;
+
+    const totalFin = fins.reduce((s,f) => s + Number(f.valor), 0);
+    document.getElementById("kpi-gasto").textContent = totalFin.toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
+
+    const pct = calcularIntegridade();
+    const bar = document.getElementById("ca-int-bar");
+    bar.style.width = pct + "%";
+    bar.style.background = pct>=75
+      ? "linear-gradient(90deg,var(--ca-ok),#34d399)"
+      : pct>=45
+      ? "linear-gradient(90deg,var(--ca-medio),#fcd34d)"
+      : "linear-gradient(90deg,var(--ca-ruim),#f97316)";
+
+    document.getElementById("ca-int-pct").textContent    = pct + "%";
+    document.getElementById("ca-int-label").textContent  = labelIntegridade(pct);
+    document.getElementById("ca-int-status").textContent = `${rFeitas.length} de ${rDiarias.length} rotinas hoje`;
+    document.getElementById("ca-xp-label").textContent   = xp + " XP";
+  }
+
+  /* ─────────────── 13. DADOS INICIAIS (seed) ─────────────── */
+  /*
+     Lista montada para: Hugo + Laila | 1 sala, 1 cozinha, 1 quarto,
+     1 escritório, 1 banheiro, 1 área privativa pequena | sem pets.
+
+     Só insere se a chave ainda não existir no Storage.
+     Para re-semear: F12 → Application → Clear site data.
+  */
+  function semearDados() {
+    if (!Store.ler(CA.CHAVES.rotinas, null)) {
+      Store.salvar(CA.CHAVES.rotinas, [
+
+        /* ── DIÁRIAS ─────────────────────────────────── */
+        // Quarto
+        { id:gerarId(), nome:"Arrumar a cama",              freq:"diaria", comodo:"Quarto",          dia:"" },
+        // Cozinha
+        { id:gerarId(), nome:"Lavar a louça",               freq:"diaria", comodo:"Cozinha",         dia:"" },
+        { id:gerarId(), nome:"Limpar bancada e fogão",       freq:"diaria", comodo:"Cozinha",         dia:"" },
+        { id:gerarId(), nome:"Guardar alimentos e embalagens",freq:"diaria", comodo:"Cozinha",        dia:"" },
+        // Sala
+        { id:gerarId(), nome:"Guardar objetos fora do lugar",freq:"diaria", comodo:"Sala",            dia:"" },
+        // Banheiro
+        { id:gerarId(), nome:"Jogar lixo do banheiro fora", freq:"diaria", comodo:"Banheiro",        dia:"" },
+        // Geral
+        { id:gerarId(), nome:"Tirar o lixo da cozinha",     freq:"diaria", comodo:"Geral",           dia:"" },
+        { id:gerarId(), nome:"Verificar e-mails e recados",  freq:"diaria", comodo:"Escritório",      dia:"" },
+
+        /* ── SEMANAIS ─────────────────────────────────── */
+        // Segunda — Sala e Escritório
+        { id:gerarId(), nome:"Aspirar sala e tapetes",       freq:"semanal", comodo:"Sala",           dia:"Segunda" },
+        { id:gerarId(), nome:"Organizar escritório e mesa",  freq:"semanal", comodo:"Escritório",     dia:"Segunda" },
+        // Terça — Banheiro
+        { id:gerarId(), nome:"Limpar vaso sanitário",        freq:"semanal", comodo:"Banheiro",       dia:"Terça" },
+        { id:gerarId(), nome:"Limpar pia e torneira",        freq:"semanal", comodo:"Banheiro",       dia:"Terça" },
+        { id:gerarId(), nome:"Limpar box e chuveiro",        freq:"semanal", comodo:"Banheiro",       dia:"Terça" },
+        // Quarta — Quarto
+        { id:gerarId(), nome:"Trocar roupa de cama",         freq:"semanal", comodo:"Quarto",         dia:"Quarta" },
+        { id:gerarId(), nome:"Limpar espelhos e abajures",   freq:"semanal", comodo:"Quarto",         dia:"Quarta" },
+        // Quinta — Cozinha fundo
+        { id:gerarId(), nome:"Limpar microondas por dentro", freq:"semanal", comodo:"Cozinha",        dia:"Quinta" },
+        { id:gerarId(), nome:"Limpar pia e ralo da cozinha", freq:"semanal", comodo:"Cozinha",        dia:"Quinta" },
+        // Sexta — Área privativa + gerais
+        { id:gerarId(), nome:"Varrer área privativa",        freq:"semanal", comodo:"Área Privativa", dia:"Sexta" },
+        { id:gerarId(), nome:"Lavar tapete do banheiro",     freq:"semanal", comodo:"Banheiro",       dia:"Sexta" },
+        // Sábado — Lavanderia
+        { id:gerarId(), nome:"Lavar roupa",                  freq:"semanal", comodo:"Geral",          dia:"Sábado" },
+        { id:gerarId(), nome:"Passar roupa",                 freq:"semanal", comodo:"Geral",          dia:"Sábado" },
+        // Domingo — Revisão geral
+        { id:gerarId(), nome:"Limpar piso de todos os cômodos", freq:"semanal", comodo:"Geral",       dia:"Domingo" },
+        { id:gerarId(), nome:"Revisar despensa e geladeira", freq:"semanal", comodo:"Cozinha",        dia:"Domingo" },
+
+        /* ── MENSAIS ─────────────────────────────────── */
+        // Cozinha
+        { id:gerarId(), nome:"Limpar geladeira por dentro",  freq:"mensal", comodo:"Cozinha",         dia:"" },
+        { id:gerarId(), nome:"Limpar forno",                  freq:"mensal", comodo:"Cozinha",         dia:"" },
+        { id:gerarId(), nome:"Limpar coifas e exaustores",    freq:"mensal", comodo:"Cozinha",         dia:"" },
+        { id:gerarId(), nome:"Limpar armários da cozinha",    freq:"mensal", comodo:"Cozinha",         dia:"" },
+        // Quarto
+        { id:gerarId(), nome:"Limpar embaixo da cama",        freq:"mensal", comodo:"Quarto",          dia:"" },
+        { id:gerarId(), nome:"Organizar guarda-roupa",        freq:"mensal", comodo:"Quarto",          dia:"" },
+        // Geral
+        { id:gerarId(), nome:"Limpar janelas e persianas",    freq:"mensal", comodo:"Geral",           dia:"" },
+        { id:gerarId(), nome:"Limpar ventiladores",           freq:"mensal", comodo:"Geral",           dia:"" },
+        { id:gerarId(), nome:"Limpeza profunda do banheiro",  freq:"mensal", comodo:"Banheiro",        dia:"" },
+        // Escritório
+        { id:gerarId(), nome:"Limpar teclado, mouse e monitor",freq:"mensal", comodo:"Escritório",     dia:"" },
+        { id:gerarId(), nome:"Organizar cabos e papéis",      freq:"mensal", comodo:"Escritório",      dia:"" },
+        // Área privativa
+        { id:gerarId(), nome:"Lavar área privativa",          freq:"mensal", comodo:"Área Privativa",  dia:"" },
+      ]);
+    }
+
+    if (!Store.ler(CA.CHAVES.manutencoes, null)) {
+      Store.salvar(CA.CHAVES.manutencoes, [
+        { id:gerarId(), nome:"Limpar filtro do ar-condicionado",    cat:"Climatização", freq:30,  ultima:somaDias(hojeStr(),-25), proxima:somaDias(hojeStr(), 5)   },
+        { id:gerarId(), nome:"Limpar ralos (banheiro e cozinha)",   cat:"Hidráulica",   freq:15,  ultima:somaDias(hojeStr(),-20), proxima:somaDias(hojeStr(),-5)  },
+        { id:gerarId(), nome:"Revisar vedação do chuveiro/torneira",cat:"Hidráulica",   freq:180, ultima:somaDias(hojeStr(),-60), proxima:somaDias(hojeStr(),120) },
+        { id:gerarId(), nome:"Revisar tomadas e disjuntores",       cat:"Elétrica",     freq:180, ultima:somaDias(hojeStr(),-30), proxima:somaDias(hojeStr(),150) },
+        { id:gerarId(), nome:"Limpar área privativa a fundo",       cat:"Área Externa", freq:30,  ultima:somaDias(hojeStr(),-10), proxima:somaDias(hojeStr(), 20) },
+        { id:gerarId(), nome:"Revisar silicone do box do banheiro", cat:"Banheiros",    freq:365, ultima:somaDias(hojeStr(),-90), proxima:somaDias(hojeStr(),275) },
+        { id:gerarId(), nome:"Dedetização preventiva",              cat:"Segurança",    freq:180, ultima:somaDias(hojeStr(),-45), proxima:somaDias(hojeStr(),135) },
+      ]);
+    }
+  }
+
+  /* ─────────────── 14. INIT ─────────────── */
+  document.addEventListener("DOMContentLoaded", () => {
+    // Inicializa os períodos com os valores de hoje
+    const hoje = new Date();
+    CA.diaAtual    = hojeStr();
+    CA.semanaAtual = chaveSemanaDaData(hoje);
+    CA.mesAtual    = chaveMes(hoje);
+    CA.finMes      = chaveMes(hoje);
+
+    semearDados();
+
+    // Atualiza rótulos de navegação
+    atualizarNavDia();
+    atualizarNavSemana();
+    atualizarNavMes();
+    atualizarNavFinMes();
+
+    // Renderiza todas as seções
+    renderRotinas();
+    renderManutencoes();
+    renderCompras();
+    renderFinancas();
+    renderInventario();
+    renderProblemas();
+    renderFoco();
+    renderDashProximasManut();
+    atualizarDashboard();
+  });
+  </script>
+</body>
+</html>

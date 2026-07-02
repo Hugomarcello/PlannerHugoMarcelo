@@ -1,0 +1,1100 @@
+<!DOCTYPE html>
+<html lang="pt-br" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Planner Hugo Marcelo | Hobbies e Lazer</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+
+  <style>
+    /* =====================================================================
+       Estilos SÓ da página Hobbies e Lazer — prefixo "hb-"
+       ===================================================================== */
+
+    /* ---- Dashboard ---- */
+    .hb-stats {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    @media (min-width: 700px)  { .hb-stats { grid-template-columns: repeat(3, 1fr); } }
+    @media (min-width: 1000px) { .hb-stats { grid-template-columns: repeat(6, 1fr); } }
+    .hb-stat {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 16px;
+      text-align: center;
+    }
+    .hb-stat i { font-size: 18px; color: var(--accent); margin-bottom: 8px; display: block; }
+    .hb-stat__num { font-size: 22px; font-weight: 900; letter-spacing: -0.5px; }
+    .hb-stat__label {
+      font-size: 9px; font-weight: 800; text-transform: uppercase;
+      letter-spacing: 1px; color: var(--text-muted); margin-top: 2px;
+    }
+
+    .hb-atual {
+      display: flex; gap: 10px; overflow-x: auto; padding-bottom: 4px; margin-bottom: 24px;
+    }
+    .hb-atual::-webkit-scrollbar { height: 0; }
+    .hb-atual__chip {
+      flex-shrink: 0;
+      display: flex; align-items: center; gap: 10px;
+      background: var(--accent-soft);
+      border: 1px solid var(--accent);
+      border-radius: 99px;
+      padding: 8px 14px 8px 8px;
+      font-size: 12px; font-weight: 700;
+    }
+    .hb-atual__chip i {
+      width: 26px; height: 26px; border-radius: 50%;
+      background: var(--accent); color: #fff;
+      display: grid; place-items: center; font-size: 11px;
+    }
+    .hb-atual__chip span.hb-atual__sub { color: var(--text-muted); font-weight: 600; }
+
+    /* ---- Abas dos módulos ---- */
+    .hb-tabs {
+      display: flex; gap: 8px; overflow-x: auto; margin-bottom: 20px; padding-bottom: 2px;
+    }
+    .hb-tabs::-webkit-scrollbar { height: 0; }
+    .hb-tab {
+      flex-shrink: 0;
+      display: flex; align-items: center; gap: 8px;
+      padding: 10px 16px;
+      border-radius: 12px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 12px; font-weight: 800;
+      transition: all .15s;
+    }
+    .hb-tab:hover { color: var(--text-strong); }
+    .hb-tab.is-active { background: var(--accent); border-color: var(--accent); color: #fff; box-shadow: var(--glow); }
+
+    /* ---- Barra de ferramentas do módulo (filtros + adicionar) ---- */
+    .hb-toolbar {
+      display: flex; flex-wrap: wrap; gap: 10px; align-items: center;
+      justify-content: space-between; margin-bottom: 18px;
+    }
+    .hb-filtros { display: flex; flex-wrap: wrap; gap: 8px; }
+    .hb-chip-filtro {
+      padding: 7px 13px; border-radius: 99px;
+      background: var(--bg-soft); border: 1px solid var(--border);
+      color: var(--text-muted); font-size: 10px; font-weight: 800;
+      text-transform: uppercase; letter-spacing: .5px;
+    }
+    .hb-chip-filtro.is-active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+    /* ---- Toggle de visualização (Grade / Lista) ---- */
+    .hb-view-toggle {
+      display: flex; gap: 4px;
+      background: var(--bg-soft); border: 1px solid var(--border);
+      border-radius: 10px; padding: 3px; flex-shrink: 0;
+    }
+    .hb-view-toggle button {
+      width: 32px; height: 32px; border-radius: 7px;
+      display: grid; place-items: center;
+      color: var(--text-muted); font-size: 12px; transition: all .15s;
+    }
+    .hb-view-toggle button:hover { color: var(--text-strong); }
+    .hb-view-toggle button.is-active { background: var(--accent); color: #fff; }
+
+    /* ---- Grid de cards do acervo ---- */
+    .hb-grid {
+      display: grid; gap: 16px;
+      grid-template-columns: repeat(2, 1fr);
+    }
+    @media (min-width: 640px)  { .hb-grid { grid-template-columns: repeat(3, 1fr); } }
+    @media (min-width: 1000px) { .hb-grid { grid-template-columns: repeat(4, 1fr); } }
+    @media (min-width: 1300px) { .hb-grid { grid-template-columns: repeat(5, 1fr); } }
+
+    .hb-card {
+      background: var(--panel); border: 1px solid var(--border);
+      border-radius: 16px; overflow: hidden; cursor: pointer;
+      transition: transform .15s, border-color .15s, box-shadow .15s;
+      display: flex; flex-direction: column;
+    }
+    .hb-card:hover { transform: translateY(-3px); border-color: var(--accent); box-shadow: var(--shadow); }
+    .hb-card__capa {
+      width: 100%; aspect-ratio: 2/3; background: var(--bg-soft);
+      display: grid; place-items: center; position: relative; overflow: hidden;
+    }
+    .hb-card__capa img { width: 100%; height: 100%; object-fit: cover; }
+    .hb-card__capa i.hb-card__icone-vazio { font-size: 28px; color: var(--text-muted); opacity: .5; }
+    .hb-card__fav {
+      position: absolute; top: 8px; right: 8px;
+      width: 26px; height: 26px; border-radius: 50%;
+      background: rgba(0,0,0,.55); backdrop-filter: blur(4px);
+      display: grid; place-items: center; color: #fff; font-size: 12px;
+    }
+    .hb-card__fav.is-fav { color: #f43f5e; }
+    .hb-card__status {
+      position: absolute; bottom: 8px; left: 8px;
+      background: rgba(0,0,0,.6); backdrop-filter: blur(4px);
+      color: #fff; font-size: 9px; font-weight: 800; text-transform: uppercase;
+      letter-spacing: .5px; padding: 4px 8px; border-radius: 99px;
+    }
+    .hb-card__body { padding: 10px 12px 12px; display: flex; flex-direction: column; gap: 4px; flex: 1; }
+    .hb-card__nome { font-size: 12.5px; font-weight: 700; line-height: 1.3; }
+    .hb-card__sub { font-size: 10.5px; color: var(--text-muted); font-weight: 600; }
+    .hb-card__nota { display: flex; gap: 2px; margin-top: 2px; }
+    .hb-card__nota i { font-size: 10px; color: var(--border); }
+    .hb-card__nota i.is-on { color: #f5b942; }
+    .hb-card__progress { height: 4px; border-radius: 99px; background: var(--bg-soft); overflow: hidden; margin-top: 6px; }
+    .hb-card__progress-fill { height: 100%; background: var(--accent); }
+
+    /* ---- Checklist de progresso (dentro dos jogos) ---- */
+    .hb-cl-progress-wrap { margin-bottom: 4px; }
+    .hb-cl-progress-bar { height: 8px; border-radius: 99px; background: var(--bg-soft); overflow: hidden; }
+    .hb-cl-progress-fill { height: 100%; background: var(--accent); transition: width .3s ease; }
+    .hb-cl-progress-txt { font-size: 11px; color: var(--text-muted); margin-top: 6px; font-weight: 700; }
+    .hb-cl-grupo { margin-bottom: 18px; }
+    .hb-cl-grupo__head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .hb-cl-grupo__nome { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: var(--accent); }
+    .hb-cl-grupo__count { font-size: 10px; color: var(--text-muted); font-weight: 700; }
+    .hb-cl-item { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); }
+    .hb-cl-item:last-child { border-bottom: none; }
+    .hb-cl-item__check {
+      width: 20px; height: 20px; border-radius: 6px; flex-shrink: 0;
+      border: 2px solid var(--border); display: grid; place-items: center;
+      color: transparent; font-size: 10px; cursor: pointer; transition: all .15s;
+    }
+    .hb-cl-item.is-feito .hb-cl-item__check { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .hb-cl-item__txt { flex: 1; font-size: 12.5px; cursor: pointer; }
+    .hb-cl-item.is-feito .hb-cl-item__txt { text-decoration: line-through; color: var(--text-muted); }
+    .hb-cl-item__del { color: var(--text-muted); font-size: 12px; padding: 4px; flex-shrink: 0; }
+    .hb-cl-item__del:hover { color: #ef4444; }
+    .hb-cl-add-row { display: flex; gap: 8px; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); flex-wrap: wrap; }
+    .hb-cl-nova-cat { display: flex; gap: 8px; margin-top: 10px; }
+    .hb-cl-add-row input, .hb-cl-add-row select, .hb-cl-nova-cat input {
+      flex: 1; min-width: 120px; padding: 9px 10px; border-radius: 8px;
+      background: var(--bg-soft); border: 1px solid var(--border);
+      color: var(--text-strong); font-size: 12px; font-family: inherit;
+    }
+    .hb-cl-add-row button, .hb-cl-nova-cat button { flex-shrink: 0; }
+    .hb-cl-vazio { font-size: 12px; color: var(--text-muted); text-align: center; padding: 24px 0; }
+
+    .hb-vazio {
+      text-align: center; padding: 50px 20px; color: var(--text-muted);
+      grid-column: 1 / -1;
+    }
+    .hb-vazio i { font-size: 30px; margin-bottom: 12px; display: block; color: var(--accent); opacity: .6; }
+    .hb-vazio p { font-size: 13px; margin-bottom: 16px; }
+
+    /* ---- Visão em lista (imagens pequenas) ---- */
+    .hb-lista { display: flex; flex-direction: column; gap: 8px; }
+    .hb-lista-item {
+      display: flex; align-items: center; gap: 12px;
+      background: var(--panel); border: 1px solid var(--border);
+      border-radius: 12px; padding: 8px 14px 8px 8px; cursor: pointer;
+      transition: border-color .15s, transform .1s;
+    }
+    .hb-lista-item:hover { border-color: var(--accent); transform: translateX(2px); }
+    .hb-lista__capa {
+      width: 44px; height: 44px; border-radius: 9px; flex-shrink: 0;
+      background: var(--bg-soft); display: grid; place-items: center;
+      overflow: hidden; position: relative;
+    }
+    .hb-lista__capa img { width: 100%; height: 100%; object-fit: cover; }
+    .hb-lista__capa i.hb-icone-vazio { font-size: 15px; color: var(--text-muted); opacity: .5; }
+    .hb-lista__corpo { flex: 1; min-width: 0; }
+    .hb-lista__nome { font-size: 13px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .hb-lista__sub { font-size: 10.5px; color: var(--text-muted); font-weight: 600; margin-top: 1px; }
+    .hb-lista__nota { display: flex; gap: 2px; margin-top: 3px; }
+    .hb-lista__nota i { font-size: 9px; color: var(--border); }
+    .hb-lista__nota i.is-on { color: #f5b942; }
+    .hb-lista__direita { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+    .hb-lista__status {
+      font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: .5px;
+      color: var(--text-muted); background: var(--bg-soft); padding: 4px 9px;
+      border-radius: 99px; white-space: nowrap;
+    }
+    .hb-lista__fav { color: var(--border); font-size: 14px; }
+    .hb-lista__fav.is-fav { color: #f43f5e; }
+    .hb-lista__progress { width: 54px; height: 4px; border-radius: 99px; background: var(--bg-soft); overflow: hidden; flex-shrink: 0; }
+    .hb-lista__progress-fill { height: 100%; background: var(--accent); }
+    @media (max-width: 500px) {
+      .hb-lista__status { display: none; } /* some no celular pra não apertar demais */
+    }
+
+    .hb-btn-add {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 10px 16px; border-radius: 10px;
+      background: var(--accent); color: #fff;
+      font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;
+      box-shadow: var(--glow); flex-shrink: 0;
+    }
+    .hb-btn-add:hover { filter: brightness(1.08); }
+
+    /* ---- Bucket List ---- */
+    .hb-bucket-item {
+      display: flex; align-items: center; gap: 14px;
+      background: var(--panel); border: 1px solid var(--border);
+      border-radius: 14px; padding: 14px 16px; margin-bottom: 10px;
+    }
+    .hb-bucket-item.is-feito { opacity: .55; }
+    .hb-bucket-item.is-feito .hb-bucket-item__nome { text-decoration: line-through; }
+    .hb-bucket-item__check {
+      width: 26px; height: 26px; border-radius: 50%; flex-shrink: 0;
+      border: 2px solid var(--border); display: grid; place-items: center;
+      color: transparent; font-size: 12px; transition: all .15s;
+    }
+    .hb-bucket-item.is-feito .hb-bucket-item__check { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .hb-bucket-item__txt { flex: 1; }
+    .hb-bucket-item__nome { font-size: 13px; font-weight: 700; }
+    .hb-bucket-item__cat {
+      font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: .5px;
+      color: var(--accent); margin-top: 2px;
+    }
+    .hb-bucket-item__del { color: var(--text-muted); font-size: 14px; padding: 6px; }
+    .hb-bucket-item__del:hover { color: #ef4444; }
+
+    /* ---- Modal genérico de item (maior que o de backup) ---- */
+    .hb-modal__box { max-width: 480px; max-height: 90dvh; display: flex; flex-direction: column; }
+    .hb-modal__body { padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; }
+    .hb-campo label {
+      display: block; font-size: 10px; font-weight: 800; text-transform: uppercase;
+      letter-spacing: 1px; color: var(--text-muted); margin-bottom: 6px;
+    }
+    .hb-campo__label-linha { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+    .hb-campo__label-linha label { margin-bottom: 0; }
+    .hb-link-buscar {
+      display: inline-flex; align-items: center; gap: 5px;
+      font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: .5px;
+      color: var(--accent);
+    }
+    .hb-link-buscar:hover { text-decoration: underline; }
+    .hb-campo input[type="text"], .hb-campo input[type="number"], .hb-campo input[type="url"],
+    .hb-campo select, .hb-campo textarea {
+      width: 100%; padding: 11px 12px; border-radius: 10px;
+      background: var(--bg-soft); border: 1px solid var(--border);
+      color: var(--text-strong); font-family: inherit; font-size: 13px;
+    }
+    .hb-campo textarea { resize: vertical; min-height: 60px; }
+    .hb-campo input:focus, .hb-campo select:focus, .hb-campo textarea:focus { outline: none; border-color: var(--accent); }
+    .hb-campo-linha { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .hb-nota-picker { display: flex; gap: 8px; }
+    .hb-nota-picker i { font-size: 22px; color: var(--border); cursor: pointer; transition: color .1s; }
+    .hb-nota-picker i.is-on { color: #f5b942; }
+    .hb-fav-toggle {
+      display: flex; align-items: center; gap: 10px;
+      background: var(--bg-soft); border: 1px solid var(--border);
+      border-radius: 10px; padding: 11px 12px; cursor: pointer;
+    }
+    .hb-fav-toggle i { font-size: 16px; color: var(--text-muted); }
+    .hb-fav-toggle.is-on i { color: #f43f5e; }
+    .hb-fav-toggle span { font-size: 12px; font-weight: 700; }
+    .hb-modal__footer {
+      padding: 16px 20px; border-top: 1px solid var(--border);
+      display: flex; gap: 10px; background: var(--panel); flex-shrink: 0;
+    }
+    .hb-modal__footer .btn { flex: 1; justify-content: center; }
+    .hb-btn-excluir { color: #ef4444 !important; }
+    .hb-btn-excluir:hover { border-color: #ef4444 !important; }
+  </style>
+</head>
+
+<body class="app" data-page="hobbies">
+
+  <div id="sidebar-container"></div>
+  <div id="overlay" class="overlay" onclick="fecharMenu()"></div>
+
+  <main class="main">
+
+    <header class="header">
+      <div class="header__left">
+        <button class="btn btn--icon btn--menu" onclick="abrirMenu()" aria-label="Abrir menu">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+        <div>
+          <h1 class="header__title">Hobbies e Lazer</h1>
+          <p class="header__subtitle">Seu diário de experiências</p>
+        </div>
+      </div>
+      <div class="header__actions">
+        <button class="btn" onclick="abrirSync()">
+          <i class="fa-solid fa-cloud-arrow-up" style="color: var(--accent)"></i>
+          <span>Backup</span>
+        </button>
+        <button class="btn btn--icon" id="btn-tema" onclick="Tema.alternar()" aria-label="Trocar tema">
+          <i class="fa-solid fa-moon"></i>
+        </button>
+      </div>
+    </header>
+
+    <div class="container fade-up">
+
+      <!-- ===================== DASHBOARD ===================== -->
+      <div class="hb-stats" id="hb-stats"></div>
+      <div class="hb-atual" id="hb-atual"></div>
+
+      <!-- ===================== ABAS ===================== -->
+      <div class="hb-tabs" id="hb-tabs"></div>
+
+      <!-- ===================== BARRA DE FERRAMENTAS ===================== -->
+      <div class="hb-toolbar">
+        <div class="hb-filtros" id="hb-filtros"></div>
+        <div style="display:flex; gap:10px; align-items:center;">
+          <div class="hb-view-toggle" id="hb-view-toggle"></div>
+          <button class="hb-btn-add" id="hb-btn-add" onclick="abrirModalNovo()">
+            <i class="fa-solid fa-plus"></i> <span id="hb-btn-add-label">Adicionar</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- ===================== CONTEÚDO DO MÓDULO ===================== -->
+      <div id="hb-conteudo"></div>
+
+    </div>
+
+    <div id="footer-container"></div>
+  </main>
+
+  <!-- ======= Modal de item (filmes/livros/jogos/lugares) ======= -->
+  <div id="modal-item" class="modal">
+    <div class="modal__box hb-modal__box">
+      <div class="modal__head">
+        <h3 id="hb-modal-titulo"><i class="fa-solid fa-pen" style="color:var(--accent)"></i> Item</h3>
+        <button class="modal__close" onclick="fecharModalItem()"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal__body hb-modal__body" id="hb-modal-campos"></div>
+      <div class="hb-modal__footer">
+        <button class="btn hb-btn-excluir" id="hb-btn-excluir" onclick="excluirItemAtual()" style="display:none;">
+          <i class="fa-solid fa-trash"></i> Excluir
+        </button>
+        <button class="btn btn--primary" onclick="salvarItemAtual()">
+          <i class="fa-solid fa-check"></i> Salvar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======= Modal de item da Bucket List ======= -->
+  <div id="modal-bucket" class="modal">
+    <div class="modal__box hb-modal__box" style="max-width:380px;">
+      <div class="modal__head">
+        <h3><i class="fa-solid fa-list-check" style="color:var(--accent)"></i> Novo desejo</h3>
+        <button class="modal__close" onclick="fecharModalBucket()"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal__body hb-modal__body">
+        <div class="hb-campo">
+          <label>O que você quer viver?</label>
+          <input type="text" id="bk-nome" placeholder="Ex: Conhecer Fernando de Noronha">
+        </div>
+        <div class="hb-campo">
+          <label>Categoria</label>
+          <select id="bk-categoria">
+            <option>Viagem</option>
+            <option>Experiência</option>
+            <option>Aventura</option>
+            <option>Evento</option>
+            <option>Outro</option>
+          </select>
+        </div>
+      </div>
+      <div class="hb-modal__footer">
+        <button class="btn btn--primary" onclick="salvarBucket()" style="width:100%; justify-content:center;">
+          <i class="fa-solid fa-plus"></i> Adicionar à lista
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======= Modal de Checklist de Progresso (só módulo Jogos) ======= -->
+  <div id="modal-checklist" class="modal">
+    <div class="modal__box hb-modal__box" style="max-width:520px;">
+      <div class="modal__head">
+        <h3 id="hb-cl-titulo"><i class="fa-solid fa-list-check" style="color:var(--accent)"></i> Checklist</h3>
+        <button class="modal__close" onclick="fecharChecklist()"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal__body hb-modal__body">
+        <div class="hb-cl-progress-wrap">
+          <div class="hb-cl-progress-bar"><div class="hb-cl-progress-fill" id="hb-cl-progress-fill"></div></div>
+          <div class="hb-cl-progress-txt" id="hb-cl-progress-txt"></div>
+        </div>
+        <div id="hb-cl-grupos"></div>
+        <div class="hb-cl-add-row">
+          <select id="cl-item-grupo"></select>
+          <input type="text" id="cl-item-texto" placeholder="Novo item...">
+          <button class="btn btn--icon" onclick="adicionarChecklistItem()"><i class="fa-solid fa-plus"></i></button>
+        </div>
+        <div class="hb-cl-nova-cat">
+          <input type="text" id="cl-nova-categoria" placeholder="Nova categoria (ex: Troféus Secretos)">
+          <button class="btn btn--icon" onclick="adicionarChecklistCategoria()"><i class="fa-solid fa-folder-plus"></i></button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de backup — IGUAL em todas as páginas -->
+  <div id="modal-sync" class="modal">
+    <div class="modal__box">
+      <div class="modal__head">
+        <h3><i class="fa-solid fa-cloud-arrow-up" style="color:var(--accent)"></i> Backup & Transferência</h3>
+        <button class="modal__close" onclick="fecharSync()"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal__body">
+        <p>Sem nuvem por enquanto: use isto pra levar seus dados entre celular e computador.</p>
+        <button class="btn" onclick="exportarBackup()" style="width:100%; justify-content:center;">
+          <i class="fa-solid fa-download"></i> Exportar (baixar arquivo)
+        </button>
+        <input type="file" id="input-import" accept=".json" onchange="importarBackup(event)" style="display:none;">
+        <button class="btn btn--primary" onclick="document.getElementById('input-import').click()" style="width:100%; justify-content:center;">
+          <i class="fa-solid fa-upload"></i> Importar (restaurar backup)
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    /* =====================================================================
+       HOBBIES E LAZER — lógica da página
+       ---------------------------------------------------------------------
+       Ideia geral: em vez de escrever um bloco de código diferente pra
+       "filmes", outro pra "livros", outro pra "jogos"... eu descrevo cada
+       módulo como um OBJETO DE CONFIGURAÇÃO (o que ele tem de especial:
+       nome, ícone, campo extra, opções de status). Um único conjunto de
+       funções genéricas (render, abrir modal, salvar, excluir) sabe ler
+       essa configuração e desenhar/gravar qualquer um dos módulos.
+       Isso evita repetir a mesma lógica 4 vezes.
+       ===================================================================== */
+
+    // ---- 1. Todos os dados da página moram numa única chave do Store ----
+    const dadosPadrao = { filmes: [], livros: [], jogos: [], lugares: [], bebidas: [], bucket: [], visualizacao: 'grade' };
+    let dados = Store.ler('hobbies', dadosPadrao);
+    // Garante que módulos novos existam mesmo em backups antigos
+    for (const k in dadosPadrao) if (!dados[k]) dados[k] = dadosPadrao[k];
+
+    function salvarDados() { Store.salvar('hobbies', dados); }
+
+    // ---- 2. Configuração de cada módulo de "acervo" ----
+    const MODULOS = {
+      filmes: {
+        nome: 'Filmes & Séries', icone: 'fa-clapperboard', corIcone: 'fa-solid',
+        vazioTxt: 'Nenhum filme ou série por aqui ainda.',
+        statusOpcoes: ['Quero assistir', 'Assistindo', 'Assistido'],
+        statusAtual: 'Assistindo',
+        campoExtra: { id: 'tipo', label: 'Tipo', tipo: 'select', opcoes: ['Filme', 'Série'] },
+        subtitulo: it => [it.tipo, it.ano].filter(Boolean).join(' · '),
+        campoAno: true,
+      },
+      livros: {
+        nome: 'Livros', icone: 'fa-book', corIcone: 'fa-solid',
+        vazioTxt: 'Nenhum livro registrado ainda.',
+        statusOpcoes: ['Quero ler', 'Lendo', 'Lido'],
+        statusAtual: 'Lendo',
+        campoExtra: { id: 'autor', label: 'Autor', tipo: 'text', placeholder: 'Ex: James Clear' },
+        subtitulo: it => it.autor || '',
+      },
+      jogos: {
+        nome: 'Jogos', icone: 'fa-gamepad', corIcone: 'fa-solid',
+        vazioTxt: 'Nenhum jogo registrado ainda.',
+        statusOpcoes: ['Wishlist', 'Jogando', 'Concluído'],
+        statusAtual: 'Jogando',
+        campoExtra: { id: 'plataforma', label: 'Plataforma', tipo: 'select', opcoes: ['PS5', 'PC', 'Xbox', 'Switch', 'Mobile', 'Outra'] },
+        subtitulo: it => it.plataforma || '',
+      },
+      lugares: {
+        nome: 'Lugares & Restaurantes', icone: 'fa-location-dot', corIcone: 'fa-solid',
+        vazioTxt: 'Nenhum lugar registrado ainda.',
+        statusOpcoes: ['Quero ir', 'Já fui'],
+        statusAtual: null,
+        campoExtra: { id: 'categoria', label: 'Categoria', tipo: 'select', opcoes: ['Restaurante', 'Parque', 'Museu', 'Passeio', 'Cidade', 'Evento', 'Outro'] },
+        campoCidade: true,
+        subtitulo: it => [it.categoria, it.cidade].filter(Boolean).join(' · '),
+      },
+      bebidas: {
+        nome: 'Bebidas', icone: 'fa-wine-glass', corIcone: 'fa-solid',
+        vazioTxt: 'Nenhuma bebida registrada ainda.',
+        statusOpcoes: ['Quero provar', 'Provado'],
+        statusAtual: null,
+        campoExtra: { id: 'uva', label: 'Tipo de Uva / Estilo', tipo: 'text', placeholder: 'Ex: Cabernet Sauvignon' },
+        subtitulo: it => it.uva || '',
+      },
+    };
+
+    const ORDEM_MODULOS = ['filmes', 'livros', 'jogos', 'lugares', 'bebidas', 'bucket'];
+    let moduloAtivo = 'filmes';
+    let filtroAtivo = 'todos';
+    let idEditando = null; // se null = está criando um item novo
+
+    // ---- 3. Utilitários ----
+    function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+    function escapeHtml(s) {
+      return (s || '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    }
+    function estrelas(nota, tam) {
+      let html = '';
+      for (let i = 1; i <= 5; i++) html += `<i class="fa-solid fa-star ${i <= (nota || 0) ? 'is-on' : ''}" style="${tam ? 'font-size:' + tam + 'px' : ''}"></i>`;
+      return html;
+    }
+
+    // ---- 4. Dashboard ----
+    function renderDashboard() {
+      const totalFavoritos = ['filmes', 'livros', 'jogos', 'lugares', 'bebidas']
+        .reduce((soma, m) => soma + dados[m].filter(it => it.favorito).length, 0);
+
+      const stats = [
+        { icone: 'fa-clapperboard', num: dados.filmes.filter(it => it.status === 'Assistido').length, label: 'Filmes/Séries' },
+        { icone: 'fa-book', num: dados.livros.filter(it => it.status === 'Lido').length, label: 'Livros Lidos' },
+        { icone: 'fa-gamepad', num: dados.jogos.filter(it => it.status === 'Concluído').length, label: 'Jogos Concluídos' },
+        { icone: 'fa-location-dot', num: dados.lugares.filter(it => it.status === 'Já fui').length, label: 'Lugares Visitados' },
+        { icone: 'fa-wine-glass', num: dados.bebidas.filter(it => it.status === 'Provado').length, label: 'Bebidas Provadas' },
+        { icone: 'fa-heart', num: totalFavoritos, label: 'Favoritos' },
+      ];
+      document.getElementById('hb-stats').innerHTML = stats.map(s => `
+        <div class="hb-stat">
+          <i class="fa-solid ${s.icone}"></i>
+          <div class="hb-stat__num">${s.num}</div>
+          <div class="hb-stat__label">${s.label}</div>
+        </div>
+      `).join('');
+
+      // "Fazendo agora" — pega o item mais recente de cada módulo cujo status é o "atual"
+      const chips = [];
+      for (const [chave, cfg] of Object.entries(MODULOS)) {
+        if (!cfg.statusAtual) continue;
+        const item = dados[chave].filter(it => it.status === cfg.statusAtual).slice(-1)[0];
+        if (item) chips.push({ icone: cfg.icone, nome: item.nome, sub: cfg.statusAtual });
+      }
+      const atualEl = document.getElementById('hb-atual');
+      if (!chips.length) {
+        atualEl.innerHTML = '';
+      } else {
+        atualEl.innerHTML = chips.map(c => `
+          <div class="hb-atual__chip">
+            <i class="fa-solid ${c.icone}"></i>
+            <span>${escapeHtml(c.nome)}</span>
+            <span class="hb-atual__sub">· ${c.sub}</span>
+          </div>
+        `).join('');
+      }
+    }
+
+    // ---- 5. Abas ----
+    function renderTabs() {
+      const labels = { filmes: 'Filmes & Séries', livros: 'Livros', jogos: 'Jogos', lugares: 'Lugares', bebidas: 'Bebidas', bucket: 'Bucket List' };
+      const icones = { filmes: 'fa-clapperboard', livros: 'fa-book', jogos: 'fa-gamepad', lugares: 'fa-location-dot', bebidas: 'fa-wine-glass', bucket: 'fa-list-check' };
+      document.getElementById('hb-tabs').innerHTML = ORDEM_MODULOS.map(m => `
+        <button class="hb-tab ${moduloAtivo === m ? 'is-active' : ''}" onclick="trocarModulo('${m}')">
+          <i class="fa-solid ${icones[m]}"></i> ${labels[m]}
+        </button>
+      `).join('');
+    }
+    function trocarModulo(m) {
+      moduloAtivo = m;
+      filtroAtivo = 'todos';
+      renderTudo();
+    }
+
+    // ---- 6. Filtros + botão adicionar (mudam de acordo com o módulo) ----
+    function renderToolbar() {
+      const btnLabel = document.getElementById('hb-btn-add-label');
+      const filtrosEl = document.getElementById('hb-filtros');
+      const toggleEl = document.getElementById('hb-view-toggle');
+
+      if (moduloAtivo === 'bucket') {
+        toggleEl.innerHTML = ''; // bucket list já é uma lista, não precisa do toggle
+        btnLabel.textContent = 'Novo desejo';
+        filtrosEl.innerHTML = ['todos', 'pendentes', 'conquistas'].map(f => `
+          <button class="hb-chip-filtro ${filtroAtivo === f ? 'is-active' : ''}" onclick="filtrar('${f}')">
+            ${f === 'todos' ? 'Todos' : f === 'pendentes' ? 'Pendentes' : 'Conquistas'}
+          </button>
+        `).join('');
+        return;
+      }
+
+      toggleEl.innerHTML = `
+        <button class="${dados.visualizacao === 'grade' ? 'is-active' : ''}" onclick="mudarVisualizacao('grade')" aria-label="Ver em grade">
+          <i class="fa-solid fa-grip"></i>
+        </button>
+        <button class="${dados.visualizacao === 'lista' ? 'is-active' : ''}" onclick="mudarVisualizacao('lista')" aria-label="Ver em lista">
+          <i class="fa-solid fa-list"></i>
+        </button>
+      `;
+
+      const cfg = MODULOS[moduloAtivo];
+      btnLabel.textContent = 'Adicionar';
+      const opcoesFiltro = ['todos', 'favoritos', ...cfg.statusOpcoes];
+      filtrosEl.innerHTML = opcoesFiltro.map(f => `
+        <button class="hb-chip-filtro ${filtroAtivo === f ? 'is-active' : ''}" onclick="filtrar('${f.replace(/'/g, "\\'")}')">
+          ${f === 'todos' ? 'Todos' : f === 'favoritos' ? '♥ Favoritos' : f}
+        </button>
+      `).join('');
+    }
+    function filtrar(f) { filtroAtivo = f; renderConteudo(); }
+    function mudarVisualizacao(v) {
+      dados.visualizacao = v;
+      salvarDados();
+      renderToolbar();
+      renderConteudo();
+    }
+
+    // ---- 7. Conteúdo (grid de cards OU lista da bucket list) ----
+    function renderConteudo() {
+      if (moduloAtivo === 'bucket') { renderBucket(); return; }
+
+      const cfg = MODULOS[moduloAtivo];
+      let itens = [...dados[moduloAtivo]];
+
+      if (filtroAtivo === 'favoritos') itens = itens.filter(it => it.favorito);
+      else if (filtroAtivo !== 'todos') itens = itens.filter(it => it.status === filtroAtivo);
+
+      itens.sort((a, b) => (b.nota || 0) - (a.nota || 0));
+
+      const el = document.getElementById('hb-conteudo');
+      if (!itens.length) {
+        el.innerHTML = `
+          <div class="hb-vazio">
+            <i class="fa-solid ${cfg.icone}"></i>
+            <p>${cfg.vazioTxt}</p>
+            <button class="hb-btn-add" onclick="abrirModalNovo()"><i class="fa-solid fa-plus"></i> Adicionar</button>
+          </div>`;
+        return;
+      }
+
+      if (dados.visualizacao === 'lista') {
+        el.innerHTML = `<div class="hb-lista">${itens.map(it => {
+          const p = moduloAtivo === 'jogos' ? progressoChecklist(it) : null;
+          return `
+          <div class="hb-lista-item" onclick="abrirModalEditar('${it.id}')">
+            <div class="hb-lista__capa">
+              ${it.capa
+                ? `<img src="${escapeHtml(it.capa)}" alt="" onerror="this.style.display='none'; this.parentElement.querySelector('.hb-icone-vazio').style.display='block';">`
+                : ''}
+              <i class="fa-solid ${cfg.icone} hb-icone-vazio" style="${it.capa ? 'display:none' : ''}"></i>
+            </div>
+            <div class="hb-lista__corpo">
+              <div class="hb-lista__nome">${escapeHtml(it.nome)}</div>
+              <div class="hb-lista__sub">${escapeHtml(cfg.subtitulo(it))}</div>
+              <div class="hb-lista__nota">${estrelas(it.nota)}</div>
+            </div>
+            <div class="hb-lista__direita">
+              ${p ? `<div class="hb-lista__progress"><div class="hb-lista__progress-fill" style="width:${p.pct}%"></div></div>` : ''}
+              ${it.status ? `<span class="hb-lista__status">${it.status}</span>` : ''}
+              <i class="fa-solid fa-heart hb-lista__fav ${it.favorito ? 'is-fav' : ''}"></i>
+            </div>
+          </div>`;
+        }).join('')}</div>`;
+        return;
+      }
+
+      el.innerHTML = `<div class="hb-grid">${itens.map(it => `
+        <div class="hb-card" onclick="abrirModalEditar('${it.id}')">
+          <div class="hb-card__capa">
+            ${it.capa
+              ? `<img src="${escapeHtml(it.capa)}" alt="" onerror="this.style.display='none'; this.parentElement.querySelector('.hb-card__icone-vazio').style.display='block';">`
+              : ''}
+            <i class="fa-solid ${cfg.icone} hb-card__icone-vazio" style="${it.capa ? 'display:none' : ''}"></i>
+            <div class="hb-card__fav ${it.favorito ? 'is-fav' : ''}"><i class="fa-solid fa-heart"></i></div>
+            ${it.status ? `<div class="hb-card__status">${it.status}</div>` : ''}
+          </div>
+          <div class="hb-card__body">
+            <div class="hb-card__nome">${escapeHtml(it.nome)}</div>
+            <div class="hb-card__sub">${escapeHtml(cfg.subtitulo(it))}</div>
+            <div class="hb-card__nota">${estrelas(it.nota)}</div>
+            ${moduloAtivo === 'jogos' && progressoChecklist(it) ? `<div class="hb-card__progress"><div class="hb-card__progress-fill" style="width:${progressoChecklist(it).pct}%"></div></div>` : ''}
+          </div>
+        </div>
+      `).join('')}</div>`;
+    }
+
+    // ---- 8. Bucket List (lista, não grid) ----
+    function renderBucket() {
+      let itens = [...dados.bucket];
+      if (filtroAtivo === 'pendentes') itens = itens.filter(it => !it.concluido);
+      else if (filtroAtivo === 'conquistas') itens = itens.filter(it => it.concluido);
+
+      const el = document.getElementById('hb-conteudo');
+      if (!itens.length) {
+        el.innerHTML = `
+          <div class="hb-vazio">
+            <i class="fa-solid fa-list-check"></i>
+            <p>Sua bucket list está vazia. Que tal sonhar um pouco?</p>
+            <button class="hb-btn-add" onclick="abrirModalNovo()"><i class="fa-solid fa-plus"></i> Novo desejo</button>
+          </div>`;
+        return;
+      }
+      el.innerHTML = itens.map(it => `
+        <div class="hb-bucket-item ${it.concluido ? 'is-feito' : ''}">
+          <div class="hb-bucket-item__check" onclick="toggleBucket('${it.id}')"><i class="fa-solid fa-check"></i></div>
+          <div class="hb-bucket-item__txt" onclick="toggleBucket('${it.id}')">
+            <div class="hb-bucket-item__nome">${escapeHtml(it.nome)}</div>
+            <div class="hb-bucket-item__cat">${escapeHtml(it.categoria)}</div>
+          </div>
+          <button class="hb-bucket-item__del" onclick="excluirBucket('${it.id}')"><i class="fa-solid fa-trash"></i></button>
+        </div>
+      `).join('');
+    }
+    function toggleBucket(id) {
+      const it = dados.bucket.find(i => i.id === id);
+      it.concluido = !it.concluido;
+      salvarDados(); renderTudo();
+    }
+    function excluirBucket(id) {
+      dados.bucket = dados.bucket.filter(i => i.id !== id);
+      salvarDados(); renderTudo();
+    }
+
+    // ---- 9. Modal genérico de item (acervo) ----
+    function abrirModalNovo() {
+      if (moduloAtivo === 'bucket') { abrirModalBucket(); return; }
+      idEditando = null;
+      montarModalItem({});
+    }
+    function abrirModalEditar(id) {
+      idEditando = id;
+      const item = dados[moduloAtivo].find(i => i.id === id);
+      montarModalItem(item);
+    }
+    function montarModalItem(item) {
+      const cfg = MODULOS[moduloAtivo];
+      document.getElementById('hb-modal-titulo').innerHTML =
+        `<i class="fa-solid ${cfg.icone}" style="color:var(--accent)"></i> ${idEditando ? 'Editar' : 'Novo'} · ${cfg.nome}`;
+      document.getElementById('hb-btn-excluir').style.display = idEditando ? 'flex' : 'none';
+
+      const campoExtraHtml = cfg.campoExtra.tipo === 'select'
+        ? `<select id="it-extra">${cfg.campoExtra.opcoes.map(o => `<option ${item[cfg.campoExtra.id] === o ? 'selected' : ''}>${o}</option>`).join('')}</select>`
+        : `<input type="text" id="it-extra" placeholder="${cfg.campoExtra.placeholder || ''}" value="${escapeHtml(item[cfg.campoExtra.id])}">`;
+
+      document.getElementById('hb-modal-campos').innerHTML = `
+        <div class="hb-campo">
+          <label>Nome</label>
+          <input type="text" id="it-nome" placeholder="Nome" value="${escapeHtml(item.nome)}">
+        </div>
+        <div class="hb-campo-linha">
+          <div class="hb-campo">
+            <label>${cfg.campoExtra.label}</label>
+            ${campoExtraHtml}
+          </div>
+          ${cfg.campoAno
+            ? `<div class="hb-campo"><label>Ano</label><input type="number" id="it-ano" placeholder="2026" value="${item.ano || ''}"></div>`
+            : cfg.campoCidade
+              ? `<div class="hb-campo"><label>Cidade</label><input type="text" id="it-cidade" placeholder="Belo Horizonte" value="${escapeHtml(item.cidade)}"></div>`
+              : `<div></div>`}
+        </div>
+        <div class="hb-campo">
+          <div class="hb-campo__label-linha">
+            <label>Capa (link de imagem, opcional)</label>
+            <button type="button" class="hb-link-buscar" onclick="buscarImagemGoogle()">
+              <i class="fa-solid fa-magnifying-glass"></i> Buscar imagem
+            </button>
+          </div>
+          <input type="url" id="it-capa" placeholder="https://..." value="${escapeHtml(item.capa)}">
+        </div>
+        <div class="hb-campo-linha">
+          <div class="hb-campo">
+            <label>Status</label>
+            <select id="it-status">${cfg.statusOpcoes.map(o => `<option ${item.status === o ? 'selected' : ''}>${o}</option>`).join('')}</select>
+          </div>
+          <div class="hb-campo">
+            <label>Nota</label>
+            <div class="hb-nota-picker" id="it-nota-picker" data-nota="${item.nota || 0}">${[1, 2, 3, 4, 5].map(n => `
+              <i class="fa-solid fa-star ${n <= (item.nota || 0) ? 'is-on' : ''}" onclick="setNota(${n})"></i>
+            `).join('')}</div>
+          </div>
+        </div>
+        <div class="hb-fav-toggle ${item.favorito ? 'is-on' : ''}" id="it-fav-toggle" onclick="toggleFavCampo()">
+          <i class="fa-solid fa-heart"></i> <span>Marcar como favorito</span>
+        </div>
+        <div class="hb-campo">
+          <label>Comentário</label>
+          <textarea id="it-comentario" placeholder="O que achou? Alguma lembrança?">${escapeHtml(item.comentario)}</textarea>
+        </div>
+        ${moduloAtivo === 'jogos' && idEditando ? (() => {
+          const p = progressoChecklist(item);
+          const label = p ? `${p.feitos}/${p.total} concluídos (${p.pct}%)` : 'Criar checklist de progresso';
+          return `<button type="button" class="btn" style="width:100%; justify-content:center;" onclick="abrirChecklist('${idEditando}')">
+            <i class="fa-solid fa-list-check"></i> ${label}
+          </button>`;
+        })() : ''}
+      `;
+      document.getElementById('modal-item').classList.add('is-open');
+    }
+    function setNota(n) {
+      const picker = document.getElementById('it-nota-picker');
+      const notaAtual = Number(picker.dataset.nota) === n ? 0 : n; // clicar na mesma estrela zera
+      picker.dataset.nota = notaAtual;
+      [...picker.children].forEach((i, idx) => i.classList.toggle('is-on', idx < notaAtual));
+    }
+    function toggleFavCampo() { document.getElementById('it-fav-toggle').classList.toggle('is-on'); }
+    function fecharModalItem() { document.getElementById('modal-item').classList.remove('is-open'); }
+    function buscarImagemGoogle() {
+      const nome = document.getElementById('it-nome').value.trim();
+      if (!nome) { document.getElementById('it-nome').focus(); return; }
+      // Uma palavra de contexto por módulo ajuda a busca a trazer a imagem certa
+      const contexto = { filmes: 'poster', livros: 'capa livro', jogos: 'capa jogo', lugares: '', bebidas: 'garrafa vinho' }[moduloAtivo] || '';
+      const q = encodeURIComponent(`${nome} ${contexto}`.trim());
+      window.open(`https://www.google.com/search?tbm=isch&q=${q}`, '_blank');
+    }
+
+    function salvarItemAtual() {
+      const cfg = MODULOS[moduloAtivo];
+      const nome = document.getElementById('it-nome').value.trim();
+      if (!nome) { document.getElementById('it-nome').focus(); return; }
+
+      const item = {
+        id: idEditando || uid(),
+        nome,
+        capa: document.getElementById('it-capa').value.trim(),
+        status: document.getElementById('it-status').value,
+        nota: Number(document.getElementById('it-nota-picker').dataset.nota) || 0,
+        favorito: document.getElementById('it-fav-toggle').classList.contains('is-on'),
+        comentario: document.getElementById('it-comentario').value.trim(),
+        [cfg.campoExtra.id]: document.getElementById('it-extra').value.trim(),
+      };
+      if (cfg.campoAno) item.ano = document.getElementById('it-ano').value.trim();
+      if (cfg.campoCidade) item.cidade = document.getElementById('it-cidade').value.trim();
+
+      if (idEditando) {
+        const idx = dados[moduloAtivo].findIndex(i => i.id === idEditando);
+        dados[moduloAtivo][idx] = item;
+      } else {
+        dados[moduloAtivo].push(item);
+      }
+      salvarDados();
+      fecharModalItem();
+      renderTudo();
+    }
+    function excluirItemAtual() {
+      dados[moduloAtivo] = dados[moduloAtivo].filter(i => i.id !== idEditando);
+      salvarDados();
+      fecharModalItem();
+      renderTudo();
+    }
+
+    // ---- 10. Checklist de progresso (só módulo Jogos) ----
+    function progressoChecklist(item) {
+      if (!item || !item.checklist || !item.checklist.grupos.length) return null;
+      let total = 0, feitos = 0;
+      item.checklist.grupos.forEach(g => { total += g.itens.length; feitos += g.itens.filter(i => i.feito).length; });
+      if (!total) return null;
+      return { feitos, total, pct: Math.round((feitos / total) * 100) };
+    }
+    let checklistGameId = null;
+    function getJogoChecklistAtual() { return dados.jogos.find(i => i.id === checklistGameId); }
+
+    function abrirChecklist(id) {
+      checklistGameId = id;
+      const item = getJogoChecklistAtual();
+      if (!item.checklist) item.checklist = { grupos: [] };
+      renderChecklist();
+      document.getElementById('modal-checklist').classList.add('is-open');
+    }
+    function fecharChecklist() {
+      document.getElementById('modal-checklist').classList.remove('is-open');
+      renderConteudo(); // atualiza a barrinha de progresso no card
+    }
+    function renderChecklist() {
+      const item = getJogoChecklistAtual();
+      document.getElementById('hb-cl-titulo').innerHTML = `<i class="fa-solid fa-list-check" style="color:var(--accent)"></i> ${escapeHtml(item.nome)}`;
+      const grupos = item.checklist.grupos;
+      const p = progressoChecklist(item);
+      document.getElementById('hb-cl-progress-fill').style.width = (p ? p.pct : 0) + '%';
+      document.getElementById('hb-cl-progress-txt').textContent = p
+        ? `${p.feitos} / ${p.total} concluídos (${p.pct}%)`
+        : 'Nenhum item ainda';
+
+      document.getElementById('hb-cl-grupos').innerHTML = grupos.length ? grupos.map(g => `
+        <div class="hb-cl-grupo">
+          <div class="hb-cl-grupo__head">
+            <span class="hb-cl-grupo__nome">${escapeHtml(g.nome)}</span>
+            <span class="hb-cl-grupo__count">${g.itens.filter(i => i.feito).length}/${g.itens.length}</span>
+          </div>
+          ${g.itens.length ? g.itens.map(i => `
+            <div class="hb-cl-item ${i.feito ? 'is-feito' : ''}">
+              <div class="hb-cl-item__check" onclick="toggleChecklistItem('${g.id}','${i.id}')"><i class="fa-solid fa-check"></i></div>
+              <div class="hb-cl-item__txt" onclick="toggleChecklistItem('${g.id}','${i.id}')">${escapeHtml(i.texto)}</div>
+              <button class="hb-cl-item__del" onclick="excluirChecklistItem('${g.id}','${i.id}')"><i class="fa-solid fa-trash"></i></button>
+            </div>
+          `).join('') : `<p class="hb-cl-vazio">Categoria vazia.</p>`}
+        </div>
+      `).join('') : `<p class="hb-cl-vazio">Nenhuma categoria ainda. Crie uma abaixo.</p>`;
+
+      document.getElementById('cl-item-grupo').innerHTML = grupos.map(g => `<option value="${g.id}">${escapeHtml(g.nome)}</option>`).join('');
+    }
+    function toggleChecklistItem(grupoId, itemId) {
+      const item = getJogoChecklistAtual();
+      const it = item.checklist.grupos.find(g => g.id === grupoId).itens.find(i => i.id === itemId);
+      it.feito = !it.feito;
+      salvarDados(); renderChecklist();
+    }
+    function excluirChecklistItem(grupoId, itemId) {
+      const item = getJogoChecklistAtual();
+      const grupo = item.checklist.grupos.find(g => g.id === grupoId);
+      grupo.itens = grupo.itens.filter(i => i.id !== itemId);
+      salvarDados(); renderChecklist();
+    }
+    function adicionarChecklistItem() {
+      const texto = document.getElementById('cl-item-texto').value.trim();
+      const grupoId = document.getElementById('cl-item-grupo').value;
+      if (!texto || !grupoId) return;
+      const item = getJogoChecklistAtual();
+      item.checklist.grupos.find(g => g.id === grupoId).itens.push({ id: uid(), texto, feito: false });
+      document.getElementById('cl-item-texto').value = '';
+      salvarDados(); renderChecklist();
+    }
+    function adicionarChecklistCategoria() {
+      const nome = document.getElementById('cl-nova-categoria').value.trim();
+      if (!nome) return;
+      const item = getJogoChecklistAtual();
+      item.checklist.grupos.push({ id: uid(), nome, itens: [] });
+      document.getElementById('cl-nova-categoria').value = '';
+      salvarDados(); renderChecklist();
+    }
+
+    // ---- 11. Modal da Bucket List ----
+    function abrirModalBucket() {
+      document.getElementById('bk-nome').value = '';
+      document.getElementById('bk-categoria').selectedIndex = 0;
+      document.getElementById('modal-bucket').classList.add('is-open');
+    }
+    function fecharModalBucket() { document.getElementById('modal-bucket').classList.remove('is-open'); }
+    function salvarBucket() {
+      const nome = document.getElementById('bk-nome').value.trim();
+      if (!nome) { document.getElementById('bk-nome').focus(); return; }
+      dados.bucket.push({ id: uid(), nome, categoria: document.getElementById('bk-categoria').value, concluido: false });
+      salvarDados();
+      fecharModalBucket();
+      renderTudo();
+    }
+
+    // ---- 12. Orquestração ----
+    function renderTudo() {
+      renderDashboard();
+      renderTabs();
+      renderToolbar();
+      renderConteudo();
+    }
+
+    // ---- 13. Dados iniciais (só roda uma vez, se você nunca usou a página) ----
+    function seedInicial() {
+      // Guarda de segurança: se a chave já existe no navegador (mesmo vazia
+      // por causa do Store.ler acima), não mexe em nada — evita sobrescrever
+      // qualquer coisa que você já tenha cadastrado.
+      if (localStorage.getItem('planner_hobbies') !== null) return;
+
+      const mkGrupo = (nome, textos) => ({ id: uid(), nome, itens: textos.map(t => ({ id: uid(), texto: t, feito: false })) });
+
+      dados.filmes = [
+        // --- Séries (ranking "melhores" = favorito) ---
+        { id: uid(), nome: 'Peaky Blinders', tipo: 'Série', ano: '', status: 'Assistido', nota: 5, favorito: true, capa: '', comentario: 'Top 1 do ranking de séries.' },
+        { id: uid(), nome: 'Loki', tipo: 'Série', ano: '', status: 'Assistido', nota: 5, favorito: true, capa: '', comentario: 'Top 2 do ranking de séries.' },
+        { id: uid(), nome: 'Vikings', tipo: 'Série', ano: '', status: 'Assistido', nota: 4, favorito: true, capa: '', comentario: 'Top 3 do ranking de séries.' },
+        { id: uid(), nome: 'Breaking Bad', tipo: 'Série', ano: '', status: 'Assistido', nota: 4, favorito: true, capa: '', comentario: 'Top 4 do ranking de séries.' },
+        { id: uid(), nome: 'Better Call Saul', tipo: 'Série', ano: '', status: 'Assistido', nota: 4, favorito: true, capa: '', comentario: 'Top 5 do ranking de séries.' },
+        { id: uid(), nome: 'Dragon Ball Super', tipo: 'Série', ano: '', status: 'Assistido', nota: 4, favorito: false, capa: '', comentario: '' },
+        { id: uid(), nome: 'The Ranch', tipo: 'Série', ano: '', status: 'Assistido', nota: 3, favorito: false, capa: '', comentario: '' },
+        // --- Filmes (ranking "melhores" = favorito) ---
+        { id: uid(), nome: 'Vingadores: Guerra Infinita', tipo: 'Filme', ano: '', status: 'Assistido', nota: 5, favorito: true, capa: '', comentario: 'Top 1 do ranking de filmes.' },
+        { id: uid(), nome: 'Vingadores: Ultimato', tipo: 'Filme', ano: '', status: 'Assistido', nota: 5, favorito: true, capa: '', comentario: 'Top 2 do ranking de filmes.' },
+        { id: uid(), nome: 'Homem-Aranha: Sem Volta Para Casa', tipo: 'Filme', ano: '', status: 'Assistido', nota: 5, favorito: true, capa: '', comentario: 'Top 3 do ranking de filmes.' },
+        { id: uid(), nome: 'À Procura da Felicidade', tipo: 'Filme', ano: '', status: 'Assistido', nota: 5, favorito: true, capa: '', comentario: 'Top 4 do ranking de filmes.' },
+        { id: uid(), nome: 'O Homem que Mudou o Jogo', tipo: 'Filme', ano: '', status: 'Assistido', nota: 5, favorito: true, capa: '', comentario: 'Top 5 do ranking de filmes.' },
+        { id: uid(), nome: 'Deadpool e Wolverine', tipo: 'Filme', ano: '', status: 'Assistido', nota: 5, favorito: false, capa: '', comentario: '' },
+        { id: uid(), nome: 'Superman', tipo: 'Filme', ano: '', status: 'Assistido', nota: 4, favorito: false, capa: '', comentario: '' },
+        { id: uid(), nome: 'Quarteto Fantástico', tipo: 'Filme', ano: '', status: 'Assistido', nota: 4, favorito: false, capa: '', comentario: '' },
+        { id: uid(), nome: 'Planeta dos Macacos: Origem', tipo: 'Filme', ano: '', status: 'Assistido', nota: 4, favorito: false, capa: '', comentario: '' },
+        { id: uid(), nome: 'Planeta dos Macacos: Confronto', tipo: 'Filme', ano: '', status: 'Assistido', nota: 4, favorito: false, capa: '', comentario: '' },
+        { id: uid(), nome: 'Planeta dos Macacos: A Guerra', tipo: 'Filme', ano: '', status: 'Assistido', nota: 4, favorito: false, capa: '', comentario: '' },
+        { id: uid(), nome: 'Planeta dos Macacos: O Reinado', tipo: 'Filme', ano: '', status: 'Assistido', nota: 3, favorito: false, capa: '', comentario: '' },
+        { id: uid(), nome: 'Robô Selvagem', tipo: 'Filme', ano: '', status: 'Assistido', nota: 3, favorito: false, capa: '', comentario: '' },
+        { id: uid(), nome: 'Meu Malvado Favorito 4', tipo: 'Filme', ano: '', status: 'Assistido', nota: 3, favorito: false, capa: '', comentario: '' },
+        { id: uid(), nome: 'Brilho Eterno de uma Mente sem Lembranças', tipo: 'Filme', ano: '', status: 'Assistido', nota: 3, favorito: false, capa: '', comentario: '' },
+        // --- Quero assistir ---
+        { id: uid(), nome: 'Godzilla x Kong: O Novo Império', tipo: 'Filme', ano: '', status: 'Quero assistir', nota: 0, favorito: false, capa: '', comentario: '' },
+        { id: uid(), nome: 'Venom 3: A Última Rodada', tipo: 'Filme', ano: '', status: 'Quero assistir', nota: 0, favorito: false, capa: '', comentario: '' },
+        { id: uid(), nome: 'Não Espere Muito do Fim do Mundo', tipo: 'Filme', ano: '', status: 'Quero assistir', nota: 0, favorito: false, capa: '', comentario: '' },
+        { id: uid(), nome: 'Sociedade da Neve', tipo: 'Filme', ano: '', status: 'Quero assistir', nota: 0, favorito: false, capa: '', comentario: '' },
+        { id: uid(), nome: 'Gladiador', tipo: 'Filme', ano: '', status: 'Quero assistir', nota: 0, favorito: false, capa: '', comentario: '' },
+      ];
+
+      dados.lugares = [
+        // --- Já fui ---
+        { id: uid(), nome: 'Parque Ecológico', categoria: 'Parque', cidade: '', status: 'Já fui', nota: 4, favorito: false, capa: '', comentario: '' },
+        // --- Quero ir ---
+        { id: uid(), nome: 'Museu de Inhotim', categoria: 'Museu', cidade: '', status: 'Quero ir', nota: 0, favorito: false, capa: '', comentario: '' },
+        { id: uid(), nome: 'Parque Guanabara', categoria: 'Parque', cidade: 'Belo Horizonte', status: 'Quero ir', nota: 0, favorito: false, capa: '', comentario: '' },
+        { id: uid(), nome: 'Parque Municipal', categoria: 'Parque', cidade: 'Belo Horizonte', status: 'Quero ir', nota: 0, favorito: false, capa: '', comentario: '' },
+        { id: uid(), nome: 'Museu da Arena MRV', categoria: 'Museu', cidade: 'Belo Horizonte', status: 'Quero ir', nota: 0, favorito: false, capa: '', comentario: '' },
+        { id: uid(), nome: 'Museu do Mineirão', categoria: 'Museu', cidade: 'Belo Horizonte', status: 'Quero ir', nota: 0, favorito: false, capa: '', comentario: '' },
+        { id: uid(), nome: 'Parque Mangabeiras', categoria: 'Parque', cidade: 'Belo Horizonte', status: 'Quero ir', nota: 0, favorito: false, capa: '', comentario: '' },
+        { id: uid(), nome: 'Boliche', categoria: 'Passeio', cidade: '', status: 'Quero ir', nota: 0, favorito: false, capa: '', comentario: '' },
+        { id: uid(), nome: 'Kart', categoria: 'Passeio', cidade: '', status: 'Quero ir', nota: 0, favorito: false, capa: '', comentario: '' },
+        { id: uid(), nome: 'Sesc Ouro Preto', categoria: 'Passeio', cidade: 'Ouro Preto', status: 'Quero ir', nota: 0, favorito: false, capa: '', comentario: '' },
+        { id: uid(), nome: 'Espaço do Conhecimento UFMG', categoria: 'Museu', cidade: 'Belo Horizonte', status: 'Quero ir', nota: 0, favorito: false, capa: '', comentario: '' },
+        { id: uid(), nome: 'Museu de Artes e Ofícios', categoria: 'Museu', cidade: 'Belo Horizonte', status: 'Quero ir', nota: 0, favorito: false, capa: '', comentario: '' },
+        { id: uid(), nome: 'Praça do Papa', categoria: 'Passeio', cidade: 'Belo Horizonte', status: 'Quero ir', nota: 0, favorito: false, capa: '', comentario: '' },
+        { id: uid(), nome: 'Museu do Banco do Brasil', categoria: 'Museu', cidade: '', status: 'Quero ir', nota: 0, favorito: false, capa: '', comentario: '' },
+        { id: uid(), nome: 'Igreja da Pampulha', categoria: 'Passeio', cidade: 'Belo Horizonte', status: 'Quero ir', nota: 0, favorito: false, capa: '', comentario: '' },
+        { id: uid(), nome: 'Impulse Parque', categoria: 'Parque', cidade: '', status: 'Quero ir', nota: 0, favorito: false, capa: '', comentario: '' },
+      ];
+
+      // Obs: o ranking de vinhos não trazia estrelas preenchidas, só a posição
+      // (1º a 7º). As notas abaixo são uma aproximação a partir do ranking —
+      // ajuste como quiser, é só abrir o item e mudar a nota.
+      dados.bebidas = [
+        { id: uid(), nome: 'Cave de Ladac', uva: 'Rouge', status: 'Provado', nota: 5, favorito: true, capa: '', comentario: '1º no ranking. Degustado com Laila e Marcelino.' },
+        { id: uid(), nome: 'Altos del Condor', uva: 'Chardonnay', status: 'Provado', nota: 4, favorito: false, capa: '', comentario: '2º no ranking. Degustado com Laila e Marcelino.' },
+        { id: uid(), nome: 'Terras del Rey', uva: '', status: 'Provado', nota: 4, favorito: false, capa: '', comentario: '3º no ranking. Degustado com Laila e Marcelino.' },
+        { id: uid(), nome: 'Travessia', uva: '', status: 'Provado', nota: 3, favorito: false, capa: '', comentario: '4º no ranking. Degustado com Laila e Marcelino.' },
+        { id: uid(), nome: 'Guarda Rios', uva: '', status: 'Provado', nota: 3, favorito: false, capa: '', comentario: '5º no ranking. Degustado com Laila e Marcelino.' },
+        { id: uid(), nome: 'Carta Magna', uva: '', status: 'Provado', nota: 3, favorito: false, capa: '', comentario: '6º no ranking. Degustado com Laila e Marcelino.' },
+        { id: uid(), nome: 'Castelo de Alandroal', uva: '', status: 'Provado', nota: 2, favorito: false, capa: '', comentario: '7º no ranking. Degustado com Laila e Marcelino.' },
+      ];
+
+      dados.jogos = [{
+        id: uid(), nome: 'God of War Ragnarök', plataforma: 'PS5', status: 'Jogando', nota: 0, favorito: false, capa: '', comentario: '',
+        checklist: {
+          grupos: [
+            mkGrupo('A Jornada (Campanha Principal)', [
+              'Capítulo 01: Sobrevivendo ao Fimbulwinter', 'Capítulo 02: A Busca por Týr', 'Capítulo 03: Velhos Amigos',
+              'Capítulo 04: O Segredo de Gróa', 'Capítulo 05: O Santuário Perdido', 'Capítulo 06: O Acerto de Contas',
+              'Capítulo 07: O Fugitivo', 'Capítulo 08: No Fogo', 'Capítulo 09: A Palavra do Destino',
+              'Capítulo 10: Forjando o Destino', 'Capítulo 11: Libertando Hel', 'Capítulo 12: Reunião',
+              'Capítulo 13: Criaturas da Profecia', 'Capítulo 14: Desbloqueando a Máscara', 'Capítulo 15: Caçando Conforto',
+              'Capítulo 16: A Convocação', 'Capítulo 17: Os Reinos em Guerra (Fim da História)', 'Capítulo 18: Além do Ragnarök (Epílogo)',
+            ]),
+            mkGrupo('Arsenal e Evolução (Meta: Nível 9)', [
+              'Machado Leviatã — Nível 9', 'Lâminas do Caos — Nível 9', 'Terceira Arma Narrativa — Nível 9',
+              'Escudo Principal — Nível 9', 'Armadura de Peito — Nível 9', 'Armadura de Pulso — Nível 9', 'Armadura de Cintura — Nível 9',
+            ]),
+            mkGrupo('Desafios de Elite e Exploração', [
+              'Baús Nornir (Vida e Fúria Máximas)', 'Baús Lendários (Ataques Rúnicos)', 'Fendas de Yggdrasil Fechadas',
+              'Caçadas da Cratera Concluídas (Vanaheim)', '10 Lápides de Berserker Concluídas', 'Rei Hrolf Kraki Derrotado',
+              'Gná, a Rainha Valquíria Derrotada',
+            ]),
+            mkGrupo('Troféus · História Principal', [
+              'A Florzinha', 'O Urso', 'Encontro de Sangue', 'Lover de Quintal', 'Raízes do Problema', 'O Caldeirão',
+              'Cachorro de Caça', 'Sufoco Coletivo', 'Luz Noturna', 'Linguagem Corporal', 'Cisne de Sangue', 'Ragnarök',
+            ]),
+            mkGrupo('Troféus · Favores e Missões Secundárias', [
+              'Acolhimento', 'Líder Rebelde', 'Novas Amizades', 'Gufa Completa', 'Reparação',
+              'Foi um Bom Dia', 'Espécie Invasora', 'Melhores Amigas',
+            ]),
+            mkGrupo('Troféus · Colecionáveis', [
+              'Alfabetizado (14 Poemas de Kvasir)', 'Florada (9 Flores)', 'Lugar de Direito (Lindwyrms)',
+              'Puro de Coração (4 Cervos)', 'Colecionador de Olhos (48 Corvos de Odin)',
+            ]),
+            mkGrupo('Troféus · Combate, Upgrades e Desafios Extremos', [
+              'Pronto para o Compromisso', 'Polimento de Esparta', 'Modos Espartanos', 'Falange', 'Coletor',
+              'Matador de Dragões', 'Provações de Fogo', 'Erro Grave', 'A Verdadeira Rainha', 'Gênese Divina',
+            ]),
+            mkGrupo('Platina', ['O Urso e o Lobo']),
+          ],
+        },
+      }];
+
+      salvarDados();
+    }
+    seedInicial();
+
+    renderTudo();
+  </script>
+</body>
+</html>

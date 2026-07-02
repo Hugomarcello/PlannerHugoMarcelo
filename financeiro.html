@@ -1,0 +1,1486 @@
+<!DOCTYPE html>
+<html lang="pt-br" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Planner Hugo Marcelo | Financeiro</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+
+  <!-- =====================================================================
+       ESTILOS SÓ DESTA PÁGINA · prefixo "fi-" (Financeiro)
+       Variáveis no :root para os modais (que ficam fora do .container)
+       enxergarem as mesmas cores.
+       ===================================================================== -->
+  <style>
+    :root {
+      --fi-ok:    #10b981;
+      --fi-alerta:#f59e0b;
+      --fi-risco: #ef4444;
+      --fi-cripto:#f7931a; /* laranja bitcoin, só pro acento do bloco cripto */
+    }
+
+    /* ---------- ABAS ---------------------------------------------------- */
+    .fi-tabs {
+      display: flex; gap: 8px; overflow-x: auto;
+      padding: 10px 0; margin-bottom: 22px;
+      border-bottom: 1px solid var(--border);
+      position: sticky; top: 0; z-index: 25;
+      background: var(--bg);
+    }
+    .fi-tabs::-webkit-scrollbar { height: 0; }
+    .fi-tab {
+      flex-shrink: 0;
+      padding: 10px 16px; border-radius: 12px 12px 0 0;
+      background: var(--panel); border: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 10.5px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;
+      transition: all .15s;
+    }
+    .fi-tab i { margin-right: 6px; }
+    .fi-tab:hover { color: var(--accent); border-color: var(--accent); }
+    .fi-tab.is-active { background: var(--accent); color: #fff; border-color: var(--accent); box-shadow: var(--glow); }
+
+    .fi-view { display: none; }
+    .fi-view.is-active { display: block; animation: fadeUp .35s ease both; }
+
+    /* ---------- CABEÇALHO DE SEÇÃO -------------------------------------- */
+    .fi-secao-head { display: flex; align-items: center; justify-content: space-between; margin: 26px 0 14px; }
+    .fi-secao-head:first-child { margin-top: 0; }
+    .fi-secao-head h2 { font-size: 13px; font-weight: 900; text-transform: uppercase; letter-spacing: 1.5px; display: flex; align-items: center; gap: 8px; }
+    .fi-secao-head h2 i { color: var(--accent); }
+    .fi-secao-sub { font-size: 11px; color: var(--text-muted); margin-top: -10px; margin-bottom: 16px; }
+
+    /* ---------- PAINEL: cards de resumo --------------------------------- */
+    .fi-resumo-grid { display: grid; gap: 14px; grid-template-columns: repeat(2, 1fr); }
+    @media (min-width: 700px) { .fi-resumo-grid { grid-template-columns: repeat(4, 1fr); } }
+    .fi-resumo-card {
+      background: var(--panel); border: 1px solid var(--border); border-radius: 14px;
+      padding: 16px; text-align: center;
+    }
+    .fi-resumo-card .num { font-size: 24px; font-weight: 900; letter-spacing: -1px; }
+    .fi-resumo-card .lbl { font-size: 8.5px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.2px; color: var(--text-muted); margin-top: 4px; }
+    .fi-resumo-card.streak .num { color: var(--fi-alerta); }
+    .fi-resumo-card.streak .num i { font-size: 18px; margin-right: 4px; }
+
+    .fi-cta {
+      margin: 18px 0; padding: 22px; border-radius: 18px; text-align: center;
+      background: linear-gradient(135deg, var(--accent-soft), transparent), var(--panel);
+      border: 1px solid var(--border);
+    }
+    .fi-cta p { font-size: 11px; color: var(--text-muted); margin-bottom: 14px; }
+    .fi-cta .btn--primary { padding: 14px 28px; font-size: 12px; }
+
+    /* ---------- ATALHOS --------------------------------------------------- */
+    .fi-atalhos-cat { margin-bottom: 16px; }
+    .fi-atalhos-cat h3 { font-size: 9.5px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-muted); margin-bottom: 8px; }
+    .fi-atalhos-row { display: flex; flex-wrap: wrap; gap: 8px; }
+    .fi-atalho {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 9px 12px 9px 10px; border-radius: 12px;
+      background: var(--bg-soft); border: 1px solid var(--border);
+      font-size: 11px; font-weight: 700; transition: all .15s;
+    }
+    .fi-atalho:hover { border-color: var(--accent); color: var(--accent); }
+    .fi-atalho i.fa-solid:first-child { color: var(--accent); width: 14px; text-align: center; }
+    .fi-atalho .fi-x {
+      color: var(--text-muted); font-size: 10px; padding: 2px; margin-left: 2px;
+    }
+    .fi-atalho .fi-x:hover { color: var(--fi-risco); }
+    .fi-add-chip {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 9px 14px; border-radius: 12px; border: 1px dashed var(--border);
+      color: var(--text-muted); font-size: 10.5px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;
+    }
+    .fi-add-chip:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* ---------- SESSÃO FINANCEIRA ---------------------------------------- */
+    .fi-sessao-timer {
+      text-align: center; padding: 26px 20px;
+      background: var(--panel); border: 1px solid var(--border); border-radius: 18px;
+      margin-bottom: 18px;
+    }
+    .fi-sessao-timer .tempo { font-size: 40px; font-weight: 900; letter-spacing: -1px; font-variant-numeric: tabular-nums; }
+    .fi-sessao-timer .lbl { font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; color: var(--text-muted); margin-bottom: 6px; }
+
+    .fi-progress-track {
+      width: 100%; height: 12px; border-radius: 99px;
+      background: var(--bg-soft); border: 1px solid var(--border);
+      overflow: hidden; margin: 14px 0 4px;
+    }
+    .fi-progress-fill { height: 100%; background: var(--accent); border-radius: 99px; transition: width .4s ease; }
+    .fi-progress-txt { font-size: 10px; font-weight: 700; color: var(--text-muted); text-align: right; }
+
+    .fi-check-grupo { margin-bottom: 18px; }
+    .fi-check-grupo h4 {
+      font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px;
+      color: var(--text-muted); margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between;
+    }
+    .fi-check-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 12px 14px; border-radius: 12px;
+      background: var(--bg-soft); border: 1px solid var(--border);
+      margin-bottom: 8px; cursor: pointer; transition: all .15s;
+    }
+    .fi-check-item:hover { border-color: var(--accent); }
+    .fi-check-box {
+      width: 20px; height: 20px; border-radius: 6px; flex-shrink: 0;
+      border: 2px solid var(--border); display: grid; place-items: center;
+      font-size: 11px; color: transparent; transition: all .15s;
+    }
+    .fi-check-item.marcado .fi-check-box { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .fi-check-item.marcado span.txt { text-decoration: line-through; color: var(--text-muted); }
+    .fi-check-item .txt { flex: 1; font-size: 12.5px; font-weight: 600; }
+    .fi-check-item .fi-mini { color: var(--text-muted); font-size: 11px; padding: 4px; }
+    .fi-check-item .fi-mini:hover { color: var(--fi-risco); }
+
+    .fi-sem-sessao { text-align: center; padding: 30px 16px; color: var(--text-muted); font-size: 12px; }
+
+    /* ---------- FLUXO DO DINHEIRO ----------------------------------------- */
+    .fi-flow { max-width: 420px; margin: 0 auto; }
+    .fi-flow-node {
+      background: var(--panel); border: 1px solid var(--border); border-radius: 14px;
+      padding: 14px 16px; display: flex; align-items: center; justify-content: space-between;
+      gap: 10px; margin-bottom: 4px;
+    }
+    .fi-flow-node b { font-size: 12.5px; font-weight: 800; }
+    .fi-flow-actions { display: flex; gap: 4px; flex-shrink: 0; }
+    .fi-flow-actions button { color: var(--text-muted); font-size: 11px; padding: 5px; }
+    .fi-flow-actions button:hover { color: var(--accent); }
+    .fi-flow-actions button.fi-danger:hover { color: var(--fi-risco); }
+    .fi-flow-arrow { text-align: center; color: var(--text-muted); font-size: 13px; padding: 4px 0; }
+
+    /* ---------- BIBLIOTECA DE CONTAS -------------------------------------- */
+    .fi-lib-card {
+      background: var(--panel); border: 1px solid var(--border); border-radius: 14px;
+      padding: 18px; display: flex; flex-direction: column; gap: 8px;
+    }
+    .fi-lib-card .fi-lib-head { display: flex; align-items: center; justify-content: space-between; }
+    .fi-lib-card .fi-lib-head b { font-size: 13px; font-weight: 900; }
+    .fi-lib-card .fi-lib-actions { display: flex; gap: 4px; }
+    .fi-lib-card .fi-lib-actions button { color: var(--text-muted); font-size: 11px; padding: 5px; }
+    .fi-lib-card .fi-lib-actions button:hover { color: var(--accent); }
+    .fi-lib-row { font-size: 11.5px; line-height: 1.5; }
+    .fi-lib-row b { color: var(--text-muted); font-weight: 800; text-transform: uppercase; font-size: 9px; letter-spacing: 1px; display: block; margin-bottom: 1px; }
+
+    /* ---------- METAS ------------------------------------------------------ */
+    .fi-meta-card { background: var(--panel); border: 1px solid var(--border); border-radius: 14px; padding: 16px; }
+    .fi-meta-card .fi-meta-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+    .fi-meta-card b { font-size: 12px; font-weight: 800; }
+    .fi-meta-vals { display: flex; justify-content: space-between; font-size: 10.5px; color: var(--text-muted); margin-top: 6px; }
+    .fi-meta-vals b { color: var(--text-strong); font-size: 11px; }
+    .fi-meta-pct { font-size: 10px; font-weight: 800; color: var(--accent); }
+
+    /* ---------- LISTA GENÉRICA (receitas / despesas) ---------------------- */
+    .fi-lista-item {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 11px 14px; border-radius: 10px; background: var(--bg-soft);
+      border: 1px solid var(--border); margin-bottom: 7px;
+    }
+    .fi-lista-item .fi-nome { font-size: 12px; font-weight: 700; }
+    .fi-lista-item .fi-nome small { display: block; font-size: 9.5px; color: var(--text-muted); font-weight: 600; margin-top: 1px; }
+    .fi-lista-item .fi-val { font-size: 12px; font-weight: 800; color: var(--accent); margin-right: 10px; }
+    .fi-lista-actions { display: flex; gap: 2px; }
+    .fi-lista-actions button { color: var(--text-muted); font-size: 10.5px; padding: 5px; }
+    .fi-lista-actions button:hover { color: var(--accent); }
+    .fi-lista-actions button.fi-danger:hover { color: var(--fi-risco); }
+    .fi-lista-total {
+      display: flex; justify-content: space-between; padding: 10px 14px;
+      font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .5px;
+      color: var(--text-muted); border-top: 1px dashed var(--border); margin-top: 4px;
+    }
+    .fi-lista-total b { color: var(--text-strong); font-size: 13px; }
+
+    /* ---------- DESPESAS RECOLHÍVEIS --------------------------------------- */
+    .fi-cat { background: var(--panel); border: 1px solid var(--border); border-radius: 14px; margin-bottom: 12px; overflow: hidden; }
+    .fi-cat-head {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 16px; cursor: pointer;
+    }
+    .fi-cat-head b { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: .5px; }
+    .fi-cat-head .fi-cat-sub { font-size: 10.5px; color: var(--text-muted); font-weight: 700; margin-left: auto; margin-right: 10px; }
+    .fi-cat-head i.fa-chevron-down { transition: transform .2s; color: var(--text-muted); font-size: 11px; }
+    .fi-cat.is-aberta .fa-chevron-down { transform: rotate(180deg); }
+    .fi-cat-body { display: none; padding: 0 16px 16px; }
+    .fi-cat.is-aberta .fi-cat-body { display: block; }
+
+    /* ---------- INVESTIMENTOS ---------------------------------------------- */
+    .fi-patrimonio {
+      text-align: center; padding: 26px; border-radius: 18px; margin-bottom: 18px;
+      background: linear-gradient(135deg, var(--accent-soft), transparent), var(--panel);
+      border: 1px solid var(--border);
+    }
+    .fi-patrimonio .num { font-size: 34px; font-weight: 900; letter-spacing: -1px; color: var(--accent); }
+    .fi-patrimonio .lbl { font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; color: var(--text-muted); margin-top: 6px; }
+
+    .fi-invest-grid { display: grid; gap: 12px; grid-template-columns: repeat(2, 1fr); margin-bottom: 20px; }
+    @media (min-width: 700px) { .fi-invest-grid { grid-template-columns: repeat(3, 1fr); } }
+    .fi-invest-item { background: var(--bg-soft); border: 1px solid var(--border); border-radius: 12px; padding: 12px; text-align: center; }
+    .fi-invest-item .num { font-size: 15px; font-weight: 900; }
+    .fi-invest-item .lbl { font-size: 8.5px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-top: 3px; }
+
+    .fi-cripto-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 12px 14px; border-radius: 12px; background: var(--bg-soft);
+      border: 1px solid var(--border); margin-bottom: 8px;
+    }
+    .fi-cripto-icon {
+      width: 34px; height: 34px; border-radius: 99px; flex-shrink: 0;
+      background: color-mix(in srgb, var(--fi-cripto) 18%, transparent);
+      color: var(--fi-cripto); display: grid; place-items: center; font-size: 13px; font-weight: 900;
+    }
+    .fi-cripto-info { flex: 1; }
+    .fi-cripto-info b { font-size: 12.5px; font-weight: 800; }
+    .fi-cripto-info small { display: block; font-size: 10px; color: var(--text-muted); margin-top: 1px; }
+    .fi-cripto-val { text-align: right; }
+    .fi-cripto-val b { font-size: 12.5px; font-weight: 800; color: var(--accent); display: block; }
+
+    /* ---------- HISTÓRICO ---------------------------------------------------- */
+    .fi-hist-item {
+      display: flex; align-items: center; gap: 14px;
+      padding: 13px 16px; border-radius: 12px; background: var(--bg-soft);
+      border: 1px solid var(--border); margin-bottom: 8px;
+    }
+    .fi-hist-icon {
+      width: 36px; height: 36px; border-radius: 10px; flex-shrink: 0;
+      background: var(--accent-soft); color: var(--accent);
+      display: grid; place-items: center; font-size: 14px;
+    }
+    .fi-hist-info { flex: 1; }
+    .fi-hist-info b { font-size: 12px; font-weight: 800; }
+    .fi-hist-info small { display: block; font-size: 10px; color: var(--text-muted); margin-top: 1px; }
+    .fi-hist-badge {
+      font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: .5px;
+      padding: 4px 9px; border-radius: 99px; background: var(--accent-soft); color: var(--accent);
+    }
+
+    /* ---------- ESTADO VAZIO --------------------------------------------- */
+    .fi-vazio { text-align: center; padding: 26px 16px; color: var(--text-muted); font-size: 12px; }
+    .fi-vazio i { font-size: 22px; display: block; margin-bottom: 8px; opacity: .5; }
+
+    /* ---------- FORMULÁRIOS DENTRO DOS MODAIS ------------------------------ */
+    .fi-campo { display: flex; flex-direction: column; gap: 5px; }
+    .fi-campo label { font-size: 9.5px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); }
+    .fi-campo input, .fi-campo select, .fi-campo textarea {
+      background: var(--bg-soft); border: 1px solid var(--border); border-radius: 10px;
+      padding: 10px 12px; font-size: 13px; color: var(--text-strong); font-family: inherit;
+    }
+    .fi-campo textarea { resize: vertical; min-height: 60px; }
+    .fi-campo input:focus, .fi-campo select:focus, .fi-campo textarea:focus { outline: none; border-color: var(--accent); }
+    .fi-modal-linha { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .fi-modal-acoes { display: flex; gap: 10px; margin-top: 4px; }
+    .fi-modal-acoes .btn { flex: 1; justify-content: center; }
+
+    /* Modal maior que o de backup, mas mesma classe base */
+    #fi-modal-conta .modal__box,
+    #fi-modal-checklist .modal__box { max-width: 460px; }
+  </style>
+</head>
+
+<body class="app" data-page="financeiro">
+
+  <div id="sidebar-container"></div>
+  <div id="overlay" class="overlay" onclick="fecharMenu()"></div>
+
+  <main class="main">
+
+    <header class="header">
+      <div class="header__left">
+        <button class="btn btn--icon btn--menu" onclick="abrirMenu()" aria-label="Abrir menu">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+        <div>
+          <h1 class="header__title">Financeiro</h1>
+          <p class="header__subtitle">Centro de Operações Financeiras</p>
+        </div>
+      </div>
+      <div class="header__actions">
+        <button class="btn" onclick="abrirSync()">
+          <i class="fa-solid fa-cloud-arrow-up" style="color: var(--accent)"></i>
+          <span>Backup</span>
+        </button>
+        <button class="btn btn--icon" id="btn-tema" onclick="Tema.alternar()" aria-label="Trocar tema">
+          <i class="fa-solid fa-moon"></i>
+        </button>
+      </div>
+    </header>
+
+    <div class="container fade-up">
+
+      <!-- ======= ABAS ======= -->
+      <div class="fi-tabs">
+        <button class="fi-tab is-active" id="fi-tab-painel"   onclick="FI.mudarAba('painel')"><i class="fa-solid fa-gauge-high"></i>Painel</button>
+        <button class="fi-tab"           id="fi-tab-sessao"   onclick="FI.mudarAba('sessao')"><i class="fa-solid fa-stopwatch"></i>Sessão</button>
+        <button class="fi-tab"           id="fi-tab-fluxo"    onclick="FI.mudarAba('fluxo')"><i class="fa-solid fa-diagram-project"></i>Fluxo do Dinheiro</button>
+        <button class="fi-tab"           id="fi-tab-contas"   onclick="FI.mudarAba('contas')"><i class="fa-solid fa-book-bookmark"></i>Contas &amp; Biblioteca</button>
+        <button class="fi-tab"           id="fi-tab-metas"    onclick="FI.mudarAba('metas')"><i class="fa-solid fa-bullseye"></i>Metas &amp; Orçamento</button>
+        <button class="fi-tab"           id="fi-tab-invest"   onclick="FI.mudarAba('invest')"><i class="fa-solid fa-chart-line"></i>Investimentos</button>
+        <button class="fi-tab"           id="fi-tab-historico" onclick="FI.mudarAba('historico')"><i class="fa-solid fa-clock-rotate-left"></i>Histórico</button>
+      </div>
+
+      <!-- ======= VIEW: PAINEL ======= -->
+      <section class="fi-view is-active" id="fi-view-painel">
+        <div class="fi-resumo-grid" id="fi-resumo"></div>
+
+        <div class="fi-cta">
+          <p>Pronto pra revisar sua vida financeira de hoje?</p>
+          <button class="btn btn--primary" onclick="FI.mudarAba('sessao'); FI.iniciarSessao()">
+            <i class="fa-solid fa-play"></i> Iniciar Sessão Financeira
+          </button>
+        </div>
+
+        <div class="fi-secao-head">
+          <h2><i class="fa-solid fa-link"></i> Central de Atalhos</h2>
+          <button class="btn btn--icon" onclick="FI.abrirModalAtalho()" title="Novo atalho"><i class="fa-solid fa-plus"></i></button>
+        </div>
+        <div id="fi-atalhos"></div>
+      </section>
+
+      <!-- ======= VIEW: SESSÃO FINANCEIRA ======= -->
+      <section class="fi-view" id="fi-view-sessao">
+        <div id="fi-sessao-conteudo"></div>
+      </section>
+
+      <!-- ======= VIEW: FLUXO DO DINHEIRO ======= -->
+      <section class="fi-view" id="fi-view-fluxo">
+        <p class="fi-secao-sub">O caminho que seu dinheiro percorre — de onde entra até onde é investido. Edite quando sua estratégia mudar.</p>
+        <div class="fi-flow" id="fi-flow"></div>
+        <div style="text-align:center; margin-top:14px;">
+          <button class="btn" onclick="FI.abrirModalFluxo()"><i class="fa-solid fa-plus"></i> Adicionar etapa</button>
+        </div>
+      </section>
+
+      <!-- ======= VIEW: CONTAS & BIBLIOTECA ======= -->
+      <section class="fi-view" id="fi-view-contas">
+        <div class="fi-secao-head">
+          <h2><i class="fa-solid fa-book-bookmark"></i> Biblioteca de Contas</h2>
+          <button class="btn btn--icon" onclick="FI.abrirModalConta()" title="Nova conta"><i class="fa-solid fa-plus"></i></button>
+        </div>
+        <p class="fi-secao-sub">O manual de cada conta: pra que serve, quando usar e o que nunca fazer com ela.</p>
+        <div class="grid grid--2" id="fi-contas"></div>
+      </section>
+
+      <!-- ======= VIEW: METAS & ORÇAMENTO ======= -->
+      <section class="fi-view" id="fi-view-metas">
+
+        <div class="fi-secao-head">
+          <h2><i class="fa-solid fa-bullseye"></i> Metas</h2>
+          <button class="btn btn--icon" onclick="FI.abrirModalMeta()" title="Nova meta"><i class="fa-solid fa-plus"></i></button>
+        </div>
+        <div class="grid grid--3" id="fi-metas"></div>
+
+        <div class="fi-secao-head">
+          <h2><i class="fa-solid fa-sack-dollar"></i> Receitas</h2>
+          <button class="btn btn--icon" onclick="FI.abrirModalReceita()" title="Nova receita"><i class="fa-solid fa-plus"></i></button>
+        </div>
+        <div id="fi-receitas"></div>
+
+        <div class="fi-secao-head">
+          <h2><i class="fa-solid fa-file-invoice-dollar"></i> Orçamento (Despesas)</h2>
+        </div>
+        <div id="fi-despesas"></div>
+      </section>
+
+      <!-- ======= VIEW: INVESTIMENTOS ======= -->
+      <section class="fi-view" id="fi-view-invest">
+        <div class="fi-patrimonio">
+          <div class="num" id="fi-patrimonio-total">R$ 0,00</div>
+          <div class="lbl">Patrimônio Total (investimentos + cripto)</div>
+        </div>
+
+        <div class="fi-secao-head">
+          <h2><i class="fa-solid fa-chart-pie"></i> Visão Geral</h2>
+          <button class="btn btn--icon" onclick="FI.abrirModalInvest()" title="Editar valores"><i class="fa-solid fa-pen"></i></button>
+        </div>
+        <div class="fi-invest-grid" id="fi-invest-grid"></div>
+
+        <div class="fi-secao-head">
+          <h2><i class="fa-brands fa-bitcoin"></i> Criptomoedas</h2>
+          <button class="btn btn--icon" onclick="FI.abrirModalCripto()" title="Nova moeda"><i class="fa-solid fa-plus"></i></button>
+        </div>
+        <div id="fi-cripto"></div>
+      </section>
+
+      <!-- ======= VIEW: HISTÓRICO ======= -->
+      <section class="fi-view" id="fi-view-historico">
+        <div class="fi-resumo-grid" style="grid-template-columns: repeat(2,1fr); margin-bottom:22px;">
+          <div class="fi-resumo-card streak">
+            <div class="num"><i class="fa-solid fa-fire"></i><span id="fi-hist-streak-atual">0</span></div>
+            <div class="lbl">Sequência Atual</div>
+          </div>
+          <div class="fi-resumo-card">
+            <div class="num" id="fi-hist-streak-melhor">0</div>
+            <div class="lbl">Melhor Sequência</div>
+          </div>
+        </div>
+        <div class="fi-secao-head"><h2><i class="fa-solid fa-clock-rotate-left"></i> Sessões Concluídas</h2></div>
+        <div id="fi-historico"></div>
+      </section>
+
+    </div>
+
+    <div id="footer-container"></div>
+  </main>
+
+  <!-- ============================================================
+       MODAIS
+       ============================================================ -->
+
+  <!-- Backup — igual em todas as páginas -->
+  <div id="modal-sync" class="modal">
+    <div class="modal__box">
+      <div class="modal__head">
+        <h3><i class="fa-solid fa-cloud-arrow-up" style="color:var(--accent)"></i> Backup & Transferência</h3>
+        <button class="modal__close" onclick="fecharSync()"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal__body">
+        <p>Sem nuvem por enquanto: use isto pra levar seus dados entre celular e computador.</p>
+        <button class="btn" onclick="exportarBackup()" style="width:100%; justify-content:center;">
+          <i class="fa-solid fa-download"></i> Exportar (baixar arquivo)
+        </button>
+        <input type="file" id="input-import" accept=".json" onchange="importarBackup(event)" style="display:none;">
+        <button class="btn btn--primary" onclick="document.getElementById('input-import').click()" style="width:100%; justify-content:center;">
+          <i class="fa-solid fa-upload"></i> Importar (restaurar backup)
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Confirmação genérica (substitui o confirm() nativo) -->
+  <div id="fi-modal-confirm" class="modal">
+    <div class="modal__box">
+      <div class="modal__head">
+        <h3><i class="fa-solid fa-triangle-exclamation" style="color:var(--fi-risco)"></i> Confirmar</h3>
+        <button class="modal__close" onclick="FI.fecharModal('fi-modal-confirm')"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal__body">
+        <p id="fi-confirm-msg">Tem certeza?</p>
+        <div class="fi-modal-acoes">
+          <button class="btn" onclick="FI.fecharModal('fi-modal-confirm')">Cancelar</button>
+          <button class="btn btn--primary" style="background:var(--fi-risco); border-color:var(--fi-risco);" onclick="FI.confirmarSim()">Sim, excluir</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Atalho -->
+  <div id="fi-modal-atalho" class="modal">
+    <div class="modal__box">
+      <div class="modal__head">
+        <h3><i class="fa-solid fa-link" style="color:var(--accent)"></i> Atalho</h3>
+        <button class="modal__close" onclick="FI.fecharModal('fi-modal-atalho')"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal__body">
+        <input type="hidden" id="fi-atalho-id">
+        <div class="fi-campo">
+          <label>Categoria</label>
+          <select id="fi-atalho-categoria">
+            <option value="Bancos">Bancos</option>
+            <option value="Controle Financeiro">Controle Financeiro</option>
+            <option value="Investimentos">Investimentos</option>
+            <option value="Utilidades">Utilidades</option>
+          </select>
+        </div>
+        <div class="fi-campo"><label>Nome</label><input type="text" id="fi-atalho-nome" placeholder="Ex: Banco Inter"></div>
+        <div class="fi-campo"><label>Link (URL)</label><input type="text" id="fi-atalho-url" placeholder="https://..."></div>
+        <div class="fi-modal-acoes">
+          <button class="btn" id="fi-atalho-excluir" onclick="FI.excluirAtalhoAtual()" style="display:none;"><i class="fa-solid fa-trash"></i></button>
+          <button class="btn btn--primary" onclick="FI.salvarAtalho()">Salvar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Conta (Biblioteca) -->
+  <div id="fi-modal-conta" class="modal">
+    <div class="modal__box">
+      <div class="modal__head">
+        <h3><i class="fa-solid fa-book-bookmark" style="color:var(--accent)"></i> Conta / Instituição</h3>
+        <button class="modal__close" onclick="FI.fecharModal('fi-modal-conta')"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal__body">
+        <input type="hidden" id="fi-conta-id">
+        <div class="fi-campo"><label>Nome</label><input type="text" id="fi-conta-nome" placeholder="Ex: Banco Inter"></div>
+        <div class="fi-campo"><label>Objetivo</label><input type="text" id="fi-conta-objetivo" placeholder="Ex: Conta principal"></div>
+        <div class="fi-campo"><label>Função</label><textarea id="fi-conta-funcao" placeholder="Ex: Receber todas as receitas"></textarea></div>
+        <div class="fi-campo"><label>Quando utilizar</label><input type="text" id="fi-conta-quando" placeholder="Ex: Sempre / Só em emergência"></div>
+        <div class="fi-campo"><label>Observações</label><textarea id="fi-conta-obs" placeholder="Opcional"></textarea></div>
+        <div class="fi-modal-acoes">
+          <button class="btn" id="fi-conta-excluir" onclick="FI.excluirContaAtual()" style="display:none;"><i class="fa-solid fa-trash"></i></button>
+          <button class="btn btn--primary" onclick="FI.salvarConta()">Salvar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Fluxo -->
+  <div id="fi-modal-fluxo" class="modal">
+    <div class="modal__box">
+      <div class="modal__head">
+        <h3><i class="fa-solid fa-diagram-project" style="color:var(--accent)"></i> Etapa do Fluxo</h3>
+        <button class="modal__close" onclick="FI.fecharModal('fi-modal-fluxo')"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal__body">
+        <input type="hidden" id="fi-fluxo-id">
+        <div class="fi-campo"><label>Nome da etapa</label><input type="text" id="fi-fluxo-nome" placeholder="Ex: Corretora"></div>
+        <div class="fi-modal-acoes">
+          <button class="btn" id="fi-fluxo-excluir" onclick="FI.excluirFluxoAtual()" style="display:none;"><i class="fa-solid fa-trash"></i></button>
+          <button class="btn btn--primary" onclick="FI.salvarFluxo()">Salvar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Meta -->
+  <div id="fi-modal-meta" class="modal">
+    <div class="modal__box">
+      <div class="modal__head">
+        <h3><i class="fa-solid fa-bullseye" style="color:var(--accent)"></i> Meta Financeira</h3>
+        <button class="modal__close" onclick="FI.fecharModal('fi-modal-meta')"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal__body">
+        <input type="hidden" id="fi-meta-id">
+        <div class="fi-campo"><label>Nome</label><input type="text" id="fi-meta-nome" placeholder="Ex: Patrimônio Total"></div>
+        <div class="fi-modal-linha">
+          <div class="fi-campo"><label>Valor Atual (R$)</label><input type="number" step="0.01" id="fi-meta-atual" placeholder="0"></div>
+          <div class="fi-campo"><label>Meta (R$)</label><input type="number" step="0.01" id="fi-meta-meta" placeholder="0"></div>
+        </div>
+        <div class="fi-modal-acoes">
+          <button class="btn" id="fi-meta-excluir" onclick="FI.excluirMetaAtual()" style="display:none;"><i class="fa-solid fa-trash"></i></button>
+          <button class="btn btn--primary" onclick="FI.salvarMeta()">Salvar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Receita -->
+  <div id="fi-modal-receita" class="modal">
+    <div class="modal__box">
+      <div class="modal__head">
+        <h3><i class="fa-solid fa-sack-dollar" style="color:var(--accent)"></i> Fonte de Receita</h3>
+        <button class="modal__close" onclick="FI.fecharModal('fi-modal-receita')"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal__body">
+        <input type="hidden" id="fi-receita-id">
+        <div class="fi-campo"><label>Nome</label><input type="text" id="fi-receita-nome" placeholder="Ex: Personal Soccer"></div>
+        <div class="fi-campo"><label>Valor mensal (R$)</label><input type="number" step="0.01" id="fi-receita-valor" placeholder="0"></div>
+        <div class="fi-campo"><label>Observações</label><input type="text" id="fi-receita-obs" placeholder="Opcional"></div>
+        <div class="fi-modal-acoes">
+          <button class="btn" id="fi-receita-excluir" onclick="FI.excluirReceitaAtual()" style="display:none;"><i class="fa-solid fa-trash"></i></button>
+          <button class="btn btn--primary" onclick="FI.salvarReceita()">Salvar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Despesa (compartilhado pelas 4 categorias) -->
+  <div id="fi-modal-despesa" class="modal">
+    <div class="modal__box">
+      <div class="modal__head">
+        <h3><i class="fa-solid fa-file-invoice-dollar" style="color:var(--accent)"></i> Item de Despesa</h3>
+        <button class="modal__close" onclick="FI.fecharModal('fi-modal-despesa')"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal__body">
+        <input type="hidden" id="fi-despesa-id">
+        <input type="hidden" id="fi-despesa-categoria">
+        <div class="fi-campo"><label>Nome</label><input type="text" id="fi-despesa-nome" placeholder="Ex: Internet"></div>
+        <div class="fi-campo"><label>Valor (R$)</label><input type="number" step="0.01" id="fi-despesa-valor" placeholder="0"></div>
+        <div class="fi-modal-acoes">
+          <button class="btn" id="fi-despesa-excluir" onclick="FI.excluirDespesaAtual()" style="display:none;"><i class="fa-solid fa-trash"></i></button>
+          <button class="btn btn--primary" onclick="FI.salvarDespesa()">Salvar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Painel de Investimentos (edita os 4 valores de uma vez) -->
+  <div id="fi-modal-invest" class="modal">
+    <div class="modal__box">
+      <div class="modal__head">
+        <h3><i class="fa-solid fa-chart-pie" style="color:var(--accent)"></i> Visão Geral de Investimentos</h3>
+        <button class="modal__close" onclick="FI.fecharModal('fi-modal-invest')"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal__body">
+        <div class="fi-modal-linha">
+          <div class="fi-campo"><label>Renda Fixa · CDB/Tesouro (R$)</label><input type="number" step="0.01" id="fi-invest-cdb"></div>
+          <div class="fi-campo"><label>Ações (R$)</label><input type="number" step="0.01" id="fi-invest-acoes"></div>
+        </div>
+        <div class="fi-modal-linha">
+          <div class="fi-campo"><label>FIIs (R$)</label><input type="number" step="0.01" id="fi-invest-fiis"></div>
+          <div class="fi-campo"><label>Previdência (R$)</label><input type="number" step="0.01" id="fi-invest-previdencia"></div>
+        </div>
+        <div class="fi-campo"><label>Reserva de Emergência (R$)</label><input type="number" step="0.01" id="fi-invest-reserva"></div>
+        <p style="font-size:10.5px; color:var(--text-muted);">O patrimônio total é calculado automaticamente somando estes valores + suas criptomoedas. Cada bloco também mostra o % que representa no seu patrimônio — útil pra acompanhar sua diversificação.</p>
+        <div class="fi-modal-acoes">
+          <button class="btn btn--primary" onclick="FI.salvarInvest()">Salvar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cripto -->
+  <div id="fi-modal-cripto" class="modal">
+    <div class="modal__box">
+      <div class="modal__head">
+        <h3><i class="fa-brands fa-bitcoin" style="color:var(--fi-cripto)"></i> Criptomoeda</h3>
+        <button class="modal__close" onclick="FI.fecharModal('fi-modal-cripto')"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal__body">
+        <input type="hidden" id="fi-cripto-id">
+        <div class="fi-campo"><label>Moeda (sigla)</label><input type="text" id="fi-cripto-moeda" placeholder="Ex: BTC" maxlength="10" style="text-transform:uppercase;"></div>
+        <div class="fi-modal-linha">
+          <div class="fi-campo"><label>Quantidade</label><input type="number" step="0.00000001" id="fi-cripto-qtd" placeholder="0"></div>
+          <div class="fi-campo"><label>Preço médio (R$)</label><input type="number" step="0.01" id="fi-cripto-preco" placeholder="0"></div>
+        </div>
+        <div class="fi-campo"><label>Observações</label><input type="text" id="fi-cripto-obs" placeholder="Opcional"></div>
+        <div class="fi-modal-acoes">
+          <button class="btn" id="fi-cripto-excluir" onclick="FI.excluirCriptoAtual()" style="display:none;"><i class="fa-solid fa-trash"></i></button>
+          <button class="btn btn--primary" onclick="FI.salvarCripto()">Salvar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Item de Checklist -->
+  <div id="fi-modal-checklist" class="modal">
+    <div class="modal__box">
+      <div class="modal__head">
+        <h3><i class="fa-solid fa-list-check" style="color:var(--accent)"></i> Item do Checklist</h3>
+        <button class="modal__close" onclick="FI.fecharModal('fi-modal-checklist')"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal__body">
+        <input type="hidden" id="fi-check-grupo">
+        <input type="hidden" id="fi-check-id">
+        <div class="fi-campo"><label>Descrição do passo</label><input type="text" id="fi-check-texto" placeholder="Ex: Conferir saldo"></div>
+        <div class="fi-modal-acoes">
+          <button class="btn" id="fi-check-excluir" onclick="FI.excluirCheckItemAtual()" style="display:none;"><i class="fa-solid fa-trash"></i></button>
+          <button class="btn btn--primary" onclick="FI.salvarCheckItem()">Salvar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    /* =====================================================================
+       FI  —  o módulo da página Financeiro
+       ---------------------------------------------------------------------
+       Tudo que a página faz mora aqui dentro, organizado em um objeto só
+       (mesma ideia do módulo "Plan" dos Planejadores). Isso evita poluir
+       o espaço global com dezenas de funções soltas.
+       ===================================================================== */
+    const FI = {
+
+      CHAVE: "financeiro",
+      dados: null,
+      _confirmCallback: null,
+      _timerId: null,
+
+      /* ---------------- DADOS ---------------------------------------- */
+
+      padrao() {
+        return {
+          atalhos: [
+            { id: FI.novoId(), categoria: "Bancos", nome: "Banco Inter", url: "https://bancointer.com.br" },
+            { id: FI.novoId(), categoria: "Bancos", nome: "Nubank", url: "https://nubank.com.br" },
+            { id: FI.novoId(), categoria: "Bancos", nome: "Bradesco (Laila)", url: "https://bradesco.com.br" },
+            { id: FI.novoId(), categoria: "Controle Financeiro", nome: "Mobills", url: "https://mobills.com.br" },
+            { id: FI.novoId(), categoria: "Investimentos", nome: "Corretora", url: "" },
+            { id: FI.novoId(), categoria: "Investimentos", nome: "Binance", url: "https://binance.com" },
+            { id: FI.novoId(), categoria: "Utilidades", nome: "Google Planilhas", url: "https://sheets.google.com" },
+            { id: FI.novoId(), categoria: "Utilidades", nome: "Status Invest", url: "https://statusinvest.com.br" },
+            { id: FI.novoId(), categoria: "Utilidades", nome: "TradingView", url: "https://tradingview.com" },
+          ],
+          contas: [
+            { id: FI.novoId(), nome: "Banco Inter", objetivo: "Conta principal", funcao: "Receber todas as receitas", quando: "Sempre", obs: "" },
+            { id: FI.novoId(), nome: "Nubank", objetivo: "Reserva / apartamento", funcao: "Guardar dinheiro destinado a objetivos específicos", quando: "Depósitos programados", obs: "Nunca usar para gastos pessoais." },
+            { id: FI.novoId(), nome: "Bradesco", objetivo: "Conta da Laila", funcao: "Controle financeiro dela, mas gerenciada por mim", quando: "Conferir junto com minhas contas", obs: "Participa do meu fluxo financeiro mesmo não sendo minha conta." },
+            { id: FI.novoId(), nome: "Corretora", objetivo: "Investimentos em renda variável", funcao: "Ações e Fundos Imobiliários", quando: "Aporte mensal", obs: "" },
+            { id: FI.novoId(), nome: "Binance", objetivo: "Investimentos em criptomoedas", funcao: "Compra e custódia de cripto", quando: "Aporte mensal", obs: "" },
+          ],
+          fluxo: [
+            "Receitas", "Banco Inter", "Conta Corrente", "Separação",
+            "Investimentos", "Corretora (Ações/FIIs)", "Binance (Cripto)",
+          ].map(nome => ({ id: FI.novoId(), nome })),
+          metas: [
+            { id: FI.novoId(), nome: "Patrimônio Total", atual: 80000, meta: 500000 },
+            { id: FI.novoId(), nome: "Investido", atual: 0, meta: 200000 },
+            { id: FI.novoId(), nome: "Faturamento Mensal", atual: 1000, meta: 4000 },
+          ],
+          receitas: [
+            { id: FI.novoId(), nome: "Personal Soccer", valor: 0, obs: "" },
+            { id: FI.novoId(), nome: "Personal Trainer", valor: 0, obs: "" },
+            { id: FI.novoId(), nome: "Afiliados", valor: 0, obs: "" },
+            { id: FI.novoId(), nome: "Produtos Digitais", valor: 0, obs: "" },
+          ],
+          despesas: {
+            fixas: [
+              ["Aluguel do Apartamento", 861.33], ["Taxa de Condomínio do Apartamento", 403.73],
+              ["Conta de Luz", 34.76], ["Conta de Internet", 109.00], ["Faculdade Laila", 800.00],
+              ["Plano de Internet Laila", 45.00], ["Plano de Saúde Hugo", 100.00],
+              ["DASN/MEI", 87.50], ["Plano de Internet Hugo", 50.80],
+            ].map(([nome, valor]) => ({ id: FI.novoId(), nome, valor })),
+            variaveis: ["Mercado", "Combustível", "Futebol", "Compras", "Lazer"].map(nome => ({ id: FI.novoId(), nome, valor: 0 })),
+            cartoes: [
+              ["Cartão de Crédito Itaú", 0], ["Cartão de Crédito Nubank", 200.00], ["Cartão de Crédito Porto Seguro", 500.00],
+            ].map(([nome, valor]) => ({ id: FI.novoId(), nome, valor })),
+            assinaturas: ["Amazon Prime", "YouTube Premium", "ChatGPT", "Spotify"].map(nome => ({ id: FI.novoId(), nome, valor: 0 })),
+            anuais: [
+              ["CREF", 369.00], ["IPVA + Licenciamento Moto", 436.62],
+            ].map(([nome, valor]) => ({ id: FI.novoId(), nome, valor })),
+          },
+          investPanel: { rendaFixa: 0, acoes: 0, fiis: 0, previdencia: 0, reserva: 0 },
+          cripto: [
+            { id: FI.novoId(), moeda: "BTC", qtd: 0, preco: 0, obs: "" },
+            { id: FI.novoId(), moeda: "ETH", qtd: 0, preco: 0, obs: "" },
+            { id: FI.novoId(), moeda: "USDT", qtd: 0, preco: 0, obs: "" },
+          ],
+          checklist: [
+            { id: "antes", nome: "Antes de Começar", itens: ["Conferir pagamentos a fazer", "Conferir extrato Banco Inter", "Conferir extrato Nubank", "Conferir extrato Bradesco (Laila)"].map(t => ({ id: FI.novoId(), texto: t })) },
+            { id: "controle", nome: "Controle", itens: ["Conferir fatura do cartão de crédito", "Conferir extrato Binance", "Conferir desempenho das ações", "Conferência aplicativo Mobills"].map(t => ({ id: FI.novoId(), texto: t })) },
+            { id: "investimentos", nome: "Investimentos", itens: ["Aporte mensal de Aposentadoria", "Aporte mensal do Apartamento", "Aporte mensal em Ações", "Aporte mensal em FIIs"].map(t => ({ id: FI.novoId(), texto: t })) },
+            { id: "finalizacao", nome: "Finalização", itens: ["Atualizar valores em Investimentos", "Conferir patrimônio total", "Encerrar sessão"].map(t => ({ id: FI.novoId(), texto: t })) },
+          ],
+          sessaoAtual: null,
+          sessoes: [],
+          streak: { atual: 0, melhor: 0, ultimaData: null },
+        };
+      },
+
+      novoId() { return "fi_" + Date.now() + "_" + Math.floor(Math.random() * 100000); },
+
+      carregar() {
+        // Guarda de seed: só cria os dados padrão se a chave ainda não existir.
+        const salvo = Store.ler(this.CHAVE, null);
+        this.dados = salvo || this.padrao();
+        // Garante que campos novos existam mesmo em backups antigos
+        if (!this.dados.despesas) this.dados.despesas = this.padrao().despesas;
+        if (!this.dados.despesas.cartoes) this.dados.despesas.cartoes = [];
+        if (!this.dados.despesas.anuais) this.dados.despesas.anuais = [];
+        if (!this.dados.investPanel) this.dados.investPanel = { rendaFixa: 0, acoes: 0, fiis: 0, previdencia: 0, reserva: 0 };
+        if (this.dados.investPanel.cdb !== undefined && this.dados.investPanel.rendaFixa === undefined) {
+          this.dados.investPanel.rendaFixa = this.dados.investPanel.cdb; // migra nome antigo
+        }
+        if (this.dados.investPanel.previdencia === undefined) this.dados.investPanel.previdencia = 0;
+        if (!this.dados.streak) this.dados.streak = { atual: 0, melhor: 0, ultimaData: null };
+        if (!Array.isArray(this.dados.sessoes)) this.dados.sessoes = [];
+        this.salvar();
+      },
+
+      salvar() { Store.salvar(this.CHAVE, this.dados); },
+
+      /* ---------------- DATA / HORA (sempre local, nunca toISOString) -- */
+
+      hojeStr() {
+        const d = new Date();
+        return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+      },
+      ontemStr() {
+        const d = new Date();
+        d.setDate(d.getDate() - 1);
+        return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+      },
+      dataBonita(strAAAAMMDD) {
+        if (!strAAAAMMDD) return "—";
+        const [a, m, d] = strAAAAMMDD.split("-");
+        return `${d}/${m}/${a}`;
+      },
+      diasDesde(strAAAAMMDD) {
+        if (!strAAAAMMDD) return null;
+        const [a, m, d] = strAAAAMMDD.split("-").map(Number);
+        const alvo = new Date(a, m - 1, d);
+        const hoje = new Date();
+        const hojeSemHora = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate());
+        return Math.round((hojeSemHora - alvo) / 86400000);
+      },
+
+      /* ---------------- FORMATAÇÃO -------------------------------------- */
+
+      fmtReal(v) {
+        return "R$ " + Number(v || 0).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      },
+      fmtTempo(segundos) {
+        const m = Math.floor(segundos / 60).toString().padStart(2, "0");
+        const s = Math.floor(segundos % 60).toString().padStart(2, "0");
+        return `${m}:${s}`;
+      },
+
+      /* ---------------- ABAS -------------------------------------------- */
+
+      mudarAba(nome) {
+        document.querySelectorAll(".fi-tab").forEach(b => b.classList.remove("is-active"));
+        document.querySelectorAll(".fi-view").forEach(v => v.classList.remove("is-active"));
+        document.getElementById("fi-tab-" + nome).classList.add("is-active");
+        document.getElementById("fi-view-" + nome).classList.add("is-active");
+      },
+
+      /* ---------------- MODAL: helpers genéricos ------------------------- */
+
+      abrirModal(id) { document.getElementById(id).classList.add("is-open"); },
+      fecharModal(id) { document.getElementById(id).classList.remove("is-open"); },
+
+      confirmar(msg, callback) {
+        document.getElementById("fi-confirm-msg").textContent = msg;
+        this._confirmCallback = callback;
+        this.abrirModal("fi-modal-confirm");
+      },
+      confirmarSim() {
+        const cb = this._confirmCallback;
+        this.fecharModal("fi-modal-confirm");
+        this._confirmCallback = null;
+        if (typeof cb === "function") cb();
+      },
+
+      /* ================================================================
+         RENDER GERAL
+         ================================================================ */
+
+      renderTudo() {
+        this.renderPainel();
+        this.renderAtalhos();
+        this.renderSessao();
+        this.renderFluxo();
+        this.renderContas();
+        this.renderMetas();
+        this.renderReceitas();
+        this.renderDespesas();
+        this.renderInvest();
+        this.renderCripto();
+        this.renderHistorico();
+      },
+
+      /* ---------------- PAINEL ------------------------------------------- */
+
+      totalInvestido() {
+        const p = this.dados.investPanel;
+        const base = (p.rendaFixa || 0) + (p.acoes || 0) + (p.fiis || 0) + (p.previdencia || 0) + (p.reserva || 0);
+        const cripto = this.dados.cripto.reduce((s, c) => s + (c.qtd || 0) * (c.preco || 0), 0);
+        return base + cripto;
+      },
+
+      renderPainel() {
+        const s = this.dados.streak;
+        const ultima = this.dados.sessoes.length ? this.dados.sessoes[0] : null;
+        const dias = ultima ? this.diasDesde(ultima.data) : null;
+        const ultimaTxt = !ultima ? "Nunca" : dias === 0 ? "Hoje" : dias === 1 ? "Ontem" : `Há ${dias} dias`;
+
+        document.getElementById("fi-resumo").innerHTML = `
+          <div class="fi-resumo-card streak"><div class="num"><i class="fa-solid fa-fire"></i>${s.atual}</div><div class="lbl">Sequência</div></div>
+          <div class="fi-resumo-card"><div class="num">${this.dados.sessoes.length}</div><div class="lbl">Sessões</div></div>
+          <div class="fi-resumo-card"><div class="num" style="font-size:15px;">${ultimaTxt}</div><div class="lbl">Última Revisão</div></div>
+          <div class="fi-resumo-card"><div class="num" style="font-size:15px;">${this.fmtReal(this.totalInvestido())}</div><div class="lbl">Patrimônio</div></div>`;
+      },
+
+      /* ---------------- ATALHOS ------------------------------------------ */
+
+      renderAtalhos() {
+        const cats = ["Bancos", "Controle Financeiro", "Investimentos", "Utilidades"];
+        const box = document.getElementById("fi-atalhos");
+        box.innerHTML = cats.map(cat => {
+          const itens = this.dados.atalhos.filter(a => a.categoria === cat);
+          if (!itens.length) return "";
+          return `
+            <div class="fi-atalhos-cat">
+              <h3>${cat}</h3>
+              <div class="fi-atalhos-row">
+                ${itens.map(a => `
+                  <a class="fi-atalho" href="${a.url || '#'}" target="${a.url ? '_blank' : '_self'}" rel="noopener" onclick="${a.url ? '' : 'event.preventDefault(); FI.abrirModalAtalho(\'' + a.id + '\')'}">
+                    <i class="fa-solid fa-arrow-up-right-from-square"></i>${a.nome}
+                    <i class="fa-solid fa-pen fi-x" onclick="event.preventDefault(); event.stopPropagation(); FI.abrirModalAtalho('${a.id}')"></i>
+                  </a>`).join("")}
+              </div>
+            </div>`;
+        }).join("") + `<button class="fi-add-chip" onclick="FI.abrirModalAtalho()"><i class="fa-solid fa-plus"></i> Novo atalho</button>`;
+      },
+
+      abrirModalAtalho(id = null) {
+        const a = id ? this.dados.atalhos.find(x => x.id === id) : null;
+        document.getElementById("fi-atalho-id").value = id || "";
+        document.getElementById("fi-atalho-categoria").value = a ? a.categoria : "Bancos";
+        document.getElementById("fi-atalho-nome").value = a ? a.nome : "";
+        document.getElementById("fi-atalho-url").value = a ? a.url : "";
+        document.getElementById("fi-atalho-excluir").style.display = id ? "inline-flex" : "none";
+        this.abrirModal("fi-modal-atalho");
+      },
+      salvarAtalho() {
+        const id = document.getElementById("fi-atalho-id").value;
+        const nome = document.getElementById("fi-atalho-nome").value.trim();
+        if (!nome) return;
+        const obj = {
+          categoria: document.getElementById("fi-atalho-categoria").value,
+          nome,
+          url: document.getElementById("fi-atalho-url").value.trim(),
+        };
+        if (id) {
+          Object.assign(this.dados.atalhos.find(x => x.id === id), obj);
+        } else {
+          this.dados.atalhos.push({ id: this.novoId(), ...obj });
+        }
+        this.salvar(); this.renderAtalhos(); this.fecharModal("fi-modal-atalho");
+      },
+      excluirAtalhoAtual() {
+        const id = document.getElementById("fi-atalho-id").value;
+        this.fecharModal("fi-modal-atalho");
+        this.confirmar("Excluir este atalho?", () => {
+          this.dados.atalhos = this.dados.atalhos.filter(x => x.id !== id);
+          this.salvar(); this.renderAtalhos();
+        });
+      },
+
+      /* ---------------- SESSÃO FINANCEIRA --------------------------------- */
+
+      iniciarSessao() {
+        if (this.dados.sessaoAtual) { this.renderSessao(); return; }
+        this.dados.sessaoAtual = { inicio: Date.now(), marcados: [] };
+        this.salvar();
+        this.renderSessao();
+        if (this._timerId) clearInterval(this._timerId);
+        this._timerId = setInterval(() => this.atualizarTimer(), 1000);
+      },
+
+      totalItensChecklist() {
+        return this.dados.checklist.reduce((s, g) => s + g.itens.length, 0);
+      },
+
+      toggleItemSessao(itemId) {
+        const s = this.dados.sessaoAtual;
+        if (!s) return;
+        const i = s.marcados.indexOf(itemId);
+        if (i >= 0) s.marcados.splice(i, 1); else s.marcados.push(itemId);
+        this.salvar();
+        this.renderSessao();
+      },
+
+      atualizarTimer() {
+        const s = this.dados.sessaoAtual;
+        if (!s) { clearInterval(this._timerId); return; }
+        const el = document.getElementById("fi-timer-num");
+        if (el) el.textContent = this.fmtTempo((Date.now() - s.inicio) / 1000);
+      },
+
+      concluirSessao() {
+        const s = this.dados.sessaoAtual;
+        if (!s) return;
+        const finalizar = () => {
+          const total = this.totalItensChecklist();
+          const tempoSegundos = Math.round((Date.now() - s.inicio) / 1000);
+          this.dados.sessoes.unshift({
+            id: this.novoId(),
+            data: this.hojeStr(),
+            tempoSegundos,
+            concluidos: s.marcados.length,
+            total,
+          });
+          this.atualizarStreak();
+          this.dados.sessaoAtual = null;
+          if (this._timerId) { clearInterval(this._timerId); this._timerId = null; }
+          this.salvar();
+          this.renderPainel(); this.renderSessao(); this.renderHistorico();
+        };
+        const total = this.totalItensChecklist();
+        if (s.marcados.length < total) {
+          this.confirmar(`Você concluiu ${s.marcados.length} de ${total} itens. Encerrar assim mesmo?`, finalizar);
+        } else {
+          finalizar();
+        }
+      },
+
+      cancelarSessao() {
+        this.confirmar("Cancelar esta sessão sem salvar no histórico?", () => {
+          this.dados.sessaoAtual = null;
+          if (this._timerId) { clearInterval(this._timerId); this._timerId = null; }
+          this.salvar();
+          this.renderSessao();
+        });
+      },
+
+      atualizarStreak() {
+        const st = this.dados.streak;
+        const hoje = this.hojeStr();
+        if (st.ultimaData === hoje) return; // já contou hoje
+        if (st.ultimaData === this.ontemStr()) st.atual += 1;
+        else st.atual = 1;
+        st.ultimaData = hoje;
+        st.melhor = Math.max(st.melhor, st.atual);
+      },
+
+      renderSessao() {
+        const box = document.getElementById("fi-sessao-conteudo");
+        const s = this.dados.sessaoAtual;
+
+        if (!s) {
+          const ultima = this.dados.sessoes[0];
+          box.innerHTML = `
+            <div class="fi-sem-sessao">
+              <i class="fa-solid fa-circle-check" style="font-size:26px; display:block; margin-bottom:10px; opacity:.5;"></i>
+              Nenhuma sessão em andamento.<br>
+              ${ultima ? `Última sessão: ${this.dataBonita(ultima.data)} — ${ultima.concluidos}/${ultima.total} itens em ${this.fmtTempo(ultima.tempoSegundos)}.` : "Você ainda não fez nenhuma sessão."}
+            </div>
+            <div style="text-align:center;">
+              <button class="btn btn--primary" onclick="FI.iniciarSessao()"><i class="fa-solid fa-play"></i> Iniciar Sessão Financeira</button>
+            </div>`;
+          return;
+        }
+
+        const total = this.totalItensChecklist();
+        const feitos = s.marcados.length;
+        const pct = total ? Math.round((feitos / total) * 100) : 0;
+        const decorrido = (Date.now() - s.inicio) / 1000;
+
+        box.innerHTML = `
+          <div class="fi-sessao-timer">
+            <div class="lbl">Tempo de Sessão</div>
+            <div class="tempo" id="fi-timer-num">${this.fmtTempo(decorrido)}</div>
+            <div class="fi-progress-track"><div class="fi-progress-fill" style="width:${pct}%"></div></div>
+            <div class="fi-progress-txt">${feitos} de ${total} itens (${pct}%)</div>
+          </div>
+          ${this.dados.checklist.map(g => `
+            <div class="fi-check-grupo">
+              <h4>${g.nome} <i class="fa-solid fa-plus" style="cursor:pointer; color:var(--text-muted);" onclick="FI.abrirModalCheckItem('${g.id}')"></i></h4>
+              ${g.itens.map(it => `
+                <div class="fi-check-item ${s.marcados.includes(it.id) ? 'marcado' : ''}" onclick="FI.toggleItemSessao('${it.id}')">
+                  <div class="fi-check-box"><i class="fa-solid fa-check"></i></div>
+                  <span class="txt">${it.texto}</span>
+                  <button class="fi-mini" onclick="event.stopPropagation(); FI.abrirModalCheckItem('${g.id}','${it.id}')"><i class="fa-solid fa-pen"></i></button>
+                </div>`).join("")}
+            </div>`).join("")}
+          <div class="fi-modal-acoes" style="margin-top:6px;">
+            <button class="btn" onclick="FI.cancelarSessao()"><i class="fa-solid fa-xmark"></i> Cancelar</button>
+            <button class="btn btn--primary" onclick="FI.concluirSessao()"><i class="fa-solid fa-flag-checkered"></i> Concluir Sessão</button>
+          </div>`;
+      },
+
+      abrirModalCheckItem(grupoId, itemId = null) {
+        const grupo = this.dados.checklist.find(g => g.id === grupoId);
+        const item = itemId ? grupo.itens.find(i => i.id === itemId) : null;
+        document.getElementById("fi-check-grupo").value = grupoId;
+        document.getElementById("fi-check-id").value = itemId || "";
+        document.getElementById("fi-check-texto").value = item ? item.texto : "";
+        document.getElementById("fi-check-excluir").style.display = itemId ? "inline-flex" : "none";
+        this.abrirModal("fi-modal-checklist");
+      },
+      salvarCheckItem() {
+        const grupoId = document.getElementById("fi-check-grupo").value;
+        const itemId = document.getElementById("fi-check-id").value;
+        const texto = document.getElementById("fi-check-texto").value.trim();
+        if (!texto) return;
+        const grupo = this.dados.checklist.find(g => g.id === grupoId);
+        if (itemId) {
+          grupo.itens.find(i => i.id === itemId).texto = texto;
+        } else {
+          grupo.itens.push({ id: this.novoId(), texto });
+        }
+        this.salvar(); this.renderSessao(); this.fecharModal("fi-modal-checklist");
+      },
+      excluirCheckItemAtual() {
+        const grupoId = document.getElementById("fi-check-grupo").value;
+        const itemId = document.getElementById("fi-check-id").value;
+        this.fecharModal("fi-modal-checklist");
+        this.confirmar("Excluir este item do checklist?", () => {
+          const grupo = this.dados.checklist.find(g => g.id === grupoId);
+          grupo.itens = grupo.itens.filter(i => i.id !== itemId);
+          if (this.dados.sessaoAtual) this.dados.sessaoAtual.marcados = this.dados.sessaoAtual.marcados.filter(id => id !== itemId);
+          this.salvar(); this.renderSessao();
+        });
+      },
+
+      /* ---------------- FLUXO DO DINHEIRO ---------------------------------- */
+
+      renderFluxo() {
+        const box = document.getElementById("fi-flow");
+        if (!this.dados.fluxo.length) { box.innerHTML = `<div class="fi-vazio"><i class="fa-solid fa-diagram-project"></i>Nenhuma etapa cadastrada ainda.</div>`; return; }
+        box.innerHTML = this.dados.fluxo.map((n, i) => `
+          ${i > 0 ? '<div class="fi-flow-arrow"><i class="fa-solid fa-arrow-down"></i></div>' : ''}
+          <div class="fi-flow-node">
+            <b>${n.nome}</b>
+            <div class="fi-flow-actions">
+              <button onclick="FI.moverFluxo('${n.id}',-1)" title="Subir"><i class="fa-solid fa-arrow-up"></i></button>
+              <button onclick="FI.moverFluxo('${n.id}',1)" title="Descer"><i class="fa-solid fa-arrow-down"></i></button>
+              <button onclick="FI.abrirModalFluxo('${n.id}')" title="Editar"><i class="fa-solid fa-pen"></i></button>
+              <button class="fi-danger" onclick="FI.excluirFluxo('${n.id}')" title="Excluir"><i class="fa-solid fa-trash"></i></button>
+            </div>
+          </div>`).join("");
+      },
+      moverFluxo(id, dir) {
+        const arr = this.dados.fluxo;
+        const i = arr.findIndex(n => n.id === id);
+        const j = i + dir;
+        if (j < 0 || j >= arr.length) return;
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+        this.salvar(); this.renderFluxo();
+      },
+      abrirModalFluxo(id = null) {
+        const n = id ? this.dados.fluxo.find(x => x.id === id) : null;
+        document.getElementById("fi-fluxo-id").value = id || "";
+        document.getElementById("fi-fluxo-nome").value = n ? n.nome : "";
+        document.getElementById("fi-fluxo-excluir").style.display = id ? "inline-flex" : "none";
+        this.abrirModal("fi-modal-fluxo");
+      },
+      salvarFluxo() {
+        const id = document.getElementById("fi-fluxo-id").value;
+        const nome = document.getElementById("fi-fluxo-nome").value.trim();
+        if (!nome) return;
+        if (id) this.dados.fluxo.find(x => x.id === id).nome = nome;
+        else this.dados.fluxo.push({ id: this.novoId(), nome });
+        this.salvar(); this.renderFluxo(); this.fecharModal("fi-modal-fluxo");
+      },
+      excluirFluxoAtual() {
+        const id = document.getElementById("fi-fluxo-id").value;
+        this.fecharModal("fi-modal-fluxo");
+        this.excluirFluxo(id);
+      },
+      excluirFluxo(id) {
+        this.confirmar("Excluir esta etapa do fluxo?", () => {
+          this.dados.fluxo = this.dados.fluxo.filter(x => x.id !== id);
+          this.salvar(); this.renderFluxo();
+        });
+      },
+
+      /* ---------------- CONTAS / BIBLIOTECA --------------------------------- */
+
+      renderContas() {
+        const box = document.getElementById("fi-contas");
+        if (!this.dados.contas.length) { box.innerHTML = `<div class="fi-vazio"><i class="fa-solid fa-book-bookmark"></i>Nenhuma conta cadastrada ainda.</div>`; return; }
+        box.innerHTML = this.dados.contas.map(c => `
+          <div class="fi-lib-card">
+            <div class="fi-lib-head">
+              <b>${c.nome}</b>
+              <div class="fi-lib-actions">
+                <button onclick="FI.abrirModalConta('${c.id}')"><i class="fa-solid fa-pen"></i></button>
+              </div>
+            </div>
+            <div class="fi-lib-row"><b>Objetivo</b>${c.objetivo || "—"}</div>
+            <div class="fi-lib-row"><b>Função</b>${c.funcao || "—"}</div>
+            <div class="fi-lib-row"><b>Quando utilizar</b>${c.quando || "—"}</div>
+            ${c.obs ? `<div class="fi-lib-row"><b>Observações</b>${c.obs}</div>` : ""}
+          </div>`).join("");
+      },
+      abrirModalConta(id = null) {
+        const c = id ? this.dados.contas.find(x => x.id === id) : null;
+        document.getElementById("fi-conta-id").value = id || "";
+        document.getElementById("fi-conta-nome").value = c ? c.nome : "";
+        document.getElementById("fi-conta-objetivo").value = c ? c.objetivo : "";
+        document.getElementById("fi-conta-funcao").value = c ? c.funcao : "";
+        document.getElementById("fi-conta-quando").value = c ? c.quando : "";
+        document.getElementById("fi-conta-obs").value = c ? c.obs : "";
+        document.getElementById("fi-conta-excluir").style.display = id ? "inline-flex" : "none";
+        this.abrirModal("fi-modal-conta");
+      },
+      salvarConta() {
+        const id = document.getElementById("fi-conta-id").value;
+        const nome = document.getElementById("fi-conta-nome").value.trim();
+        if (!nome) return;
+        const obj = {
+          nome,
+          objetivo: document.getElementById("fi-conta-objetivo").value.trim(),
+          funcao: document.getElementById("fi-conta-funcao").value.trim(),
+          quando: document.getElementById("fi-conta-quando").value.trim(),
+          obs: document.getElementById("fi-conta-obs").value.trim(),
+        };
+        if (id) Object.assign(this.dados.contas.find(x => x.id === id), obj);
+        else this.dados.contas.push({ id: this.novoId(), ...obj });
+        this.salvar(); this.renderContas(); this.fecharModal("fi-modal-conta");
+      },
+      excluirContaAtual() {
+        const id = document.getElementById("fi-conta-id").value;
+        this.fecharModal("fi-modal-conta");
+        this.confirmar("Excluir esta conta da biblioteca?", () => {
+          this.dados.contas = this.dados.contas.filter(x => x.id !== id);
+          this.salvar(); this.renderContas();
+        });
+      },
+
+      /* ---------------- METAS ------------------------------------------------ */
+
+      renderMetas() {
+        const box = document.getElementById("fi-metas");
+        if (!this.dados.metas.length) { box.innerHTML = `<div class="fi-vazio"><i class="fa-solid fa-bullseye"></i>Nenhuma meta cadastrada ainda.</div>`; return; }
+        box.innerHTML = this.dados.metas.map(m => {
+          const pct = m.meta > 0 ? Math.min(100, Math.round((m.atual / m.meta) * 100)) : 0;
+          return `
+          <div class="fi-meta-card">
+            <div class="fi-meta-head">
+              <b>${m.nome}</b>
+              <button class="fi-mini" onclick="FI.abrirModalMeta('${m.id}')"><i class="fa-solid fa-pen"></i></button>
+            </div>
+            <div class="fi-progress-track"><div class="fi-progress-fill" style="width:${pct}%"></div></div>
+            <div class="fi-meta-vals">
+              <span>Atual: <b>${this.fmtReal(m.atual)}</b></span>
+              <span class="fi-meta-pct">${pct}%</span>
+            </div>
+            <div class="fi-meta-vals"><span>Meta: <b>${this.fmtReal(m.meta)}</b></span></div>
+          </div>`;
+        }).join("");
+      },
+      abrirModalMeta(id = null) {
+        const m = id ? this.dados.metas.find(x => x.id === id) : null;
+        document.getElementById("fi-meta-id").value = id || "";
+        document.getElementById("fi-meta-nome").value = m ? m.nome : "";
+        document.getElementById("fi-meta-atual").value = m ? m.atual : "";
+        document.getElementById("fi-meta-meta").value = m ? m.meta : "";
+        document.getElementById("fi-meta-excluir").style.display = id ? "inline-flex" : "none";
+        this.abrirModal("fi-modal-meta");
+      },
+      salvarMeta() {
+        const id = document.getElementById("fi-meta-id").value;
+        const nome = document.getElementById("fi-meta-nome").value.trim();
+        if (!nome) return;
+        const obj = {
+          nome,
+          atual: parseFloat(document.getElementById("fi-meta-atual").value) || 0,
+          meta: parseFloat(document.getElementById("fi-meta-meta").value) || 0,
+        };
+        if (id) Object.assign(this.dados.metas.find(x => x.id === id), obj);
+        else this.dados.metas.push({ id: this.novoId(), ...obj });
+        this.salvar(); this.renderMetas(); this.fecharModal("fi-modal-meta");
+      },
+      excluirMetaAtual() {
+        const id = document.getElementById("fi-meta-id").value;
+        this.fecharModal("fi-modal-meta");
+        this.confirmar("Excluir esta meta?", () => {
+          this.dados.metas = this.dados.metas.filter(x => x.id !== id);
+          this.salvar(); this.renderMetas();
+        });
+      },
+
+      /* ---------------- RECEITAS ---------------------------------------------- */
+
+      renderReceitas() {
+        const box = document.getElementById("fi-receitas");
+        const total = this.dados.receitas.reduce((s, r) => s + (r.valor || 0), 0);
+        box.innerHTML = (this.dados.receitas.length ? this.dados.receitas.map(r => `
+          <div class="fi-lista-item">
+            <div class="fi-nome">${r.nome}${r.obs ? `<small>${r.obs}</small>` : ""}</div>
+            <div style="display:flex; align-items:center;">
+              <span class="fi-val">${this.fmtReal(r.valor)}/mês</span>
+              <div class="fi-lista-actions">
+                <button onclick="FI.abrirModalReceita('${r.id}')"><i class="fa-solid fa-pen"></i></button>
+              </div>
+            </div>
+          </div>`).join("") : `<div class="fi-vazio"><i class="fa-solid fa-sack-dollar"></i>Nenhuma fonte de receita cadastrada.</div>`)
+          + `<div class="fi-lista-total"><span>Total mensal</span><b>${this.fmtReal(total)}</b></div>`;
+      },
+      abrirModalReceita(id = null) {
+        const r = id ? this.dados.receitas.find(x => x.id === id) : null;
+        document.getElementById("fi-receita-id").value = id || "";
+        document.getElementById("fi-receita-nome").value = r ? r.nome : "";
+        document.getElementById("fi-receita-valor").value = r ? r.valor : "";
+        document.getElementById("fi-receita-obs").value = r ? r.obs : "";
+        document.getElementById("fi-receita-excluir").style.display = id ? "inline-flex" : "none";
+        this.abrirModal("fi-modal-receita");
+      },
+      salvarReceita() {
+        const id = document.getElementById("fi-receita-id").value;
+        const nome = document.getElementById("fi-receita-nome").value.trim();
+        if (!nome) return;
+        const obj = {
+          nome,
+          valor: parseFloat(document.getElementById("fi-receita-valor").value) || 0,
+          obs: document.getElementById("fi-receita-obs").value.trim(),
+        };
+        if (id) Object.assign(this.dados.receitas.find(x => x.id === id), obj);
+        else this.dados.receitas.push({ id: this.novoId(), ...obj });
+        this.salvar(); this.renderReceitas(); this.fecharModal("fi-modal-receita");
+      },
+      excluirReceitaAtual() {
+        const id = document.getElementById("fi-receita-id").value;
+        this.fecharModal("fi-modal-receita");
+        this.confirmar("Excluir esta fonte de receita?", () => {
+          this.dados.receitas = this.dados.receitas.filter(x => x.id !== id);
+          this.salvar(); this.renderReceitas();
+        });
+      },
+
+      /* ---------------- DESPESAS (categorias recolhíveis) -------------------- */
+
+      CATEGORIAS_DESPESA: { fixas: "Despesas Fixas", variaveis: "Despesas Variáveis", cartoes: "Cartões de Crédito", assinaturas: "Assinaturas", anuais: "Despesas Anuais" },
+
+      renderDespesas() {
+        const box = document.getElementById("fi-despesas");
+        box.innerHTML = Object.keys(this.CATEGORIAS_DESPESA).map(cat => {
+          const itens = this.dados.despesas[cat] || [];
+          const total = itens.reduce((s, i) => s + (i.valor || 0), 0);
+          const aberta = box.querySelector ? "" : ""; // mantém estado via classe já existente no DOM, tratado abaixo
+          return `
+            <div class="fi-cat" id="fi-cat-${cat}">
+              <div class="fi-cat-head" onclick="FI.toggleCategoria('${cat}')">
+                <b>${this.CATEGORIAS_DESPESA[cat]}</b>
+                <span class="fi-cat-sub">${this.fmtReal(total)}</span>
+                <i class="fa-solid fa-chevron-down"></i>
+              </div>
+              <div class="fi-cat-body">
+                ${itens.map(i => `
+                  <div class="fi-lista-item">
+                    <div class="fi-nome">${i.nome}</div>
+                    <div style="display:flex; align-items:center;">
+                      <span class="fi-val">${this.fmtReal(i.valor)}</span>
+                      <div class="fi-lista-actions">
+                        <button onclick="FI.abrirModalDespesa('${cat}','${i.id}')"><i class="fa-solid fa-pen"></i></button>
+                      </div>
+                    </div>
+                  </div>`).join("")}
+                <button class="fi-add-chip" style="width:100%; justify-content:center; margin-top:6px;" onclick="FI.abrirModalDespesa('${cat}')"><i class="fa-solid fa-plus"></i> Adicionar item</button>
+              </div>
+            </div>`;
+        }).join("");
+      },
+      toggleCategoria(cat) {
+        document.getElementById("fi-cat-" + cat).classList.toggle("is-aberta");
+      },
+      abrirModalDespesa(categoria, id = null) {
+        const i = id ? this.dados.despesas[categoria].find(x => x.id === id) : null;
+        document.getElementById("fi-despesa-categoria").value = categoria;
+        document.getElementById("fi-despesa-id").value = id || "";
+        document.getElementById("fi-despesa-nome").value = i ? i.nome : "";
+        document.getElementById("fi-despesa-valor").value = i ? i.valor : "";
+        document.getElementById("fi-despesa-excluir").style.display = id ? "inline-flex" : "none";
+        this.abrirModal("fi-modal-despesa");
+      },
+      salvarDespesa() {
+        const categoria = document.getElementById("fi-despesa-categoria").value;
+        const id = document.getElementById("fi-despesa-id").value;
+        const nome = document.getElementById("fi-despesa-nome").value.trim();
+        if (!nome) return;
+        const obj = { nome, valor: parseFloat(document.getElementById("fi-despesa-valor").value) || 0 };
+        const abertaAntes = document.getElementById("fi-cat-" + categoria)?.classList.contains("is-aberta");
+        if (id) Object.assign(this.dados.despesas[categoria].find(x => x.id === id), obj);
+        else this.dados.despesas[categoria].push({ id: this.novoId(), ...obj });
+        this.salvar(); this.renderDespesas();
+        if (abertaAntes) document.getElementById("fi-cat-" + categoria).classList.add("is-aberta");
+        this.fecharModal("fi-modal-despesa");
+      },
+      excluirDespesaAtual() {
+        const categoria = document.getElementById("fi-despesa-categoria").value;
+        const id = document.getElementById("fi-despesa-id").value;
+        this.fecharModal("fi-modal-despesa");
+        this.confirmar("Excluir este item de despesa?", () => {
+          const abertaAntes = document.getElementById("fi-cat-" + categoria)?.classList.contains("is-aberta");
+          this.dados.despesas[categoria] = this.dados.despesas[categoria].filter(x => x.id !== id);
+          this.salvar(); this.renderDespesas();
+          if (abertaAntes) document.getElementById("fi-cat-" + categoria).classList.add("is-aberta");
+        });
+      },
+
+      /* ---------------- INVESTIMENTOS ------------------------------------------ */
+
+      renderInvest() {
+        const p = this.dados.investPanel;
+        const total = this.totalInvestido();
+        document.getElementById("fi-patrimonio-total").textContent = this.fmtReal(total);
+        const cripto = this.dados.cripto.reduce((s, c) => s + (c.qtd || 0) * (c.preco || 0), 0);
+        const pct = (v) => total > 0 ? Math.round((v / total) * 100) : 0;
+        const bloco = (valor, label) => `
+          <div class="fi-invest-item">
+            <div class="num">${this.fmtReal(valor)}</div>
+            <div class="lbl">${label}</div>
+            <div class="lbl" style="color:var(--accent); margin-top:2px;">${pct(valor)}%</div>
+          </div>`;
+        document.getElementById("fi-invest-grid").innerHTML =
+          bloco(p.rendaFixa, "Renda Fixa") +
+          bloco(p.acoes, "Ações") +
+          bloco(p.fiis, "FIIs") +
+          bloco(p.previdencia, "Previdência") +
+          bloco(p.reserva, "Reserva") +
+          bloco(cripto, "Cripto");
+      },
+      abrirModalInvest() {
+        const p = this.dados.investPanel;
+        document.getElementById("fi-invest-cdb").value = p.rendaFixa;
+        document.getElementById("fi-invest-acoes").value = p.acoes;
+        document.getElementById("fi-invest-fiis").value = p.fiis;
+        document.getElementById("fi-invest-previdencia").value = p.previdencia;
+        document.getElementById("fi-invest-reserva").value = p.reserva;
+        this.abrirModal("fi-modal-invest");
+      },
+      salvarInvest() {
+        this.dados.investPanel = {
+          rendaFixa: parseFloat(document.getElementById("fi-invest-cdb").value) || 0,
+          acoes: parseFloat(document.getElementById("fi-invest-acoes").value) || 0,
+          fiis: parseFloat(document.getElementById("fi-invest-fiis").value) || 0,
+          previdencia: parseFloat(document.getElementById("fi-invest-previdencia").value) || 0,
+          reserva: parseFloat(document.getElementById("fi-invest-reserva").value) || 0,
+        };
+        this.salvar(); this.renderInvest(); this.renderPainel(); this.fecharModal("fi-modal-invest");
+      },
+
+      /* ---------------- CRIPTO ---------------------------------------------------- */
+
+      renderCripto() {
+        const box = document.getElementById("fi-cripto");
+        if (!this.dados.cripto.length) { box.innerHTML = `<div class="fi-vazio"><i class="fa-brands fa-bitcoin"></i>Nenhuma criptomoeda cadastrada.</div>`; return; }
+        box.innerHTML = this.dados.cripto.map(c => `
+          <div class="fi-cripto-item">
+            <div class="fi-cripto-icon">${c.moeda.slice(0, 3)}</div>
+            <div class="fi-cripto-info">
+              <b>${c.moeda}</b>
+              <small>${c.qtd} un. · preço médio ${this.fmtReal(c.preco)}${c.obs ? " · " + c.obs : ""}</small>
+            </div>
+            <div class="fi-cripto-val">
+              <b>${this.fmtReal(c.qtd * c.preco)}</b>
+              <button class="fi-mini" onclick="FI.abrirModalCripto('${c.id}')"><i class="fa-solid fa-pen"></i></button>
+            </div>
+          </div>`).join("");
+      },
+      abrirModalCripto(id = null) {
+        const c = id ? this.dados.cripto.find(x => x.id === id) : null;
+        document.getElementById("fi-cripto-id").value = id || "";
+        document.getElementById("fi-cripto-moeda").value = c ? c.moeda : "";
+        document.getElementById("fi-cripto-qtd").value = c ? c.qtd : "";
+        document.getElementById("fi-cripto-preco").value = c ? c.preco : "";
+        document.getElementById("fi-cripto-obs").value = c ? c.obs : "";
+        document.getElementById("fi-cripto-excluir").style.display = id ? "inline-flex" : "none";
+        this.abrirModal("fi-modal-cripto");
+      },
+      salvarCripto() {
+        const id = document.getElementById("fi-cripto-id").value;
+        const moeda = document.getElementById("fi-cripto-moeda").value.trim().toUpperCase();
+        if (!moeda) return;
+        const obj = {
+          moeda,
+          qtd: parseFloat(document.getElementById("fi-cripto-qtd").value) || 0,
+          preco: parseFloat(document.getElementById("fi-cripto-preco").value) || 0,
+          obs: document.getElementById("fi-cripto-obs").value.trim(),
+        };
+        if (id) Object.assign(this.dados.cripto.find(x => x.id === id), obj);
+        else this.dados.cripto.push({ id: this.novoId(), ...obj });
+        this.salvar(); this.renderCripto(); this.renderInvest(); this.renderPainel(); this.fecharModal("fi-modal-cripto");
+      },
+      excluirCriptoAtual() {
+        const id = document.getElementById("fi-cripto-id").value;
+        this.fecharModal("fi-modal-cripto");
+        this.confirmar("Excluir esta criptomoeda?", () => {
+          this.dados.cripto = this.dados.cripto.filter(x => x.id !== id);
+          this.salvar(); this.renderCripto(); this.renderInvest(); this.renderPainel();
+        });
+      },
+
+      /* ---------------- HISTÓRICO ---------------------------------------------------- */
+
+      renderHistorico() {
+        document.getElementById("fi-hist-streak-atual").textContent = this.dados.streak.atual;
+        document.getElementById("fi-hist-streak-melhor").textContent = this.dados.streak.melhor;
+        const box = document.getElementById("fi-historico");
+        if (!this.dados.sessoes.length) { box.innerHTML = `<div class="fi-vazio"><i class="fa-solid fa-clock-rotate-left"></i>Nenhuma sessão concluída ainda.</div>`; return; }
+        box.innerHTML = this.dados.sessoes.map(s => `
+          <div class="fi-hist-item">
+            <div class="fi-hist-icon"><i class="fa-solid fa-flag-checkered"></i></div>
+            <div class="fi-hist-info">
+              <b>${this.dataBonita(s.data)}</b>
+              <small>${s.concluidos}/${s.total} itens · ${this.fmtTempo(s.tempoSegundos)}</small>
+            </div>
+            ${s.concluidos === s.total ? '<span class="fi-hist-badge">Completa</span>' : ''}
+          </div>`).join("");
+      },
+    };
+
+    document.addEventListener("DOMContentLoaded", () => {
+      FI.carregar();
+      FI.renderTudo();
+      if (FI.dados.sessaoAtual) {
+        FI._timerId = setInterval(() => FI.atualizarTimer(), 1000);
+      }
+    });
+  </script>
+</body>
+</html>

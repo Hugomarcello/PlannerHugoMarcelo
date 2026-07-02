@@ -295,12 +295,48 @@
     .pl-atalho span { font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: var(--text-strong); }
 
     /* ---------- GRADE SEMANAL ----------------------------------------- */
-    .pl-sem-grid { display: grid; gap: 14px; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); }
+    .pl-sem-grid { display: grid; gap: 14px; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
+
+    /* Zonas da Semanal */
+    .sem-hab-zona {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;
+      align-items: start;
+    }
+    @media (max-width: 700px) { .sem-hab-zona { grid-template-columns: 1fr; } }
+
+    /* Foco da Semana */
+    .sem-foco-grid {
+      display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-top: 4px;
+    }
+    .sem-foco-col { display: flex; flex-direction: column; gap: 10px; }
+    .sem-foco-col--backlog { border-left: 1px solid var(--border); padding-left: 16px; }
+    @media (max-width: 900px) {
+      .sem-foco-grid { grid-template-columns: 1fr 1fr; }
+      .sem-foco-col--backlog { border-left: none; border-top: 1px solid var(--border); padding-left: 0; padding-top: 12px; grid-column: 1/-1; }
+    }
+    @media (max-width: 600px) { .sem-foco-grid { grid-template-columns: 1fr; } .sem-foco-col--backlog { grid-column: 1; } }
+
+    /* Item de backlog na Semanal (com chips de dia) */
+    .sem-bl-item { background: var(--bg-soft); border: 1px solid var(--border); border-radius: 10px; padding: 8px 12px; margin-bottom: 6px; }
+    .sem-bl-txt { font-size: 12px; font-weight: 600; color: var(--text-strong); margin-bottom: 6px; }
+    .sem-bl-chips { display: flex; flex-wrap: wrap; gap: 4px; }
+    .sem-bl-chip {
+      font-size: 10px; font-weight: 800; padding: 3px 8px; border-radius: 99px;
+      border: 1px solid var(--border); background: var(--panel); color: var(--text-muted);
+      cursor: pointer; transition: all .12s;
+    }
+    .sem-bl-chip:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
     .pl-dia-card {
       background: var(--panel); border: 1px solid var(--border); border-radius: 16px;
-      display: flex; flex-direction: column; overflow: hidden; height: 360px;
+      display: flex; flex-direction: column; overflow: hidden; height: 400px;
       transition: transform .15s, box-shadow .15s, border-color .15s;
     }
+    .pl-dia-card__body {
+      flex: 1; overflow-y: auto; display: flex; flex-direction: column;
+      scrollbar-width: thin; scrollbar-color: var(--border) transparent;
+    }
+    .pl-dia-card__body::-webkit-scrollbar { width: 4px; }
+    .pl-dia-card__body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
     .pl-dia-card:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
     .pl-dia-card.foco  { border-top: 3px solid var(--verde); }
     .pl-dia-card.dom   { border-top: 3px solid var(--vermelho); }
@@ -636,7 +672,8 @@
     .pl-hgrid .cel { cursor: pointer; }
     .pl-hgrid .cel .dot { width: 26px; height: 26px; border-radius: 8px; margin: 0 auto; display: grid; place-items: center; background: var(--bg-soft); color: transparent; font-size: 11px; transition: all .12s; }
     .pl-hgrid .cel:hover .dot { background: var(--border); transform: scale(1.08); }
-    .pl-hgrid .cel.on .dot { background: var(--accent); color: #fff; }
+    .pl-hgrid .cel.on  .dot { background: var(--accent);    color: #fff; }
+    .pl-hgrid .cel.fail .dot { background: var(--vermelho);  color: #fff; }
     .pl-hgrid tr.grp td { background: var(--bg-soft); text-align: left; font-size: 9px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); position: sticky; left: 0; padding: 7px 12px; }
 
     /* Refeições do dia */
@@ -904,14 +941,70 @@
         <div class="pl-acoes">
           <button class="pl-btn-sm danger" onclick="Plan.limparPeriodo('sem')"><i class="fa-solid fa-eraser"></i> Limpar Semana</button>
         </div>
-        <div class="card top-verde" style="margin-bottom:20px;">
+
+        <!-- ZONA 1 — Foco & Estratégia (full width) -->
+        <div class="card top-verde sem-foco-card" style="margin-bottom:16px;">
           <div class="pl-head">
-            <h3><i class="fa-solid fa-table-cells-large ico-verde"></i> Hábitos da Semana</h3>
-            <a class="pl-add" href="habitos.html" title="Gerenciar hábitos"><i class="fa-solid fa-gear"></i></a>
+            <h3><i class="fa-solid fa-crosshairs ico-verde"></i> Foco da Semana</h3>
+            <span class="pl-rev-tempo"><i class="fa-solid fa-bolt"></i> Estratégia</span>
           </div>
-          <div id="sem-habitos"></div>
+          <div class="sem-foco-grid">
+            <div class="sem-foco-col">
+              <div class="pl-rev-campo">
+                <p class="pl-item-grp"><i class="fa-solid fa-star ico-verde"></i> Principal objetivo desta semana</p>
+                <textarea class="pl-rev-txt" id="foco-principal" rows="2" onchange="Plan.salvarFocoSem('principal',this.value)" placeholder="O que mais importa alcançar esta semana?"></textarea>
+              </div>
+              <div class="pl-rev-campo">
+                <p class="pl-item-grp"><i class="fa-solid fa-trophy ico-ambar"></i> Como será considerada um sucesso?</p>
+                <textarea class="pl-rev-txt" id="foco-sucesso" rows="2" onchange="Plan.salvarFocoSem('sucesso',this.value)" placeholder="O que precisa acontecer para você ficar satisfeito?"></textarea>
+              </div>
+              <div class="pl-rev-campo">
+                <p class="pl-item-grp"><i class="fa-solid fa-fire ico-vermelho"></i> Maior prioridade</p>
+                <textarea class="pl-rev-txt" id="foco-prioridade" rows="2" onchange="Plan.salvarFocoSem('prioridade',this.value)" placeholder="Se você só pudesse fazer uma coisa, qual seria?"></textarea>
+              </div>
+            </div>
+            <div class="sem-foco-col">
+              <div class="pl-rev-campo">
+                <p class="pl-item-grp"><i class="fa-solid fa-shield ico-roxo"></i> Maior obstáculo a evitar</p>
+                <textarea class="pl-rev-txt" id="foco-obstaculo" rows="2" onchange="Plan.salvarFocoSem('obstaculo',this.value)" placeholder="O que pode te desfocar ou atrasar?"></textarea>
+              </div>
+              <div class="pl-rev-campo">
+                <p class="pl-item-grp"><i class="fa-solid fa-bolt ico-azul"></i> Onde concentrar mais energia</p>
+                <textarea class="pl-rev-txt" id="foco-energia" rows="2" onchange="Plan.salvarFocoSem('energia',this.value)" placeholder="Projeto, área ou hábito que merece foco total?"></textarea>
+              </div>
+            </div>
+            <!-- Backlog da semana -->
+            <div class="sem-foco-col sem-foco-col--backlog">
+              <details class="sem-bl-details">
+                <summary class="pl-item-grp" style="cursor:pointer; list-style:none;">
+                  <i class="fa-solid fa-inbox ico-neutro"></i> Backlog — distribuir na semana
+                  <i class="fa-solid fa-chevron-down" style="font-size:9px; margin-left:auto;"></i>
+                </summary>
+                <div id="sem-backlog" style="margin-top:8px;"></div>
+              </details>
+            </div>
+          </div>
         </div>
 
+        <!-- ZONA 2 — Rotinas | Hábitos (2 colunas) -->
+        <div class="sem-hab-zona">
+          <div class="card top-verde">
+            <div class="pl-head">
+              <h3><i class="fa-solid fa-rotate ico-verde"></i> Rotinas da Semana</h3>
+              <a class="pl-add" href="habitos.html" title="Gerenciar rotinas"><i class="fa-solid fa-gear"></i></a>
+            </div>
+            <div id="sem-rotinas"></div>
+          </div>
+          <div class="card top-verde">
+            <div class="pl-head">
+              <h3><i class="fa-solid fa-fire ico-verde"></i> Hábitos da Semana</h3>
+              <a class="pl-add" href="habitos.html" title="Gerenciar hábitos"><i class="fa-solid fa-gear"></i></a>
+            </div>
+            <div id="sem-habitos"></div>
+          </div>
+        </div>
+
+        <!-- ZONA 3 — 7 cards dos dias -->
         <div class="pl-sem-grid" id="sem-grid"></div>
       </section>
 
@@ -1594,56 +1687,186 @@
         byId('sem-titulo').textContent = `${ini.toLocaleDateString('pt-BR')} a ${fim.toLocaleDateString('pt-BR')}`;
 
         const k = this.chave('sem'); const d = this.initSem(k);
-        const grid = byId('sem-grid'); grid.innerHTML = '';
 
-        // 7 datas da semana (domingo → sábado) + grade de hábitos + tarefas
+        // migra d.obj (string antiga) para d.foco.principal
+        if (!d.foco) { d.foco = {}; }
+        if (d.obj && !d.foco.principal) { d.foco.principal = d.obj; d.obj = ''; this.persistir(); }
+
+        // Preenche campos do Foco da Semana
+        ['principal','sucesso','prioridade','obstaculo','energia'].forEach(c => {
+          const el = byId('foco-'+c); if (el) el.value = d.foco[c] || '';
+        });
+
+        // Backlog para distribuir na semana
+        const tarefas = this.lerTarefas();
+        const backlog = tarefas.filter(t => !t.prazo && !t.concluida);
+        const letsDia  = ['D','S','T','Q','Q','S','S'];
         const datas = [];
         for (let i = 0; i < 7; i++) { const dd = new Date(ini); dd.setDate(dd.getDate()+i); datas.push(this.getISO(dd)); }
+
+        byId('sem-backlog').innerHTML = backlog.length === 0
+          ? '<p class="pl-vazio">Backlog vazio — todas as tarefas têm data!</p>'
+          : backlog.map(t => `
+            <div class="sem-bl-item">
+              <p class="sem-bl-txt">${esc(t.titulo)}</p>
+              <div class="sem-bl-chips">
+                ${datas.map((iso,i) => `<button class="sem-bl-chip" onclick="Plan.puxarParaDia('${t.id}','${iso}')">${letsDia[i]} ${iso.split('-')[2]}</button>`).join('')}
+              </div>
+            </div>`).join('');
+
+        // Grade de hábitos: Rotinas separadas dos Hábitos
+        this.renderSemRotinas(datas);
         this.renderSemHabitos(datas);
-        const tarefas = this.lerTarefas();
 
-        // Card de foco da semana
-        grid.innerHTML += `
-          <div class="pl-dia-card foco">
-            <div class="pl-dia-card__head"><h4 class="ico-verde"><i class="fa-solid fa-crosshairs"></i> Foco da Semana</h4></div>
-            <textarea class="pl-caderno" id="sem-obj" spellcheck="false" onchange="Plan.salvarObjSem(this.value)" placeholder="Alinhamento da semana...">${esc(d.obj)}</textarea>
-          </div>`;
-
+        // Cards dos 7 dias
+        const grid = byId('sem-grid'); grid.innerHTML = '';
         const ordem = [
-          { nome:'Domingo', off:0, key:'d0', dom:true },
-          { nome:'Segunda', off:1, key:'d1' },
-          { nome:'Terça',   off:2, key:'d2' },
-          { nome:'Quarta',  off:3, key:'d3' },
-          { nome:'Quinta',  off:4, key:'d4' },
-          { nome:'Sexta',   off:5, key:'d5' },
-          { nome:'Sábado',  off:6, key:'d6' },
+          { nome:'Domingo', off:0, dom:true  },
+          { nome:'Segunda', off:1 },
+          { nome:'Terça',   off:2 },
+          { nome:'Quarta',  off:3 },
+          { nome:'Quinta',  off:4 },
+          { nome:'Sexta',   off:5 },
+          { nome:'Sábado',  off:6 },
         ];
         ordem.forEach(di => {
           const dt = new Date(ini); dt.setDate(dt.getDate()+di.off);
-          const iso = this.getISO(dt); const ev = DB.radar[iso]; const ehHoje = iso === this.getISO(new Date());
-          // Horário do dia agora mora por DATA (mesma fonte do Diário).
-          // Migração: traz o que já foi digitado na semana antiga (d0..d6), uma vez.
+          const iso    = this.getISO(dt);
+          const ehHoje = iso === this.getISO(new Date());
+          const ev     = DB.radar[iso];
+          const data   = `${String(dt.getDate()).padStart(2,'0')}/${String(dt.getMonth()+1).padStart(2,'0')}`;
           const diaReg = this.initDia(iso);
-          if (!diaReg.notebook && d[di.key]) { diaReg.notebook = d[di.key]; d[di.key] = ''; this.persistir(); }
-          const alerta = ev ? `<div class="pl-dia-card__alerta" style="background:${tint(ev.cor)}; color:${CORES[ev.cor]};"><i class="fa-solid fa-bell"></i> ${esc(ev.nota)}</div>` : '';
-          const data = `${String(dt.getDate()).padStart(2,'0')}/${String(dt.getMonth()+1).padStart(2,'0')}`;
+
+          // Tarefas do dia (mesmo estilo .pl-item da Diária)
           const tDia = tarefas.filter(t => t.prazo === iso);
           const tHtml = tDia.length
-            ? `<div class="pl-dia-tarefas">${tDia.map(t => `<div class="pl-mini-t"><input type="checkbox" ${t.concluida?'checked':''} onchange="Plan.toggleTarefa('${t.id}')"><span class="${t.concluida?'feito':''}">${esc(t.titulo)}</span></div>`).join('')}</div>`
+            ? `<div class="pl-items" style="padding:10px 12px 6px;">${tDia.map(t => `
+                <div class="pl-item ${t.concluida?'done':''}" style="padding:7px 10px;" onclick="Plan.toggleTarefa('${t.id}')">
+                  <input type="checkbox" ${t.concluida?'checked':''}>
+                  <span class="pl-item__txt" style="font-size:11px;">${esc(t.titulo)}</span>
+                  <i class="fa-solid fa-check pl-item__check-ic"></i>
+                </div>`).join('')}</div>`
             : '';
+
+          // Blocos do dia (mesmo sistema da Diária)
+          const blocos = Array.isArray(diaReg.blocos) ? diaReg.blocos : [];
+          const bHtml = blocos.length
+            ? `<div style="padding:0 12px 4px;">${blocos.map((b,i) => `
+                <div class="pl-bloco-row" style="padding:4px 0;">
+                  <input class="pl-bloco-hora" type="text" value="${esc(b.h)}" maxlength="14"
+                    style="width:90px; font-size:10px; padding:4px 8px;"
+                    onchange="Plan.salvarBloco('${iso}',${i},'h',this.value)">
+                  <input class="pl-bloco-txt" type="text" value="${esc(b.t)}" placeholder=""
+                    style="font-size:11px;"
+                    onchange="Plan.salvarBloco('${iso}',${i},'t',this.value)">
+                  <button class="pl-bloco-del" onclick="Plan.delBloco('${iso}',${i})"><i class="fa-solid fa-xmark"></i></button>
+                </div>`).join('')}</div>`
+            : '';
+
+          const alerta = ev ? `<div class="pl-dia-card__alerta" style="background:${tint(ev.cor)}; color:${CORES[ev.cor]};"><i class="fa-solid fa-bell"></i> ${esc(ev.nota)}</div>` : '';
+
           grid.innerHTML += `
-            <div class="pl-dia-card ${di.dom?'dom':'comum'} ${ehHoje?'hoje':''}">
-              <div class="pl-dia-card__head"><h4>${di.nome}</h4><span class="pl-dia-card__data">${data}</span></div>
+            <div class="pl-dia-card ${di.dom?'dom':'comum'} ${ehHoje?'hoje foco':''}">
+              <div class="pl-dia-card__head">
+                <h4>${di.nome}</h4>
+                <span class="pl-dia-card__data">${data}</span>
+              </div>
               ${alerta}
-              ${tHtml}
-              <textarea class="pl-caderno" spellcheck="false" onchange="Plan.salvarHorarioDia('${iso}',this.value)" placeholder="06:00 -&#10;07:00 -">${esc(diaReg.notebook||'')}</textarea>
+              <div class="pl-dia-card__body">
+                ${tHtml}
+                ${bHtml}
+                <button class="pl-bloco-add" style="margin:6px 12px 10px; width:calc(100% - 24px);"
+                  onclick="Plan.addBlocoParaDia('${iso}')">
+                  <i class="fa-solid fa-plus"></i> bloco
+                </button>
+              </div>
             </div>`;
         });
       },
+
       salvarObjSem(v) { this.initSem(this.chave('sem')).obj = v; this.persistir(); },
       salvarDiaSem(key, v) { this.initSem(this.chave('sem'))[key] = v; this.persistir(); },
       salvarHorarioDia(iso, v) { this.initDia(iso).notebook = v; this.persistir(); },
+      salvarFocoSem(campo, val) {
+        const d = this.initSem(this.chave('sem'));
+        d.foco = d.foco || {};
+        d.foco[campo] = val;
+        this.persistir();
+      },
+      // Puxar tarefa do backlog pra um dia específico da semana
+      puxarParaDia(id, iso) {
+        const arr = this.lerTarefas(); const t = arr.find(x => x.id === id);
+        if (t) { t.prazo = iso; Store.salvar('tarefas', arr); }
+        this.renderSem();
+      },
+      // Adiciona bloco a um dia específico (versão da Semanal)
+      addBlocoParaDia(iso) {
+        const d = this.initDia(iso);
+        d.blocos = d.blocos || [];
+        const ultimo = d.blocos.length ? d.blocos[d.blocos.length - 1].h : '05:00';
+        const [hh, mm] = (ultimo || '05:00').split(':').map(Number);
+        const prox = `${String((hh+1)<24?hh+1:0).padStart(2,'0')}:${String(mm||0).padStart(2,'0')}`;
+        d.blocos.push({ h: prox, t: '' });
+        this.persistir();
+        this.renderSem();
+      },
 
+      // Grade semanal: Rotinas separadas (3 estados)
+      renderSemRotinas(datas) {
+        const h = this.lerHabitos();
+        const grupos = [
+          ['Manhã', h.rotinas.manha, 'rotina', 'manha'],
+          ['Tarde', h.rotinas.tarde, 'rotina', 'tarde'],
+          ['Noite', h.rotinas.noite, 'rotina', 'noite'],
+        ];
+        this._renderGradeHab('sem-rotinas', grupos, datas,
+          'Cadastre suas rotinas na página Hábitos para vê-las aqui em grade.');
+      },
+
+      // Grade semanal: Hábitos (3 estados)
+      renderSemHabitos(datas) {
+        const h = this.lerHabitos();
+        const grupos = [['Hábitos', h.habitos, 'habito', '']];
+        this._renderGradeHab('sem-habitos', grupos, datas,
+          'Cadastre seus hábitos na página Hábitos para vê-los aqui em grade.');
+      },
+
+      // Helper compartilhado: monta a grade semanal de 7 colunas com 3 estados
+      _renderGradeHab(elId, grupos, datas, msgVazio) {
+        const letras  = ['D','S','T','Q','Q','S','S'];
+        const hojeIso = this.getISO(new Date());
+        let head = '<tr><th>Item</th>';
+        datas.forEach((iso, i) => {
+          const ehHoje = iso === hojeIso;
+          head += `<th class="${ehHoje?'hoje':''}"><span class="wd">${letras[i]}</span><span class="dd">${iso.split('-')[2]}</span></th>`;
+        });
+        head += '</tr>';
+        let body = ''; let tem = false;
+        grupos.forEach(([nome, lista, tipo, periodo]) => {
+          if (!lista || !lista.length) return;
+          tem = true;
+          body += `<tr class="grp"><td colspan="8">${nome}</td></tr>`;
+          lista.forEach(it => {
+            let row = `<tr><td title="${esc(it.txt)}">${esc(it.txt)}</td>`;
+            datas.forEach(iso => {
+              const estado  = it.history ? (it.history[iso] ?? 0) : 0;
+              const feito   = estado === 1 || estado === true;
+              const falhou  = estado === -1;
+              const cls     = feito ? 'on' : falhou ? 'fail' : '';
+              const ehHoje  = iso === hojeIso;
+              const icone   = feito ? '<i class="fa-solid fa-check"></i>'
+                            : falhou ? '<i class="fa-solid fa-xmark"></i>' : '';
+              row += `<td class="cel ${cls} ${ehHoje?'hoje-col':''}"
+                onclick="Plan.toggleHabito('${tipo}','${periodo}',${it.id},'${iso}')">
+                <span class="dot">${icone}</span></td>`;
+            });
+            body += row + '</tr>';
+          });
+        });
+        byId(elId).innerHTML = tem
+          ? `<div class="pl-hgrid-wrap"><table class="pl-hgrid"><thead>${head}</thead><tbody>${body}</tbody></table></div>`
+          : `<p class="pl-vazio">${msgVazio}</p>`;
+      },
       /* ====================================================================
          RENDER: DIÁRIO
          ==================================================================== */
@@ -2169,42 +2392,6 @@
         this.renderDiaAgua(iso);
       },
       // ----- render da Semana: grade de hábitos (estilo planilha) -----
-      renderSemHabitos(datas) {
-        const h = this.lerHabitos();
-        const letras = ['D','S','T','Q','Q','S','S'];
-        const hojeIso = this.getISO(new Date());
-        let head = '<tr><th>Hábito / Rotina</th>';
-        datas.forEach((iso, i) => {
-          const ehHoje = iso === hojeIso;
-          head += `<th class="${ehHoje?'hoje':''}"><span class="wd">${letras[i]}</span><span class="dd">${iso.split('-')[2]}</span></th>`;
-        });
-        head += '</tr>';
-        const grupos = [
-          ['Manhã',   h.rotinas.manha, 'rotina', 'manha'],
-          ['Tarde',   h.rotinas.tarde, 'rotina', 'tarde'],
-          ['Noite',   h.rotinas.noite, 'rotina', 'noite'],
-          ['Hábitos', h.habitos,       'habito', ''],
-        ];
-        let body = ''; let tem = false;
-        grupos.forEach(([nome, lista, tipo, periodo]) => {
-          if (!lista.length) return;
-          tem = true;
-          body += `<tr class="grp"><td colspan="8">${nome}</td></tr>`;
-          lista.forEach(it => {
-            let row = `<tr><td title="${esc(it.txt)}">${esc(it.txt)}</td>`;
-            datas.forEach(iso => {
-              const on = it.history && it.history[iso] === 1;
-              const ehHoje = iso === hojeIso;
-              row += `<td class="cel ${on?'on':''} ${ehHoje?'hoje-col':''}" onclick="Plan.toggleHabito('${tipo}','${periodo}',${it.id},'${iso}')"><span class="dot">${on?'<i class="fa-solid fa-check"></i>':''}</span></td>`;
-            });
-            body += row + '</tr>';
-          });
-        });
-        byId('sem-habitos').innerHTML = tem
-          ? `<div class="pl-hgrid-wrap"><table class="pl-hgrid"><thead>${head}</thead><tbody>${body}</tbody></table></div>`
-          : '<p class="pl-vazio">Cadastre seus hábitos na página Hábitos para vê-los aqui em grade.</p>';
-      },
-
       /* ====================================================================
          COMPONENTES REUTILIZÁVEIS
          ==================================================================== */

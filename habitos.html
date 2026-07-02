@@ -208,6 +208,51 @@
       font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;
       padding: 5px 10px; border-radius: 7px; transition: all .15s;
     }
+
+    /* Chip de progresso no cabeçalho de cada período (ex: "3/5") */
+    .rt-chip {
+      display: flex; align-items: center; gap: 6px;
+    }
+    .rt-chip__num {
+      font-size: 10px; font-weight: 900; letter-spacing: .5px;
+      padding: 2px 8px; border-radius: 99px;
+      background: var(--bg); border: 1px solid var(--border);
+      color: var(--text-muted); transition: all .3s;
+      white-space: nowrap;
+    }
+    .rt-chip__num--done {
+      background: var(--accent-soft); border-color: var(--accent);
+      color: var(--accent);
+    }
+    .rt-chip__bar {
+      width: 36px; height: 4px; border-radius: 99px;
+      background: var(--bg-soft); overflow: hidden;
+    }
+    .rt-chip__fill {
+      height: 100%; border-radius: 99px;
+      transition: width .4s cubic-bezier(.2,.8,.2,1);
+    }
+
+    /* Notificação de bônus de combo (aparece sobre o card) */
+    .rt-combo-pop {
+      position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
+      z-index: 9998; pointer-events: none;
+      background: linear-gradient(135deg, var(--rt-tarde), var(--rt-noite));
+      color: #fff; font-size: 13px; font-weight: 800;
+      padding: 10px 20px; border-radius: 99px;
+      box-shadow: 0 8px 24px -4px rgba(59,130,246,.5);
+      display: flex; align-items: center; gap: 8px;
+      animation: rtComboPop .4s cubic-bezier(.2,.8,.2,1) forwards,
+                 rtComboFade 2.4s .8s forwards;
+    }
+    @keyframes rtComboPop {
+      0%   { opacity: 0; transform: translateX(-50%) translateY(16px) scale(.9); }
+      100% { opacity: 1; transform: translateX(-50%) translateY(0)     scale(1); }
+    }
+    @keyframes rtComboFade {
+      0%   { opacity: 1; }
+      100% { opacity: 0; transform: translateX(-50%) translateY(-12px); }
+    }
     .rt-rotina {
       display: flex; justify-content: space-between; align-items: flex-start;
       gap: 8px; padding: 9px 8px; border-radius: 10px; border: 1px solid transparent;
@@ -436,43 +481,7 @@
       </section>
 
       <!-- ============ 3. RITUAIS DIÁRIOS ============ -->
-      <section style="margin-bottom: 24px;">
-        <div class="rt-section-head">
-          <h2 class="rt-section-title"><i class="fa-solid fa-sun" style="color:var(--rt-manha)"></i> Rituais diários</h2>
-          <div class="rt-nav">
-            <button class="rt-nav__btn" onclick="mudarDia(-1)"><i class="fa-solid fa-chevron-left"></i></button>
-            <span class="rt-nav__label" id="label-dia">Hoje</span>
-            <button class="rt-nav__btn" onclick="mudarDia(1)"><i class="fa-solid fa-chevron-right"></i></button>
-            <button class="rt-nav__hoje" onclick="irParaHoje()">Hoje</button>
-          </div>
-        </div>
-
-        <div class="rt-periodos">
-          <div class="card">
-            <div class="rt-periodo__head">
-              <span class="rt-periodo__nome"><i class="fa-solid fa-mug-hot" style="color:var(--rt-manha)"></i> Manhã</span>
-              <button class="rt-add" style="background:rgba(245,158,11,.12);color:var(--rt-manha)" onclick="addRotina('manha')">+ Add</button>
-            </div>
-            <div id="lista-manha"></div>
-          </div>
-          <div class="card">
-            <div class="rt-periodo__head">
-              <span class="rt-periodo__nome"><i class="fa-solid fa-bolt" style="color:var(--rt-tarde)"></i> Tarde</span>
-              <button class="rt-add" style="background:rgba(59,130,246,.12);color:var(--rt-tarde)" onclick="addRotina('tarde')">+ Add</button>
-            </div>
-            <div id="lista-tarde"></div>
-          </div>
-          <div class="card">
-            <div class="rt-periodo__head">
-              <span class="rt-periodo__nome"><i class="fa-solid fa-moon" style="color:var(--rt-noite)"></i> Noite</span>
-              <button class="rt-add" style="background:rgba(139,92,246,.12);color:var(--rt-noite)" onclick="addRotina('noite')">+ Add</button>
-            </div>
-            <div id="lista-noite"></div>
-          </div>
-        </div>
-      </section>
-
-      <!-- ============ 4. RASTREADOR DE HÁBITOS ============ -->
+      <!-- ============ 3. RASTREADOR DE HÁBITOS ============ -->
       <section class="card" style="margin-bottom: 24px;">
         <div class="rt-section-head" style="border-bottom:1px solid var(--border); padding-bottom:16px;">
           <h2 class="rt-section-title"><i class="fa-solid fa-calendar-week" style="color:var(--rt-feito)"></i> Rastreador de hábitos</h2>
@@ -494,6 +503,55 @@
               <div class="rt-grid__head-total">Semana</div>
             </div>
             <div id="lista-habitos"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 4. RITUAIS DIÁRIOS ============ -->
+      <section style="margin-bottom: 24px;">
+        <div class="rt-section-head">
+          <h2 class="rt-section-title"><i class="fa-solid fa-sun" style="color:var(--rt-manha)"></i> Rituais diários</h2>
+          <div class="rt-nav">
+            <button class="rt-nav__btn" onclick="mudarDia(-1)"><i class="fa-solid fa-chevron-left"></i></button>
+            <span class="rt-nav__label" id="label-dia">Hoje</span>
+            <button class="rt-nav__btn" onclick="mudarDia(1)"><i class="fa-solid fa-chevron-right"></i></button>
+            <button class="rt-nav__hoje" onclick="irParaHoje()">Hoje</button>
+          </div>
+        </div>
+
+        <div class="rt-periodos">
+          <div class="card">
+            <div class="rt-periodo__head">
+              <span class="rt-periodo__nome"><i class="fa-solid fa-mug-hot" style="color:var(--rt-manha)"></i> Manhã</span>
+              <div class="rt-chip">
+                <div class="rt-chip__bar"><div class="rt-chip__fill" id="chip-fill-manha" style="background:var(--rt-manha);width:0%"></div></div>
+                <span class="rt-chip__num" id="chip-num-manha">0/0</span>
+                <button class="rt-add" style="background:rgba(245,158,11,.12);color:var(--rt-manha)" onclick="addRotina('manha')">+ Add</button>
+              </div>
+            </div>
+            <div id="lista-manha"></div>
+          </div>
+          <div class="card">
+            <div class="rt-periodo__head">
+              <span class="rt-periodo__nome"><i class="fa-solid fa-bolt" style="color:var(--rt-tarde)"></i> Tarde</span>
+              <div class="rt-chip">
+                <div class="rt-chip__bar"><div class="rt-chip__fill" id="chip-fill-tarde" style="background:var(--rt-tarde);width:0%"></div></div>
+                <span class="rt-chip__num" id="chip-num-tarde">0/0</span>
+                <button class="rt-add" style="background:rgba(59,130,246,.12);color:var(--rt-tarde)" onclick="addRotina('tarde')">+ Add</button>
+              </div>
+            </div>
+            <div id="lista-tarde"></div>
+          </div>
+          <div class="card">
+            <div class="rt-periodo__head">
+              <span class="rt-periodo__nome"><i class="fa-solid fa-moon" style="color:var(--rt-noite)"></i> Noite</span>
+              <div class="rt-chip">
+                <div class="rt-chip__bar"><div class="rt-chip__fill" id="chip-fill-noite" style="background:var(--rt-noite);width:0%"></div></div>
+                <span class="rt-chip__num" id="chip-num-noite">0/0</span>
+                <button class="rt-add" style="background:rgba(139,92,246,.12);color:var(--rt-noite)" onclick="addRotina('noite')">+ Add</button>
+              </div>
+            </div>
+            <div id="lista-noite"></div>
           </div>
         </div>
       </section>
@@ -774,6 +832,28 @@
           </div>`;
       }).join('');
     });
+    renderChips(); // atualiza os chips depois de pintar os itens
+  }
+
+  // Atualiza os chips de progresso (X/Y + barrinha) de cada período.
+  // Chamado sempre que renderRotinas roda.
+  function renderChips() {
+    const chave = dataChave(dataDia);
+    ['manha', 'tarde', 'noite'].forEach(periodo => {
+      const itens  = db.rotinas[periodo];
+      const total  = itens.length;
+      const feitos = itens.filter(r => r.history && r.history[chave] === 1).length;
+      const pct    = total > 0 ? Math.round((feitos / total) * 100) : 0;
+      const cheio  = total > 0 && feitos === total;
+
+      const numEl  = document.getElementById(`chip-num-${periodo}`);
+      const fillEl = document.getElementById(`chip-fill-${periodo}`);
+      if (!numEl || !fillEl) return;
+
+      numEl.textContent = total > 0 ? `${feitos}/${total}` : '—';
+      numEl.classList.toggle('rt-chip__num--done', cheio);
+      fillEl.style.width = `${pct}%`;
+    });
   }
 
   function addRotina(periodo) {
@@ -796,6 +876,26 @@
     else                    { delete r.history[chave]; }
 
     salvar(); renderTudo();
+
+    // Bônus de combo: se após o clique todos os 3 períodos estiverem 100% feitos,
+    // concede +15 XP e exibe a notificação toast — mas só na transição de ida (estado 0→1).
+    if (estado === 0) {
+      const todosFeitos = ['manha', 'tarde', 'noite'].every(p => {
+        const itens = db.rotinas[p];
+        return itens.length > 0 && itens.every(i => i.history && i.history[chave] === 1);
+      });
+      if (todosFeitos) { addXP(15); mostrarCombo(); }
+    }
+  }
+
+  function mostrarCombo() {
+    // Remove eventual toast anterior antes de criar um novo
+    document.querySelectorAll('.rt-combo-pop').forEach(el => el.remove());
+    const el = document.createElement('div');
+    el.className = 'rt-combo-pop';
+    el.innerHTML = `<i class="fa-solid fa-fire-flame-curved"></i> Combo diário! +15 XP`;
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 3200);
   }
 
   function delRotina(periodo, idx) {
